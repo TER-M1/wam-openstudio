@@ -35,8 +35,8 @@ class SimpleProcessor extends AudioWorkletProcessor {
         this.port.onmessage = (e) => {
             if (e.data.audio) {
                 this.audio = e.data.audio;
-            } else if (typeof e.data.position === "number") {
-                this.playhead = e.data.position * sampleRate;
+            } else if (e.data.position && typeof e.data.position === "number") {
+                this.playhead = e.data.position; // * sampleRate;
                 this.port.postMessage({playhead: this.playhead})
             }
         };

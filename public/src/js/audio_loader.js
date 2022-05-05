@@ -1,6 +1,8 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
+import {canvasClickMoveCursor} from "./playhead.js";
 // var WAM = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
+
 class MainAudio {
     /**
      *
@@ -51,11 +53,10 @@ class MainAudio {
 
 
                 track.canvas = waveForm.canvas;
-                track.canvas.width = 2000;
-                track.canvas.height = 99;
+                track.canvas.width = MainAudio.CANVAS_WIDTH;
+                track.canvas.height = MainAudio.CANVAS_HEIGHT;
+                track.canvas.addEventListener("click", canvasClickMoveCursor);
                 drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
-
-                // track.pluginInstance = await WAM.createInstance(this.hostGroupId, audioCtx);
 
                 let trackEl = document.createElement("track-element");
                 trackEl.track = track;
@@ -74,7 +75,7 @@ class MainAudio {
         track.audioWorkletNode.disconnect();
         delete track.decodedAudioBuffer;
         delete track.operableDecodedAudioBuffer;
-        this.tracks = this.tracks.filter( (ele) => {
+        this.tracks = this.tracks.filter((ele) => {
             return ele !== track;
         });
     }
@@ -146,6 +147,22 @@ class MainAudio {
      */
     get prevStateVolume() {
         return this.oldMasterVolume;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    static get CANVAS_WIDTH() {
+        return 2000;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    static get CANVAS_HEIGHT() {
+        return 99;
     }
 }
 
@@ -283,7 +300,7 @@ template.innerHTML = /*html*/`
 
 .track-element-color {
     flex-grow: 3;
-    background-color: greenyellow;
+    background-color: greenyellow !important;
 }
 
 .track-element-tools {
@@ -292,15 +309,49 @@ template.innerHTML = /*html*/`
     flex-direction: column;
     flex-wrap: nowrap;
 }
+
 .track-name {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     padding-top: 0.5em;
-    padding-left: 3em;
     /*flex-grow: 1;*/
     color: lightgray;
     font-family: monospace;
     font-weight: bold;
     font-size: 1.1em;
 }
+
+.ui.black.label {
+    width: 150px;
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+    background-color: transparent !important; 
+    user-select: none;
+    text-align: center;
+    color: lightgrey !important;
+    font-size: 13px;
+}
+
+.item.tool.close {
+    padding-top: 3px;
+    margin-right: 5px;
+    margin-left: 2px;
+    margin-bottom: 3px;
+    border-radius: 5px;
+}
+
+.item.tool.close:hover {
+    background-color: #3b4046 !important;
+    display: flex;
+}
+
+.item.tool.close {
+    flex-grow: 2; !important;
+}
+
 .track-volume, .balance {
     display: flex;
     flex-direction: row;
@@ -311,29 +362,35 @@ template.innerHTML = /*html*/`
     justify-content: space-around;
     align-items: center;
 }
+
 .right-icon, .left-icon, .mute-icon, .solo-icon {
     font-size: 1.3em;
     font-weight: bold;
     font-family: monospace;
     font-style: normal;
     pointer-events: none;
+    user-select: none;
 }
 
 .left-icon {
     color: lightgray;
     padding-left: 2px;
     padding-right: 1px;
+    user-select: none;
 }
 
 .right-icon {
     color: lightgray;
     padding-left: 1px;
     padding-right: 4px;
+    user-select: none;
 }
 
 .mute-icon, .solo-icon {
     font-size: 1.3em;
+    user-select: none;
 }
+
 a.item.tool.mute:link {
     text-decoration: inherit;
     color: inherit;
@@ -378,7 +435,6 @@ i.icon {
 
 <div class="track-element-tools">
     <div class="track-name">
-        
         
     </div>
     <div class="track-volume">
@@ -440,9 +496,11 @@ class TrackElement extends HTMLElement {
         const name = this.shadowRoot.querySelector(".track-name");
         name.id = `${this.track.id}`;
         name.innerHTML = `
-        ${this.track.name}
+        <div class="ui black label">
+            ${this.track.name}
+        </div>
         <a class="item tool close">
-        <i class="times red icon"></i>
+            <i class="times red icon"></i>
         </a>
         `;
     }
@@ -509,7 +567,7 @@ customElements.define(
 
 const templateCanvas = document.createElement("template");
 templateCanvas.innerHTML = /*html*/`
-<canvas height="99" width="2000" class="can"></canvas>
+<canvas height="104" width="2000" class="can"></canvas>
 `;
 
 
