@@ -1,0 +1,267 @@
+body, html {
+    background-color: black;
+}
+
+.music-app {
+    padding-top: 1.5em;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    height: 100%;
+    background-color: #1C1E21;
+}
+
+.track-editor {
+    padding-top: 39px;
+    padding-bottom: 28px;
+    /*overflow-y: auto;*/
+    height: 67%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.plugin-editor {
+    /*margin-top: 28px;*/
+    height: 33%;
+    background: #1C1E21;
+    border: 1px solid black;
+    border-top: none;
+    z-index: 2;
+}
+
+.head-track-editor, .head-plugin-editor {
+    z-index: 8;
+    background-color: #3b4046;
+    border: 1px solid black;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1em;
+    color: lightgray;
+    padding-top: 0.2em;
+    padding-left: 0.75em;
+    height: 1.9em;
+}
+
+.head-track-editor {
+    border-top: none;
+    position: fixed;
+    width: 100%;
+}
+
+.head-plugin-editor {
+    position: fixed;
+    width: 99.9%;
+    border-right: 1px solid black;
+}
+
+.tracks {
+    margin-top: 1.9em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    height: 100%;
+    background-color: #1C1E21;
+}
+
+.tools-tracks {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    background-color: #1C1E21;
+    /*border: 1px solid black;*/
+    /*border-top: none;*/
+    /*border-bottom: none;*/
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1em;
+    color: lightgray;
+    overflow: scroll;
+    min-width: 192px;
+}
+.audio-tracks {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    background-color: #1C1E21;
+    overflow-y: scroll;
+}
+
+.wave-form {
+    /*position: relative;*/
+    margin-left: 3px;
+    min-height: 100px;
+    border: 1px solid black;
+    width: 2000px;
+    max-height: 100px;
+}
+
+/* Track Element */
+.track-element {
+    border: 1px solid black;
+    min-height: 100px;
+    width: 180px;
+    background-color: #31353A;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.track-element-color {
+    flex-grow: 3;
+    background-color: greenyellow;
+}
+
+.track-element-tools {
+    flex-grow: 20;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.track-name {
+    padding-top: 0.5em;
+    padding-left: 3em;
+    /*flex-grow: 1;*/
+    color: lightgray;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.track-volume, .balance {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    padding-right: 0.5em;
+    padding-left: 0.5em;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.right-icon, .left-icon, .mute-icon, .solo-icon {
+    font-size: 1.3em;
+    font-weight: bold;
+    font-family: monospace;
+    font-style: normal;
+    pointer-events: none;
+}
+
+.left-icon {
+    color: lightgray;
+    padding-left: 2px;
+    padding-right: 1px;
+}
+
+.right-icon {
+    color: lightgray;
+    padding-left: 1px;
+    padding-right: 4px;
+}
+
+.mute-icon, .solo-icon {
+    font-size: 1.3em;
+}
+
+.ui.inverted.grey.slider.track {
+    padding-top: 0.2em !important;
+    padding-bottom: 0.2em !important;
+    padding-left: 1em !important;
+    padding-right: 1em !important;
+}
+
+.track-controls {
+    padding-top: 0.2em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    /*flex-grow: 6;*/
+    align-items: center;
+    justify-content: space-around;
+}
+
+.item.tool {
+    color: grey;
+}
+
+.item.tool:hover {
+    color: white;
+}
+
+.plugin-rack {
+    padding-top: 6em;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.timer {
+    font-weight: bold;
+    font-size: 2em;
+    color: #4d5ed1;
+}
+
+a.item.menu {
+    background-color: #4d5ed1 !important;
+}
+
+a.item.menu:hover {
+    background-color: #4d5ed1 !important;
+}
+
+div.ui.dropdown.icon.item {
+    background-color: #4d5ed1 !important;
+}
+
+div.ui.dropdown.icon.item:hover {
+    background-color: #5969d3 !important;
+}
+
+a.item.volume-slider {
+    width: 15em; height: auto;
+}
+
+i.icon {
+    margin: 0 !important;
+}
+
+.main-menu {
+    max-height:60px;
+    background-color: #31353A !important;
+    font-family: monospace;
+    border-radius: unset;
+    margin: 0;
+    border: 1px solid black !important;
+}
+
+.add-plugin {
+    margin: 1em;
+    height: 4em;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-around;
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1em;
+    color: lightgray;
+}
+.add-plugin:hover {
+    background-color: #151718;
+}
+.pluginAutomationParamId{
+    color: white;
+}
+.mySelected {
+   /*background-color: grey;*/
+   /* border-color: grey;*/
+    border: 1px solid lightgrey;
+
+
+}

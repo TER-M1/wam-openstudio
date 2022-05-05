@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Player TER</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="lib/semantic.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/components/icon.min.css">
+    <link rel="stylesheet" href="lib/semantic.min.css" type="text/css">
+    <link rel="stylesheet" href="style/style.css">
+    <script src="src/js/bpf.js"></script>
+  
+</head>
+<body>
+
+<div class="ui inverted fixed menu main-menu">
+    <div class="left menu">
+        <div class="ui dropdown settings-menu icon item inverted">
+            <i class="large bars icon"></i>
+            <div class="menu">
+                <div class="ui dropdown add-multitrack icon item inverted">
+                    <i class="dropdown icon"></i>
+                    <span class="text inverted">Add Multitrack Exemple</span>
+                    <div class="menu">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+            <a class="auto ui dropdown item" >
+<!--                data-tooltip="Automation" data-position="bottom left"  data-variation="mini basic"-->
+<!--                data-inverted=""-->
+                <i class="project diagram icon"></i>
+                <div class="menu">
+
+                </div>
+            </a>
+<!--        <a class="item menu" data-tooltip="Menu" data-position="bottom right"-->
+<!--           data-variation="mini basic" data-inverted="">-->
+<!--            <i class="large bars icon"></i>-->
+<!--        </a>-->
+        <a id="btn-start" class="item" data-tooltip="Play" data-position="bottom right" data-variation="mini basic"
+           data-inverted="">
+            <i class="large play icon"></i>
+        </a>
+        <a class="item" data-tooltip="Stop" data-position="bottom right" data-variation="mini basic"
+           data-inverted="">
+            <i class="large stop icon"></i>
+        </a>
+        <a class="item" data-tooltip="Loop" data-position="bottom right" data-variation="mini basic"
+           data-inverted="" id="loop">
+            <i class="large sync alternate icon"></i>
+        </a>
+        <a class="item" data-tooltip="Record" data-position="bottom right" data-variation="mini basic"
+           data-inverted="">
+            <i class="large red circle icon"></i>
+        </a>
+        <div class="item">
+            <div class="timer">00:00:00.00</div>
+        </div>
+        <a id="mute"class="item" data-tooltip="Mute" data-position="bottom right" data-variation="mini basic"
+           data-inverted="">
+            <i class="large volume mute icon"></i>
+        </a>
+        <a class="item volume-slider" id="volume">
+            <i class="volume down large icon"></i>
+            <div class="ui inverted grey slider master"></div>
+            <i class="volume up large icon"></i>
+        </a>
+        <a class="item bornes">
+            <div class="ui left icon input">
+                <input type="text" placeholder="left born">
+                <i class="step forward icon"></i>
+            </div>
+        </a>
+        <a class="item bornes">
+            <div class="ui left icon input">
+                <input type="text" placeholder="right born">
+                <i class="step backward icon"></i>
+            </div>
+        </a>
+    </div>
+
+    <div class="right menu">
+        <a class="item" data-tooltip="Zoom out" data-position="bottom right"
+           data-variation="mini basic" data-inverted="" id="btn-zoom-out">
+            <i class="large search minus icon"></i>
+        </a>
+        <a class="item" data-tooltip="Zoom in" data-position="bottom right"
+           data-variation="mini basic" data-inverted="" id="btn-zoom-in">
+            <i class="large search plus icon"></i>
+        </a>
+    </div>
+
+</div>
+
+<div class="music-app">
+    <div class="track-editor">
+        <div class="head-track-editor">
+            <i class="inverted file audio outline icon"></i>
+            TRACKS
+        </div>
+
+        <div class="tracks">
+            <div class="tools-tracks scroll-sync">
+            </div>
+            <div class="audio-tracks scroll-sync">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="plugin-editor">
+        <div class="head-plugin-editor">
+            <i class="inverted sliders horizontal icon"></i>
+            PLUGINS
+        </div>
+        <div class="plugin-rack">
+            <div id="mount1"></div>
+            <div id="mount2"></div>
+
+            <!-- this will be used for the plugin's automation -->
+            <div id="pluginAutomationContainer">
+                <div id="pluginParamSelectorContainer">
+                    <select name="pluginParamSelector" id="pluginParamSelector" class="widget">
+                        <option value="-1" disabled selected>Add Automation...</option>
+                    </select>
+                    <label for="pluginAutomationLength">Duration (sec):</label>
+                    <input name="pluginAutomationLength" id="pluginAutomationLength" type="number" class="widget" min="1" step="0.1" value="1" />
+                    <input id="pluginAutomationApply" type="button" class="widget" value="Apply" />
+                </div>
+                <div id="pluginAutomationEditor">
+                </div>
+            </div>
+
+            <div class="add-plugin">
+                <i class="large plus icon"></i>
+                <div>Add Plugin</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="src/js/control.js"></script>
+<script src="index.js" type="module"></script>
+
+</body>
+
+</html>

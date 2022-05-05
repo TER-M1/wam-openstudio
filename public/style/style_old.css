@@ -1,0 +1,51 @@
+body {
+    position: relative;
+    background-color: wheat;
+}
+
+#waveform {
+    /* position: absolute;
+    height: auto;
+    width: auto;
+    top: 120px; */
+    position: relative;
+    /* max-width: 1206px;
+    min-width: 1206px; */
+    overflow: auto;
+    border-color: black;
+    border-radius: 20px;
+    border: black 3px solid;
+    /* width: 1000px;
+    height: 300px; */
+}
+
+#layer1  {
+    /* position: absolute;
+    ;
+    top: 0px; */
+    position: absolute;
+    top: 0px; left: 0px;
+    width: 1000px;
+    height: 300px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 1em;
+    padding: 1em;
+}
+
+.overlay {
+    display: flex;
+    flex-direction: row;
+}
+
+#drop_zone {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    border: 2px solid blue;
+    border-radius: 5px;
+    width: auto;
+    height: auto;
+}

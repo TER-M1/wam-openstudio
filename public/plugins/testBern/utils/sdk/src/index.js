@@ -1,0 +1,14 @@
+export { default as WebAudioModule } from './WebAudioModule.d.ts';
+export { default as getRingBuffer } from './RingBuffer.d.ts';
+export { default as getWamArrayRingBuffer } from './WamArrayRingBuffer.d.ts';
+export { default as initializeWamEnv } from './WamEnv.d.ts';
+export { default as initializeWamGroup } from './WamGroup.d.ts';
+export { default as getWamEventRingBuffer } from './WamEventRingBuffer.d.ts';
+export { default as WamNode } from './WamNode.d.ts';
+export { default as getWamParameter } from './WamParameter.d.ts';
+export { default as getWamParameterInfo } from './WamParameterInfo.d.ts';
+export { default as getWamParameterInterpolator } from './WamParameterInterpolator.d.ts';
+export { default as getWamProcessor } from './WamProcessor.d.ts';
+export { default as addFunctionModule } from './addFunctionModule.d.ts';
+export { default as apiVersion } from './apiVersion.js';
+export { default as initializeWamHost } from './initializeWamHost.d.ts';
