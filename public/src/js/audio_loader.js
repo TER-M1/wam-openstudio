@@ -1,6 +1,7 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
 import {canvasClickMoveCursor} from "./playhead.js";
+// var WAM = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
 
 class MainAudio {
     /**
@@ -25,13 +26,17 @@ class MainAudio {
      */
     canvasDiv = document.querySelector(".audio-tracks");
 
+    hostGroupId = undefined;
+
     constructor(audioCtx) {
         this.audioCtx = audioCtx;
         this.maxGlobalTimer = 0;
         this.masterVolumeNode = audioCtx.createGain();
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
+
     }
+
 
     addTrack(track) {
         return new Promise(async (resolve, reject) => {
@@ -197,6 +202,7 @@ class AudioTrack {
     _isSoloTrack = false;
 
     id = undefined;
+    pluginInstance = undefined
 
     /**
      *
@@ -283,8 +289,8 @@ if (audioCtx.state === "suspended") {
 }
 
 const template = document.createElement("template");
-template.innerHTML = /*html*/`
 
+template.innerHTML = /*html*/`
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="../../lib/semantic.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/components/icon.min.css">

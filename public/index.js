@@ -2,7 +2,6 @@ import {MainAudio, AudioTrack, SimpleAudioWorkletNode, audioCtx, mainAudio} from
 import {activateMainVolume, exploreTracks} from "./src/js/page_init.js";
 import {updateCursorTracks} from "./src/js/playhead.js";
 
-import {Selector} from "./src/js/control.js";
 
 const btnStart = document.getElementById("btn-start");
 const zoomIn = document.getElementById("btn-zoom-in");
@@ -38,6 +37,12 @@ var intervalCursorTracks = undefined;
     /*
     PLUGIN CONNECTION
      */
+    // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
+    // const [hostGroupId] = await initializeWamHost(audioCtx);
+    // const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
+    // mainAudio.hostGroupId = await initializeWamHost(audioCtx);
+
+
     // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
     // const [hostGroupId] = await initializeWamHost(audioCtx);
     //
