@@ -40,7 +40,6 @@ function isASoundFile(fileName) {
     return endsWith(fileName, ".m4a");
 }
 
-
 function exploreMultiTracks() {
     tracks = {"tracks": []};
     const directoryPath = TRACK_PATH;
