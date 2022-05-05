@@ -1,6 +1,6 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
-
+// var WAM = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
 class MainAudio {
     /**
      *
@@ -55,7 +55,7 @@ class MainAudio {
                 track.canvas.height = 99;
                 drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
 
-                track.pluginInstance = await WAM.createInstance(hostGroupId, audioCtx);
+                // track.pluginInstance = await WAM.createInstance(this.hostGroupId, audioCtx);
 
                 let trackEl = document.createElement("track-element");
                 trackEl.track = track;

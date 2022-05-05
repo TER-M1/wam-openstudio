@@ -37,10 +37,10 @@ var intervalCursorTracks = undefined;
     /*
     PLUGIN CONNECTION
      */
-    const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
+    // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
     // const [hostGroupId] = await initializeWamHost(audioCtx);
     // const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
-    mainAudio.hostGroupId = await initializeWamHost(audioCtx);
+    // mainAudio.hostGroupId = await initializeWamHost(audioCtx);
 
 
     // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
