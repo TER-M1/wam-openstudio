@@ -38,8 +38,25 @@ function updateCursorTracks() {
     updateAudioTimer((maxPlayHead / 48000) * 1000);
 }
 
+function canvasClickMoveCursor(event, track) {
+    let canvas = event.currentTarget;
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    let rapportCanvas = (x * 100) / canvas.width;
+
+    for(let i = 0; i < mainAudio.tracks.length; i++) {
+        let track = mainAudio.tracks[i];
+
+        let newPlayHeadPosition = (track.operableDecodedAudioBuffer.length / 100) * rapportCanvas;
+        track.audioWorkletNode.port.postMessage({position: newPlayHeadPosition});
+    }
+}
+
 export function updateAudioTimer(playHead) {
     timerDiv.innerHTML = millisToMinutesAndSeconds(playHead);
 }
 
 export {updateCursorTracks};
+export {canvasClickMoveCursor}
