@@ -1,7 +1,6 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
-import {canvasClickMoveCursor} from "./playhead.js";
-// var WAM = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
+import {canvasClickMoveCursor} from "./playhead.js"
 
 class MainAudio {
     /**
