@@ -106,7 +106,6 @@ var intervalCursorTracks = undefined;
                 inputLoop.checked = true;
             }
         })
-
     };
 
     inputMute.onclick = () => {
@@ -115,7 +114,6 @@ var intervalCursorTracks = undefined;
             // mainAudio.tracks.forEach((track) => {
             // track.gainOutNode.value = 0;
             // });
-
             mainAudio.mute();
         } else {
             console.log("unmute");

@@ -47,12 +47,14 @@ body, html {
     border-top: none;
     position: fixed;
     width: 100%;
+    user-select: none;
 }
 
 .head-plugin-editor {
     position: fixed;
     width: 99.9%;
     border-right: 1px solid black;
+    user-select: none;
 }
 
 .tracks {
@@ -68,7 +70,7 @@ body, html {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    background-color: #1C1E21;
+    background-color: #111113;
     /*border: 1px solid black;*/
     /*border-top: none;*/
     /*border-bottom: none;*/
@@ -76,21 +78,22 @@ body, html {
     font-weight: bold;
     font-size: 1em;
     color: lightgray;
-    overflow: scroll;
+    overflow: auto;
     min-width: 192px;
 }
+
 .audio-tracks {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
     background-color: #1C1E21;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .wave-form {
     /*position: relative;*/
     margin-left: 3px;
-    min-height: 100px;
+    min-height: 104px;
     border: 1px solid black;
     width: 2000px;
     max-height: 100px;
@@ -99,7 +102,7 @@ body, html {
 /* Track Element */
 .track-element {
     border: 1px solid black;
-    min-height: 100px;
+    height: 104px;
     width: 180px;
     background-color: #31353A;
     display: flex;
@@ -121,7 +124,7 @@ body, html {
 
 .track-name {
     padding-top: 0.5em;
-    padding-left: 3em;
+    /*padding-left: 3em;*/
     /*flex-grow: 1;*/
     color: lightgray;
     font-family: monospace;
