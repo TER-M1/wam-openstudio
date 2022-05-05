@@ -1,5 +1,6 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
+import {canvasClickMoveCursor} from "./playhead.js";
 
 class MainAudio {
     /**
@@ -47,8 +48,9 @@ class MainAudio {
 
 
                 track.canvas = waveForm.canvas;
-                track.canvas.width = 2000;
-                track.canvas.height = 99;
+                track.canvas.width = MainAudio.CANVAS_WIDTH;
+                track.canvas.height = MainAudio.CANVAS_HEIGHT;
+                track.canvas.addEventListener("click", canvasClickMoveCursor);
                 drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
 
                 let trackEl = document.createElement("track-element");
@@ -140,6 +142,22 @@ class MainAudio {
      */
     get prevStateVolume() {
         return this.oldMasterVolume;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    static get CANVAS_WIDTH() {
+        return 2000;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    static get CANVAS_HEIGHT() {
+        return 99;
     }
 }
 
