@@ -24,13 +24,17 @@ class MainAudio {
      */
     canvasDiv = document.querySelector(".audio-tracks");
 
+    hostGroupId = undefined;
+
     constructor(audioCtx) {
         this.audioCtx = audioCtx;
         this.maxGlobalTimer = 0;
         this.masterVolumeNode = audioCtx.createGain();
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
+
     }
+
 
     addTrack(track) {
         return new Promise(async (resolve, reject) => {
@@ -50,6 +54,8 @@ class MainAudio {
                 track.canvas.width = 2000;
                 track.canvas.height = 99;
                 drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
+
+                track.pluginInstance = await WAM.createInstance(hostGroupId, audioCtx);
 
                 let trackEl = document.createElement("track-element");
                 trackEl.track = track;
@@ -179,6 +185,7 @@ class AudioTrack {
     _isSoloTrack = false;
 
     id = undefined;
+    pluginInstance = undefined
 
     /**
      *
@@ -265,8 +272,8 @@ if (audioCtx.state === "suspended") {
 }
 
 const template = document.createElement("template");
-template.innerHTML = /*html*/`
 
+template.innerHTML = /*html*/`
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="../../lib/semantic.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/components/icon.min.css">
