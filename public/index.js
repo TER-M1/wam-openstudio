@@ -10,6 +10,8 @@ const btnRestart = document.getElementById("restart");
 const inputLoop = document.getElementById("loop");
 const volumeinput = document.getElementById("volume");
 const inputMute = document.getElementById("mute");
+const loopBeginning = document.getElementById("loop-beginning-input");
+const loopEnding = document.getElementById("loop-end-input");
 const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;

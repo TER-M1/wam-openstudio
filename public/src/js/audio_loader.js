@@ -53,7 +53,7 @@ class MainAudio {
 
 
                 track.canvas = waveForm.canvas;
-                track.canvas.width = MainAudio.CANVAS_WIDTH;
+                track.canvas.width = this.pixelAmountFromBufferLength(track);
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;
                 track.canvas.addEventListener("click", canvasClickMoveCursor);
                 drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
@@ -78,6 +78,23 @@ class MainAudio {
         this.tracks = this.tracks.filter((ele) => {
             return ele !== track;
         });
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    pixelAmountFromBufferLength(track) {
+        return track.operableDecodedAudioBuffer.duration * MainAudio.PIXEL_PER_SECONDS;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    playHeadPositionFromTime(time, track) {
+        let rapport = track.operableDecodedAudioBuffer.length / track.operableDecodedAudioBuffer.duration;
+        return rapport * time;
     }
 
     soloTrack(track) {
@@ -163,6 +180,14 @@ class MainAudio {
      */
     static get CANVAS_HEIGHT() {
         return 99;
+    }
+
+    /**
+     *
+     * @returns {Number}
+     */
+    static get PIXEL_PER_SECONDS() {
+        return 25;
     }
 }
 

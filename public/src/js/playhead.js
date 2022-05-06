@@ -1,4 +1,4 @@
-import {mainAudio} from "./audio_loader.js";
+import {MainAudio, mainAudio} from "./audio_loader.js";
 
 const timerDiv = document.querySelector(".timer");
 
@@ -38,18 +38,22 @@ function updateCursorTracks() {
     updateAudioTimer((maxPlayHead / 48000) * 1000);
 }
 
-function canvasClickMoveCursor(event, track) {
+function canvasClickMoveCursor(event) {
     let canvas = event.currentTarget;
     const rect = event.currentTarget.getBoundingClientRect()
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    let rapportCanvas = (x * 100) / canvas.width;
-
     for(let i = 0; i < mainAudio.tracks.length; i++) {
         let track = mainAudio.tracks[i];
 
-        let newPlayHeadPosition = (track.operableDecodedAudioBuffer.length / 100) * rapportCanvas;
+        let estimatedSeconds = x / MainAudio.PIXEL_PER_SECONDS;
+        let newPlayHeadPosition = mainAudio.playHeadPositionFromTime(estimatedSeconds, track);
+
+        if(newPlayHeadPosition >= track.operableDecodedAudioBuffer.length) {
+            newPlayHeadPosition = track.operableDecodedAudioBuffer.length - 1;
+        }
+
         track.audioWorkletNode.port.postMessage({position: newPlayHeadPosition});
     }
 }
