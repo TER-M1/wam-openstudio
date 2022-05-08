@@ -1,36 +1,7 @@
 import {audioCtx, AudioTrack, mainAudio, SimpleAudioWorkletNode} from "./audio_loader.js";
 import {Selector} from "./listener.js";
+import {loadPlugs} from "./plugin_loader.js";
 
-export const connectPlugin = (audioCtx, sourceNode, audioNode) => {
-    sourceNode.connect(audioNode);
-    audioNode.connect(audioCtx.destination);
-};
-const mountPlugin = (mount,domModel) => {
-    mount.innerHTML = '';
-    mount.appendChild(domModel);
-};
-async function loadPlugs() {
-    const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
-    var [hostGroupId] = await initializeWamHost(audioCtx);
-    var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
-    console.log("initializeWamHost")
-    console.log(initializeWamHost)
-    console.log("hostGroupId")
-    console.log(hostGroupId)
-    console.log("WAM")
-    console.log(WAM)
-    // for(var i = 0 ; i < mainAudio.tracks.length; i++){
-    //     console.log("loading plugin " + i)
-    var instance = await WAM.createInstance(hostGroupId, audioCtx);
-    mainAudio.tracks[0].pluginInstance = instance;
-    connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, instance._audioNode);
-    console.log(instance);
-    // }
-    let currentPluginAudioNode = instance._audioNode;
-    connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, mainAudio.masterVolumeNode);
-    var pluginDomModel = await instance.createGui();
-    mountPlugin(document.querySelector("#mount2"), pluginDomModel);
-}
 
 export function activateMainVolume(mainAudio, val) {
     mainAudio.setVolume(val);
@@ -77,10 +48,10 @@ export function exploreTracks() {
 
 function attachControl(values) {
     values.forEach(value => {
-        let el = document.querySelector('.item.multitrack-item'+value.value);
+        let el = document.querySelector('.item.multitrack-item' + value.value);
         el.addEventListener('click', () => {
             let asyncAddTrack = [];
-            fetch('http://localhost:80/track/'+value.value)
+            fetch('http://localhost:80/track/' + value.value)
                 .then(res => res.json())
                 .then(async (output) => {
                     let soundList = output.soundList;
@@ -102,7 +73,6 @@ function attachControl(values) {
 
         })
     })
-
 
 
 }
