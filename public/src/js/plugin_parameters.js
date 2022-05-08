@@ -45,10 +45,6 @@ export function addEventOnPlugin(currentPluginAudioNode) {
     });
 }
 
-export const connectPlugin = (audioCtx, sourceNode, audioNode) => {
-    sourceNode.connect(audioNode);
-    audioNode.connect(audioCtx.destination);
-};
 
 export const mountPlugin = (mount, domModel) => {
     mount.innerHTML = '';

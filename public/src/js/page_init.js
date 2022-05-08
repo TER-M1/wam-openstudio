@@ -1,7 +1,36 @@
 import {audioCtx, AudioTrack, mainAudio, SimpleAudioWorkletNode} from "./audio_loader.js";
 import {Selector} from "./listener.js";
-import {PluginLoader} from "./plugin_loader.js";
 
+export const connectPlugin = (audioCtx, sourceNode, audioNode) => {
+    sourceNode.connect(audioNode);
+    audioNode.connect(audioCtx.destination);
+};
+const mountPlugin = (mount,domModel) => {
+    mount.innerHTML = '';
+    mount.appendChild(domModel);
+};
+async function loadPlugs() {
+    const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
+    var [hostGroupId] = await initializeWamHost(audioCtx);
+    var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
+    console.log("initializeWamHost")
+    console.log(initializeWamHost)
+    console.log("hostGroupId")
+    console.log(hostGroupId)
+    console.log("WAM")
+    console.log(WAM)
+    // for(var i = 0 ; i < mainAudio.tracks.length; i++){
+    //     console.log("loading plugin " + i)
+    var instance = await WAM.createInstance(hostGroupId, audioCtx);
+    mainAudio.tracks[0].pluginInstance = instance;
+    connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, instance._audioNode);
+    console.log(instance);
+    // }
+    let currentPluginAudioNode = instance._audioNode;
+    connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, mainAudio.masterVolumeNode);
+    var pluginDomModel = await instance.createGui();
+    mountPlugin(document.querySelector("#mount2"), pluginDomModel);
+}
 
 export function activateMainVolume(mainAudio, val) {
     mainAudio.setVolume(val);
@@ -45,6 +74,7 @@ export function exploreTracks() {
 
 }
 
+
 function attachControl(values) {
     values.forEach(value => {
         let el = document.querySelector('.item.multitrack-item'+value.value);
@@ -64,7 +94,8 @@ function attachControl(values) {
                         asyncAddTrack
                     )
                     const selector = new Selector(mainAudio.tracks);
-                    const pluginLoader = new PluginLoader();
+                    loadPlugs()
+                    // const pluginLoader = new PluginLoader();
                 })
                 .catch(err => console.log(err));
 
