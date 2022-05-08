@@ -201,7 +201,8 @@ class AudioTrack {
     _isSoloTrack = false;
 
     id = undefined;
-    pluginInstance = undefined
+    pluginInstance = undefined ;
+    pluginDOM = undefined ;
 
     /**
      *

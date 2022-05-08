@@ -1,5 +1,15 @@
 import {AudioTrack} from "./audio_loader.js";
 
+const mountPlugin = (mount, domModel) => {
+    mount.innerHTML = '';
+    mount.appendChild(domModel);
+};
+
+const uMountPlugin = (mount) => {
+    mount.innerHTML = '';
+}
+
+
 class Selector {
     /**
      *
@@ -19,6 +29,7 @@ class Selector {
             this.tracksId.push(elem.id);
             let idTrack = elem.id.split('')[elem.id.length-1];
             elem.onclick = () => {
+                uMountPlugin(document.querySelector("#mount2"));
                 let toRemoveSelectionCanvas =  document.querySelector('.wave-form.mySelected');
                 let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
                 if(toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null ){
@@ -27,6 +38,7 @@ class Selector {
                 elem.className += this.selectClass;
                 document.querySelector('.'+elem.id).className += this.selectClass;
                 this.selectedTrack = this.getTrack(idTrack);
+                mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
             }
         })
         this.handlersCanvas();
@@ -41,6 +53,7 @@ class Selector {
 
                 let idTrack = e.id.split('')[e.id.length-1];
                 e.onclick = () => {
+                    uMountPlugin(document.querySelector("#mount2"));
                     let toRemoveSelectionCanvas =  document.querySelector('.wave-form.mySelected');
                     let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
                     if(toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null ){
@@ -50,6 +63,7 @@ class Selector {
                     document.querySelector('#'+e.id).className += this.selectClass;
                     this.selectedTrack = this.getTrack(idTrack);
                     console.log(this.selectedTrack)
+                    mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
 
                 }
                 elems.push(e);
