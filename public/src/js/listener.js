@@ -10,8 +10,9 @@ const uMountPlugin = (mount) => {
     mount.innerHTML = '';
 }
 
-function populateDropDown(track) {
-populateParamSelector(track.pluginInstance._audioNode)
+function populateDropDown(track, mount) {
+    console.log(mount)
+    populateParamSelector(track.pluginInstance._audioNode)
 }
 
 
@@ -45,7 +46,7 @@ class Selector {
                 document.querySelector('.' + elem.id).className += this.selectClass;
                 this.selectedTrack = this.getTrack(idTrack);
                 mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
-                populateDropDown( this.selectedTrack);
+                populateDropDown(this.selectedTrack, document.querySelector("#pluginAutomationEditor " + idTrack));
             }
         })
         this.handlersCanvas();
@@ -72,7 +73,7 @@ class Selector {
                     this.selectedTrack = this.getTrack(idTrack);
                     console.log(this.selectedTrack)
                     mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
-                    populateDropDown( this.selectedTrack);
+                    populateDropDown(this.selectedTrack);
                 }
                 elems.push(e);
             })

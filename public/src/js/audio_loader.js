@@ -46,11 +46,12 @@ class MainAudio {
                 this.tracks.push(track);
 
                 let waveForm = document.createElement("wave-form");
+
                 track.id = this.tracks.length - 1;
                 waveForm.id = "track" + track.id;
+                let pluginAutomationEditor = document.createElement("div").id="pluginAutomationEditor " + waveForm.id
                 this.canvasDiv.appendChild(waveForm);
-
-
+                waveForm.appendChild(pluginAutomationEditor);
                 track.canvas = waveForm.canvas;
                 track.canvas.width = MainAudio.CANVAS_WIDTH;
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;
