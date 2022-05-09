@@ -7,7 +7,7 @@ export const connectPlugin = (audioCtx, sourceNode, audioNode) => {
 };
 
 async function loadPlugs() {
-    const {default: initializeWamHost} = await import("../../plugins/sdk/src/initializeWamHost.js");
+    const {default: initializeWamHost} = await import("../../sdk/src/initializeWamHost.js");
     var [hostGroupId] = await initializeWamHost(audioCtx);
     var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
     for (var i = 0; i < mainAudio.tracks.length; i++) {

@@ -71,9 +71,9 @@ class Selector {
                     e.className += this.selectClass;
                     document.querySelector('#' + e.id).className += this.selectClass;
                     this.selectedTrack = this.getTrack(idTrack);
-                    console.log(this.selectedTrack)
+                    console.log(this.selectedTrack.pluginDOM);
                     mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
-                    populateDropDown(this.selectedTrack);
+                    // populateDropDown(this.selectedTrack);
                 }
                 elems.push(e);
             })

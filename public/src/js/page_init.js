@@ -63,9 +63,9 @@ function attachControl(values) {
                     }
                     let res = await Promise.all(
                         asyncAddTrack
-                    )
+                    );
                     const selector = new Selector(mainAudio.tracks);
-                    loadPlugs()
+                    await loadPlugs();
                     // const pluginLoader = new PluginLoader();
                 })
                 .catch(err => console.log(err));
