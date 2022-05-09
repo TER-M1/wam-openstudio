@@ -10,9 +10,9 @@ const uMountPlugin = (mount) => {
     mount.innerHTML = '';
 }
 
-function populateDropDown(track, mount) {
+function populateDropDown(track, mount,pluginParamSelector) {
     console.log(mount)
-    populateParamSelector(track.pluginInstance._audioNode)
+    // populateParamSelector(track.pluginInstance._audioNode,mount,pluginParamSelector)
 }
 
 
@@ -27,6 +27,7 @@ class Selector {
     waveformClass = "wave-form"
     trackElementClass = "track-element"
     selectClass = " mySelected"
+    automation = document.querySelector(".auto.ui.dropdown");
 
     constructor(tracks = []) {
         this.tracks = tracks;
@@ -45,11 +46,15 @@ class Selector {
                 elem.className += this.selectClass;
                 document.querySelector('.' + elem.id).className += this.selectClass;
                 this.selectedTrack = this.getTrack(idTrack);
+                console.log(elem.id)
                 mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
-                populateDropDown(this.selectedTrack, document.querySelector("#pluginAutomationEditor " + idTrack));
+                console.log("#pluginAutomationEditor" + elem.id)
+                console.log(document.getElementById("#pluginAutomationEditor" + +elem.id))
+                populateDropDown(this.selectedTrack, document.getElementById("#pluginAutomationEditor" + +elem.id),document.querySelector('#pluginParamSelector'));
             }
         })
         this.handlersCanvas();
+        this.defineHandler();
     }
 
 
@@ -90,6 +95,12 @@ class Selector {
 
         })
         return track;
+    }
+    defineHandler(){
+        this.automation.onclick = () => {
+            console.log("hello aut")
+
+        }
     }
 
 }

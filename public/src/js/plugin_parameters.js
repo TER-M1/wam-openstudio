@@ -69,10 +69,11 @@ export const mountPlugin = (mount, domModel) => {
 /**
  * @param {import('../api/src').WamNode} wamNode
  */
-export const populateParamSelector = async (wamNode,bpfContainer) => {
+export const populateParamSelector = async (wamNode,bpfContainer,pluginParamSelector) => {
     bpfContainer.innerHTML = '';
     pluginParamSelector.innerHTML = '';
     const info = await wamNode.getParameterInfo();
+    console.log(info)
     // eslint-disable-next-line
     for (const paramId in info) {
         const { minValue, maxValue,label } = info[paramId];
