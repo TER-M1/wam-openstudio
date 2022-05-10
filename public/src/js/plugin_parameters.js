@@ -75,37 +75,51 @@ export const populateParamSelector = async (wamNode,bpfContainer,pluginParamSele
     const info = await wamNode.getParameterInfo();
     console.log(info)
     // eslint-disable-next-line
+    let values = []
     for (const paramId in info) {
         const { minValue, maxValue,label } = info[paramId];
-        const option = new Option(`${paramId} (${label}): ${minValue} - ${maxValue}`, paramId);
-        const div = document.createElement('div');
-        div.innerHTML = `${paramId} (${label}): ${minValue} - ${maxValue}`;
-        div.addEventListener('click', async (e) => {
-            console.log("hello")
-            console.log(label)
-            if (!currentPluginAudioNode) return;
-            const paramId = e.target.value;
-            if (paramId === '-1') return;
-            if (Array.from(bpfContainer.querySelectorAll('.pluginAutomationParamId')).find(/** @param {HTMLSpanElement} span */(span) => span.textContent === paramId)) return;
-            const div2 = document.createElement('div');
-            div2.classList.add('pluginAutomation');
-            const span = document.createElement('span');
-            span.classList.add('pluginAutomationParamId');
-            span.textContent = paramId;
-            div2.appendChild(span);
-            const bpf = document.createElement('webaudiomodules-host-bpf');
-            console.log(bpf)
-            bpf.setAttribute('min', minValue);
-            bpf.setAttribute('max', maxValue);
-            let defaultValue = (maxValue - minValue) / 2;
-            bpf.setAttribute('default', defaultValue);
-            div2.appendChild(bpf);
-            bpfContainer.appendChild(div2);
-            pluginParamSelector.selectedIndex = 0;
-            console.log("done");
-        });
+        // const option = new Option(`${paramId} (${label}): ${minValue} - ${maxValue}`, paramId);
+        // const div = document.createElement('div');
+        // div.classList.add("ui", "dropdown", "item","icon", "inverted")
+        let name =  `${paramId} (${label}): ${minValue} - ${maxValue}`;
+        values.push({name : name,
+                    value: 0});
+        // div.innerHTML = name;
+        // div.addEventListener('click', async (e) => {
+        //     console.log("hello")
+        //     console.log(label)
+        //     if (!currentPluginAudioNode) return;
+        //     const paramId = e.target.value;
+        //     if (paramId === '-1') return;
+        //     if (Array.from(bpfContainer.querySelectorAll('.pluginAutomationParamId')).find(/** @param {HTMLSpanElement} span */(span) => span.textContent === paramId)) return;
+        //     const div2 = document.createElement('div');
+        //     div2.classList.add('pluginAutomation');
+        //     const span = document.createElement('span');
+        //     span.classList.add('pluginAutomationParamId');
+        //     span.textContent = paramId;
+        //     div2.appendChild(span);
+        //     const bpf = document.createElement('webaudiomodules-host-bpf');
+        //     console.log(bpf)
+        //     bpf.setAttribute('min', minValue);
+        //     bpf.setAttribute('max', maxValue);
+        //     let defaultValue = (maxValue - minValue) / 2;
+        //     bpf.setAttribute('default', defaultValue);
+        //     div2.appendChild(bpf);
+        //     bpfContainer.appendChild(div2);
+        //     pluginParamSelector.selectedIndex = 0;
+        //     console.log("done");
+        // });
         // pluginParamSelector.add(option);
-        pluginParamSelector.appendChild(div)
+        // pluginParamSelector.appendChild(div)
     }
-    pluginParamSelector.selectedIndex = 0;
+
+
+    // }
+
+    $('.ui.dropdown.auto').dropdown({
+        action: 'hide',
+        values: values
+    });
+
+    // pluginParamSelector.selectedIndex = 0;
 };

@@ -18,10 +18,6 @@ async function loadPlugs() {
         mainAudio.tracks[i].pluginDOM = await instance.createGui();
         connectPlugin(audioCtx, mainAudio.tracks[i].audioWorkletNode, instance._audioNode);
     }
-    // let currentPluginAudioNode = instance._audioNode;
-    // connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, mainAudio.masterVolumeNode);
-    // var pluginDomModel = await instance.createGui();
-    // mountPlugin(document.querySelector("#mount2"), pluginDomModel);
 }
 export {loadPlugs}
 
