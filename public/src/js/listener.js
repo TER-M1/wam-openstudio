@@ -11,7 +11,6 @@ const uMountPlugin = (mount) => {
 }
 
 function populateDropDown(track, mount,pluginParamSelector) {
-    console.log(mount)
     populateParamSelector(track.pluginInstance._audioNode,mount,pluginParamSelector)
 }
 
@@ -36,7 +35,7 @@ class Selector {
             this.tracksId.push(elem.id);
             let idTrack = elem.id.split('')[elem.id.length - 1];
             elem.onclick = () => {
-                uMountPlugin(document.querySelector("#mount2"));
+                uMountPlugin(document.querySelector("#mount1"));
                 let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
                 let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
                 if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
@@ -47,7 +46,7 @@ class Selector {
                 document.querySelector('.' + elem.id).className += this.selectClass;
                 this.selectedTrack = this.getTrack(idTrack);
                 let can = document.querySelector(`.wave-form.${elem.id}`);
-                mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
+                mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                 populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
             }
         })
@@ -64,7 +63,7 @@ class Selector {
 
                 let idTrack = e.id.split('')[e.id.length - 1];
                 e.onclick = () => {
-                    uMountPlugin(document.querySelector("#mount2"));
+                    uMountPlugin(document.querySelector("#mount1"));
                     let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
                     let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
                     if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
@@ -74,7 +73,7 @@ class Selector {
                     e.className += this.selectClass;
                     document.querySelector('#' + e.id).className += this.selectClass;
                     this.selectedTrack = this.getTrack(idTrack);
-                    mountPlugin(document.querySelector("#mount2"), this.selectedTrack.pluginDOM);
+                    mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                     let can = document.querySelector(`.wave-form.${e.id}`);
                     populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
 
@@ -95,13 +94,17 @@ class Selector {
         })
         return track;
     }
+
+   pop() {
+       let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
+       console.log(can)
+       populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
+   }
+
+
     defineHandler(){
-        this.automation.onclick = () => {
-            console.log(`.wave-form.track${this.selectedTrack.id}`)
-            // let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
-            // console.log(can)
-            // populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
-        }
+        this.automation.addEventListener("click", () => { console.log("need to update teh dropdown here too without deelting it ")})
+
     }
 
 }

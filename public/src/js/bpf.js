@@ -247,7 +247,8 @@
          this._svg = this._root.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
          this._svg.setAttribute('width', '100%');
          this._svg.setAttribute('height', '100%');
-         this._svg.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+         this._svg.style.backgroundColor = 'none';
+         // this._svg.style.position = "absolute"
          this._svg.addEventListener('mousemove', this.handleMouseMove);
          this._svg.addEventListener('dblclick', this.handleDoubleClick);
          this._root.appendChild(this._svg);

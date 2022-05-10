@@ -1,4 +1,3 @@
-
 export function addEventOnPlugin(currentPluginAudioNode) {
     /** @type {HTMLSelectElement} */ const pluginParamSelector = document.querySelector('#pluginParamSelector');
     /** @type {HTMLInputElement} */ const pluginAutomationLengthInput = document.querySelector('#pluginAutomationLength');
@@ -66,24 +65,33 @@ export const mountPlugin = (mount, domModel) => {
 // };
 
 
+
+
 /**
  * @param {import('../api/src').WamNode} wamNode
  */
-export const populateParamSelector = async (wamNode,bpfContainer,pluginParamSelector) => {
+export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector) => {
     bpfContainer.innerHTML = '';
-    pluginParamSelector.innerHTML = '';
+    pluginParamSelector.innerHTML = '<i class="project diagram icon"></i>';
     const info = await wamNode.getParameterInfo();
-    console.log(info)
+    // console.log(info)
     // eslint-disable-next-line
     let values = []
+    let params = []
     for (const paramId in info) {
-        const { minValue, maxValue,label } = info[paramId];
+        const {minValue, maxValue, label} = info[paramId];
+        console.log("paramID : "+ paramId)
+        params.push(paramId)
         // const option = new Option(`${paramId} (${label}): ${minValue} - ${maxValue}`, paramId);
         // const div = document.createElement('div');
         // div.classList.add("ui", "dropdown", "item","icon", "inverted")
-        let name =  `${paramId} (${label}): ${minValue} - ${maxValue}`;
-        values.push({name : name,
-                    value: 0});
+        let name = `${paramId} (${label}): ${minValue} - ${maxValue}`;
+        values.push({
+            name: name,
+            value: values.length,
+            class: `item dropItem${values.length}`
+        });
+
         // div.innerHTML = name;
         // div.addEventListener('click', async (e) => {
         //     console.log("hello")
@@ -120,6 +128,24 @@ export const populateParamSelector = async (wamNode,bpfContainer,pluginParamSele
         action: 'hide',
         values: values
     });
+    for(let i = 0 ; i < values.length; i++){
+        let item = pluginParamSelector.querySelector(`.dropItem${i}`);
+        console.log(item);
+        console.log(values[i].name)
+        let param = params[i]
+        console.log(param)
+        console.log(info[param])
+        const {minValue, maxValue, label} = info[param];
+
+        item.onclick = () =>{
+            const bpf = document.createElement('webaudiomodules-host-bpf');
+            bpf.setAttribute('min', minValue);
+            bpf.setAttribute('max', maxValue);
+            let defaultValue = (maxValue - minValue) / 2;
+            bpf.setAttribute('default', defaultValue);
+            bpfContainer.appendChild(bpf);
+        }
+    }
 
     // pluginParamSelector.selectedIndex = 0;
 };
