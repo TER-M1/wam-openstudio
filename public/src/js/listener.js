@@ -11,7 +11,7 @@ const uMountPlugin = (mount) => {
 }
 
 function populateDropDown(track, mount,pluginParamSelector) {
-    populateParamSelector(track.pluginInstance._audioNode,mount,pluginParamSelector)
+    populateParamSelector(track.pluginInstance._audioNode,mount,pluginParamSelector,track)
 }
 
 

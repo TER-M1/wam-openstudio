@@ -1,3 +1,5 @@
+
+
 export function addEventOnPlugin(currentPluginAudioNode) {
     /** @type {HTMLSelectElement} */ const pluginParamSelector = document.querySelector('#pluginParamSelector');
     /** @type {HTMLInputElement} */ const pluginAutomationLengthInput = document.querySelector('#pluginAutomationLength');
@@ -70,8 +72,8 @@ export const mountPlugin = (mount, domModel) => {
 /**
  * @param {import('../api/src').WamNode} wamNode
  */
-export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector) => {
-    bpfContainer.innerHTML = '';
+export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector,track) => {
+    // bpfContainer.innerHTML = '';
     pluginParamSelector.innerHTML = '<i class="project diagram icon"></i>';
     const info = await wamNode.getParameterInfo();
     // console.log(info)
@@ -91,33 +93,7 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
             class: `item dropItem${values.length}`
         });
 
-        // div.innerHTML = name;
-        // div.addEventListener('click', async (e) => {
-        //     console.log("hello")
-        //     console.log(label)
-        //     if (!currentPluginAudioNode) return;
-        //     const paramId = e.target.value;
-        //     if (paramId === '-1') return;
-        //     if (Array.from(bpfContainer.querySelectorAll('.pluginAutomationParamId')).find(/** @param {HTMLSpanElement} span */(span) => span.textContent === paramId)) return;
-        //     const div2 = document.createElement('div');
-        //     div2.classList.add('pluginAutomation');
-        //     const span = document.createElement('span');
-        //     span.classList.add('pluginAutomationParamId');
-        //     span.textContent = paramId;
-        //     div2.appendChild(span);
-        //     const bpf = document.createElement('webaudiomodules-host-bpf');
-        //     console.log(bpf)
-        //     bpf.setAttribute('min', minValue);
-        //     bpf.setAttribute('max', maxValue);
-        //     let defaultValue = (maxValue - minValue) / 2;
-        //     bpf.setAttribute('default', defaultValue);
-        //     div2.appendChild(bpf);
-        //     bpfContainer.appendChild(div2);
-        //     pluginParamSelector.selectedIndex = 0;
-        //     console.log("done");
-        // });
-        // pluginParamSelector.add(option);
-        // pluginParamSelector.appendChild(div)
+
     }
 
 
@@ -133,13 +109,14 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         const {minValue, maxValue, label} = info[param];
         item.onclick = () =>{
             const bpf = document.createElement('webaudiomodules-host-bpf');
+            bpf.className = param;
             bpf.setAttribute('min', minValue);
             bpf.setAttribute('max', maxValue);
             let defaultValue = (maxValue - minValue) / 2;
             bpf.setAttribute('default', defaultValue);
+            bpf.setAttribute('domain', track.duration);
             bpfContainer.appendChild(bpf);
         }
     }
 
-    // pluginParamSelector.selectedIndex = 0;
 };
