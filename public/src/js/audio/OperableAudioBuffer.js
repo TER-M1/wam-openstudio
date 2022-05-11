@@ -7,12 +7,14 @@ class OperableAudioBuffer extends AudioBuffer {
         }
         return newBuffer;
     }
+
     reverse() {
         for (let i = 0; i < this.numberOfChannels; i++) {
             const channel = this.getChannelData(i);
             channel.reverse();
         }
     }
+
     inverse() {
         for (let i = 0; i < this.numberOfChannels; i++) {
             const channel = this.getChannelData(i);
@@ -21,14 +23,15 @@ class OperableAudioBuffer extends AudioBuffer {
             }
         }
     }
+
     /**
      * @param {AudioBuffer} that
      * @param {number} [numberOfChannels]
      */
     concat(that, numberOfChannels = this.numberOfChannels) {
-        const { sampleRate } = this;
+        const {sampleRate} = this;
         const length = this.length + that.length;
-        const buffer = new OperableAudioBuffer({ numberOfChannels, length, sampleRate });
+        const buffer = new OperableAudioBuffer({numberOfChannels, length, sampleRate});
         const from = this.length;
         for (let i = 0; i < numberOfChannels; i++) {
             if (i < this.numberOfChannels) buffer.copyToChannel(this.getChannelData(i), i);
@@ -36,15 +39,16 @@ class OperableAudioBuffer extends AudioBuffer {
         }
         return buffer;
     }
+
     /**
      * @param {number} from
      * @returns {[OperableAudioBuffer, OperableAudioBuffer]}
      */
     split(from) {
         if (from >= this.length || from <= 0) throw new RangeError("Split point is out of bound");
-        const { length, sampleRate, numberOfChannels } = this;
-        const buffer1 = new OperableAudioBuffer({ length: from, numberOfChannels, sampleRate });
-        const buffer2 = new OperableAudioBuffer({ length: length - from, numberOfChannels, sampleRate });
+        const {length, sampleRate, numberOfChannels} = this;
+        const buffer1 = new OperableAudioBuffer({length: from, numberOfChannels, sampleRate});
+        const buffer2 = new OperableAudioBuffer({length: length - from, numberOfChannels, sampleRate});
         for (let i = 0; i < numberOfChannels; i++) {
             const channel1 = buffer1.getChannelData(i);
             const channel2 = buffer2.getChannelData(i);
@@ -53,6 +57,7 @@ class OperableAudioBuffer extends AudioBuffer {
         }
         return [buffer1, buffer2];
     }
+
     /**
      * @param {number} channel
      * @param {number} index
@@ -63,11 +68,12 @@ class OperableAudioBuffer extends AudioBuffer {
         if (index > this.length) throw new Error(`Index written ${index} out of range ${this.length}`);
         this.getChannelData(channel)[index] = value;
     }
+
     toArray(shared = false) {
         const supportSAB = typeof SharedArrayBuffer !== "undefined";
         /** @type {Float32Array[]} */
         const channelData = [];
-        const { numberOfChannels, length } = this;
+        const {numberOfChannels, length} = this;
         for (let i = 0; i < numberOfChannels; i++) {
             if (shared && supportSAB) {
                 channelData[i] = new Float32Array(new SharedArrayBuffer(length * Float32Array.BYTES_PER_ELEMENT));

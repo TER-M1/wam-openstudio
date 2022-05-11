@@ -1,5 +1,3 @@
-
-
 export function addEventOnPlugin(currentPluginAudioNode) {
     /** @type {HTMLSelectElement} */ const pluginParamSelector = document.querySelector('#pluginParamSelector');
     /** @type {HTMLInputElement} */ const pluginAutomationLengthInput = document.querySelector('#pluginAutomationLength');
@@ -67,12 +65,10 @@ export const mountPlugin = (mount, domModel) => {
 // };
 
 
-
-
 /**
  * @param {import('../api/src').WamNode} wamNode
  */
-export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector,track) => {
+export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector, track) => {
     // bpfContainer.innerHTML = '';
     pluginParamSelector.innerHTML = '<i class="project diagram icon"></i>';
     const info = await wamNode.getParameterInfo();
@@ -103,11 +99,11 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         action: 'hide',
         values: values
     });
-    for(let i = 0 ; i < values.length; i++){
+    for (let i = 0; i < values.length; i++) {
         let item = pluginParamSelector.querySelector(`.dropItem${i}`);
         let param = params[i]
         const {minValue, maxValue, label} = info[param];
-        item.onclick = () =>{
+        item.onclick = () => {
             const bpf = document.createElement('webaudiomodules-host-bpf');
             bpf.className = param;
             bpf.setAttribute('min', minValue);

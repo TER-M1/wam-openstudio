@@ -1,4 +1,5 @@
-import {MainAudio, mainAudio} from "./audio_loader.js";
+import {mainAudio} from "../audio/Utils.js";
+import MainAudio from "../audio/MainAudio.js";
 
 const timerDiv = document.querySelector(".timer");
 
@@ -61,7 +62,7 @@ export function canvasClickMoveCursor(event) {
         let estimatedSeconds = x / MainAudio.PIXEL_PER_SECONDS;
         let newPlayHeadPosition = mainAudio.playHeadPositionFromTime(estimatedSeconds, track);
 
-        if(newPlayHeadPosition >= track.operableDecodedAudioBuffer.length) {
+        if (newPlayHeadPosition >= track.operableDecodedAudioBuffer.length) {
             newPlayHeadPosition = track.operableDecodedAudioBuffer.length - 1;
         }
 
