@@ -1,5 +1,7 @@
 import {audioCtx, AudioTrack, mainAudio, SimpleAudioWorkletNode} from "./audio_loader.js";
 import {Selector} from "./listener.js";
+import {loadPlugs} from "./plugin_loader.js";
+
 
 export function activateMainVolume(mainAudio, val) {
     mainAudio.setVolume(val);
@@ -43,12 +45,13 @@ export function exploreTracks() {
 
 }
 
+
 function attachControl(values) {
     values.forEach(value => {
-        let el = document.querySelector('.item.multitrack-item'+value.value);
+        let el = document.querySelector('.item.multitrack-item' + value.value);
         el.addEventListener('click', () => {
             let asyncAddTrack = [];
-            fetch('http://localhost:80/track/'+value.value)
+            fetch('http://localhost:80/track/' + value.value)
                 .then(res => res.json())
                 .then(async (output) => {
                     let soundList = output.soundList;
@@ -60,15 +63,16 @@ function attachControl(values) {
                     }
                     let res = await Promise.all(
                         asyncAddTrack
-                    )
+                    );
                     const selector = new Selector(mainAudio.tracks);
+                    await loadPlugs();
+                    // const pluginLoader = new PluginLoader();
                 })
                 .catch(err => console.log(err));
 
 
         })
     })
-
 
 
 }

@@ -3,6 +3,7 @@ import {activateMainVolume, exploreTracks} from "./src/js/page_init.js";
 import {updateCursorTracks} from "./src/js/playhead.js";
 
 
+
 const btnStart = document.getElementById("btn-start");
 const zoomIn = document.getElementById("btn-zoom-in");
 const zoomOut = document.getElementById("btn-zoom-out");
@@ -15,6 +16,8 @@ const loopEnding = document.getElementById("loop-end-input");
 const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
+
+
 
 
 (async () => {
@@ -44,7 +47,7 @@ var intervalCursorTracks = undefined;
     // const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
     // mainAudio.hostGroupId = await initializeWamHost(audioCtx);
 
-
+    // loadPlugs();
     // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
     // const [hostGroupId] = await initializeWamHost(audioCtx);
     //
@@ -55,7 +58,6 @@ var intervalCursorTracks = undefined;
     // connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, mainAudio.masterVolumeNode);
     // var pluginDomModel = await instance.createGui();
     // mountPlugin(document.querySelector("#mount2"), pluginDomModel);
-
 
     /*
     PLUGIN PARAMETERS CONNECTION

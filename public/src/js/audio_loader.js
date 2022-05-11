@@ -1,7 +1,6 @@
 import OperableAudioBuffer from './operable-audio-buffer.js'
 import {drawBuffer} from "./drawers.js";
-import {canvasClickMoveCursor} from "./playhead.js";
-// var WAM = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
+import {canvasClickMoveCursor} from "./playhead.js"
 
 class MainAudio {
     /**
@@ -47,12 +46,14 @@ class MainAudio {
                 this.tracks.push(track);
 
                 let waveForm = document.createElement("wave-form");
+
                 track.id = this.tracks.length - 1;
                 waveForm.id = "track" + track.id;
                 this.canvasDiv.appendChild(waveForm);
-
-
+                // waveForm.innerHTML = `` //${waveForm.id}
                 track.canvas = waveForm.canvas;
+                track.bpf = waveForm.bpf;
+                // track.canvas.width = MainAudio.CANVAS_WIDTH;
                 track.canvas.width = this.pixelAmountFromBufferLength(track);
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;
                 track.canvas.addEventListener("click", canvasClickMoveCursor);
@@ -225,9 +226,15 @@ class AudioTrack {
      * @private
      */
     _isSoloTrack = false;
+    /**
+     *
+     * @type {Element}
+     */
+    bpf = undefined;
 
     id = undefined;
-    pluginInstance = undefined
+    pluginInstance = undefined ;
+    pluginDOM = undefined ;
 
     /**
      *
@@ -592,6 +599,7 @@ customElements.define(
 
 const templateCanvas = document.createElement("template");
 templateCanvas.innerHTML = /*html*/`
+<div id = "pluginAutomationEditor"></div>
 <canvas height="104" width="2000" class="can"></canvas>
 `;
 
@@ -599,6 +607,7 @@ templateCanvas.innerHTML = /*html*/`
 class WaveForm extends HTMLElement {
     id = undefined;
     canvas = undefined;
+    bpf = undefined;
 
     constructor() {
         super();
@@ -624,6 +633,7 @@ class WaveForm extends HTMLElement {
     defId() {
         this.canvas = this.shadowRoot.querySelector(".can");
         this.canvas.id = this.id;
+        this.bpf = this.shadowRoot.querySelector("#pluginAutomationEditor")
     }
 
 
