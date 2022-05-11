@@ -249,6 +249,7 @@
          this._svg.setAttribute('height', '100%');
          this._svg.style.backgroundColor = 'none';
          // this._svg.style.position = "absolute"
+         this._svg.style.zIndex = 10;
          this._svg.addEventListener('mousemove', this.handleMouseMove);
          this._svg.addEventListener('dblclick', this.handleDoubleClick);
          this._root.appendChild(this._svg);

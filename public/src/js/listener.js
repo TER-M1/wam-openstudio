@@ -18,9 +18,10 @@ function populateDropDown(track, mount,pluginParamSelector) {
 class Selector {
     /**
      *
-     * @type {[AudioTrack]}
+     * @type {AudioTrack}
      */
     selectedTrack = undefined;
+
     tracks = [];
     tracksId = [];
     waveformClass = "wave-form"
@@ -47,7 +48,8 @@ class Selector {
                 this.selectedTrack = this.getTrack(idTrack);
                 let can = document.querySelector(`.wave-form.${elem.id}`);
                 mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
-                populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
+                // console.log(this.selectedTrack.bpf)
+                populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
             }
         })
         this.handlersCanvas();
@@ -75,7 +77,7 @@ class Selector {
                     this.selectedTrack = this.getTrack(idTrack);
                     mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                     let can = document.querySelector(`.wave-form.${e.id}`);
-                    populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
+                    populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
 
                 }
                 elems.push(e);
@@ -98,7 +100,7 @@ class Selector {
    pop() {
        let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
        console.log(can)
-       populateDropDown(this.selectedTrack, can.querySelector("#pluginAutomationEditor"),document.querySelector('.ui.dropdown.auto'));
+       populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
    }
 
 

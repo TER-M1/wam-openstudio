@@ -50,8 +50,9 @@ class MainAudio {
                 track.id = this.tracks.length - 1;
                 waveForm.id = "track" + track.id;
                 this.canvasDiv.appendChild(waveForm);
-                waveForm.innerHTML = `<div id = "pluginAutomationEditor"></div>` //${waveForm.id}
+                // waveForm.innerHTML = `` //${waveForm.id}
                 track.canvas = waveForm.canvas;
+                track.bpf = waveForm.bpf;
                 track.canvas.width = MainAudio.CANVAS_WIDTH;
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;
                 track.canvas.addEventListener("click", canvasClickMoveCursor);
@@ -199,6 +200,11 @@ class AudioTrack {
      * @private
      */
     _isSoloTrack = false;
+    /**
+     *
+     * @type {Element}
+     */
+    bpf = undefined;
 
     id = undefined;
     pluginInstance = undefined ;
@@ -567,6 +573,7 @@ customElements.define(
 
 const templateCanvas = document.createElement("template");
 templateCanvas.innerHTML = /*html*/`
+<div id = "pluginAutomationEditor"></div>
 <canvas height="104" width="2000" class="can"></canvas>
 `;
 
@@ -574,6 +581,7 @@ templateCanvas.innerHTML = /*html*/`
 class WaveForm extends HTMLElement {
     id = undefined;
     canvas = undefined;
+    bpf = undefined;
 
     constructor() {
         super();
@@ -599,6 +607,7 @@ class WaveForm extends HTMLElement {
     defId() {
         this.canvas = this.shadowRoot.querySelector(".can");
         this.canvas.id = this.id;
+        this.bpf = this.shadowRoot.querySelector("#pluginAutomationEditor")
     }
 
 
