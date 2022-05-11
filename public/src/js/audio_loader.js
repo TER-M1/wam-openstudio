@@ -254,6 +254,8 @@ class AudioTrack {
         this.name = this.fpath.split("/").pop();
         this.initWamHostPath = initWamHostPath;
         this.wamIndexPath = wamIndexPath;
+        this.loopBeggining = 0;
+        this.loopEnding = 0;
     }
 
     async load() {
@@ -273,6 +275,7 @@ class AudioTrack {
             this.decodedAudioBuffer,
             OperableAudioBuffer.prototype
         );
+        this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
     }
@@ -319,7 +322,31 @@ class AudioTrack {
         this.oldGainValue = value;
     }
 
+    /**
+     *
+     * @param{number} value
+     */
+    setLoopBeggining(value) {
+        if (!isNaN(value) && value >= 0 && value < this.operableDecodedAudioBuffer.length && value < this.loopEnding)
+            this.loopBeggining = value;
+        else
+            this.loopBeggining = 1;
 
+        this.audioWorkletNode.port.postMessage({loopBeggining: this.loopBeggining});
+    }
+
+    /**
+     *
+     * @param{number} value
+     */
+    setLoopEnding(value) {
+        if (!isNaN(value) && value >= 0 && value <= this.operableDecodedAudioBuffer.length && value > this.loopBeggining)
+            this.loopEnding = value;
+        else
+            this.loopEnding = this.operableDecodedAudioBuffer.length;
+
+        this.audioWorkletNode.port.postMessage({loopEnding: this.loopEnding});
+    }
 }
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
