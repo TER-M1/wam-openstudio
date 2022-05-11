@@ -12,6 +12,14 @@ const app = express();
 
 app.use(express.static('public'));
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE");
+    next();
+});
+
+
 app.listen(PORT, () => console.log("Server is started and listening on port 80."));
 
 /*
@@ -31,6 +39,8 @@ app.get('/track/:id', async (req, res) => {
     res.end();
 } )
 
+
+
 const endsWith = (str, suffix) => str.indexOf(suffix, str.length - suffix.length) !== -1;
 
 function isASoundFile(fileName) {
@@ -39,7 +49,6 @@ function isASoundFile(fileName) {
     if (endsWith(fileName, ".wav")) return true;
     return endsWith(fileName, ".m4a");
 }
-
 
 function exploreMultiTracks() {
     tracks = {"tracks": []};

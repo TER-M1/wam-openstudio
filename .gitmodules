@@ -1,0 +1,3 @@
+[submodule "public/sdk"]
+	path = public/sdk
+	url = https://github.com/webaudiomodules/sdk

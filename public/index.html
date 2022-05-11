@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/components/icon.min.css">
     <link rel="stylesheet" href="lib/semantic.min.css" type="text/css">
     <link rel="stylesheet" href="style/style.css">
-    <script src="src/js/bpf.js"></script>
+    <script src="src/js/automation/BPF.js"></script>
   
 </head>
 <body>
@@ -27,11 +27,11 @@
                 </div>
             </div>
         </div>
-            <a class="auto ui dropdown item" >
+            <a class="auto ui dropdown search item inverted">
 <!--                data-tooltip="Automation" data-position="bottom left"  data-variation="mini basic"-->
 <!--                data-inverted=""-->
                 <i class="project diagram icon"></i>
-                <div class="menu">
+                <div class="menu pluginParamSelector">
 
                 </div>
             </a>
@@ -69,13 +69,13 @@
         </a>
         <a class="item bornes">
             <div class="ui left icon input">
-                <input type="text" placeholder="left born">
+                <input type="text" placeholder="Loop beginning" id="loop-beginning-input">
                 <i class="step forward icon"></i>
             </div>
         </a>
         <a class="item bornes">
             <div class="ui left icon input">
-                <input type="text" placeholder="right born">
+                <input type="text" placeholder="Loop end" id="loop-end-input">
                 <i class="step backward icon"></i>
             </div>
         </a>
@@ -117,21 +117,20 @@
         </div>
         <div class="plugin-rack">
             <div id="mount1"></div>
-            <div id="mount2"></div>
 
             <!-- this will be used for the plugin's automation -->
-            <div id="pluginAutomationContainer">
-                <div id="pluginParamSelectorContainer">
-                    <select name="pluginParamSelector" id="pluginParamSelector" class="widget">
-                        <option value="-1" disabled selected>Add Automation...</option>
-                    </select>
-                    <label for="pluginAutomationLength">Duration (sec):</label>
-                    <input name="pluginAutomationLength" id="pluginAutomationLength" type="number" class="widget" min="1" step="0.1" value="1" />
-                    <input id="pluginAutomationApply" type="button" class="widget" value="Apply" />
-                </div>
-                <div id="pluginAutomationEditor">
-                </div>
-            </div>
+<!--            <div id="pluginAutomationContainer">-->
+<!--                <div id="pluginParamSelectorContainer">-->
+<!--                    <select name="pluginParamSelector" id="pluginParamSelector" class="widget">-->
+<!--                        <option value="-1" disabled selected>Add Automation...</option>-->
+<!--                    </select>-->
+<!--                    <label for="pluginAutomationLength">Duration (sec):</label>-->
+<!--                    <input name="pluginAutomationLength" id="pluginAutomationLength" type="number" class="widget" min="1" step="0.1" value="1" />-->
+<!--                    <input id="pluginAutomationApply" type="button" class="widget" value="Apply" />-->
+<!--                </div>-->
+<!--                <div id="pluginAutomationEditor">-->
+<!--                </div>-->
+<!--            </div>-->
 
             <div class="add-plugin">
                 <i class="large plus icon"></i>
@@ -140,7 +139,7 @@
         </div>
     </div>
 </div>
-<script src="src/js/control.js"></script>
+<script src="src/js/track-utils/Control.js"></script>
 <script src="index.js" type="module"></script>
 
 </body>
