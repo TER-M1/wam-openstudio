@@ -34,9 +34,7 @@ customElements.define(
     /*
     PROCESSOR INITIALIZATION
      */
-    await audioCtx.audioWorklet.addModule("./src/js/processor/CompiledProcessorModule.js");
-
-
+    await audioCtx.audioWorklet.addModule("./src/js/worklet/Processor.js");
     /*
     INITIALIZATION PAGES ELEMENTS
      */

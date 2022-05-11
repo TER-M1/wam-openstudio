@@ -10,7 +10,7 @@ export default class WAMAudioWorkletNode extends AudioWorkletNode {
      * @param {BaseAudioContext} context
      */
     constructor(context) {
-        super(context, "simple-processor");
+        super(context, "wam-processor");
         this.port.onmessage = (e) => {
             if (e.data.playhead) {
                 this._playhead = e.data.playhead;

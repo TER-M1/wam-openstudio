@@ -15,7 +15,6 @@ export default class WaveFormElement extends HTMLElement {
         this.attachShadow({mode: "open"});
     }
 
-
     connectedCallback() {
         this.shadowRoot.innerHTML = templateCanvas.innerHTML;
         this.defClass();

@@ -143,5 +143,8 @@ class SimpleProcessor extends AudioWorkletProcessor {
         return true;
     }
 }
-
-registerProcessor("simple-processor", SimpleProcessor);
+try {
+    registerProcessor("wam-processor", SimpleProcessor);
+} catch (e) {
+    console.log(e);
+}

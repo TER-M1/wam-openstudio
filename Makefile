@@ -1,4 +1,4 @@
-# FLAGS =  -lembind -o CompiledProcessorModule.js processor-perf.cpp --post-js ./mod.js -s ENVIRONMENT="shell"
+# FLAGS =  -lembind -o CompiledProcessorModule.js worklet-perf.cpp --post-js ./mod.js -s ENVIRONMENT="shell"
 # CC = emcc
 
 

@@ -1,7 +1,7 @@
 import TrackSelector from "./track-utils/TrackSelector.js";
 import AudioTrack from "./audio/AudioTrack.js";
 import {audioCtx, mainAudio} from "./audio/Utils.js";
-import WAMAudioWorkletNode from "./audio/WAMAudioWorkletNode.js";
+import WAMAudioWorkletNode from "./worklet/WAMAudioWorkletNode.js";
 
 
 export function activateMainVolume(mainAudio, val) {
@@ -54,9 +54,10 @@ function attachControl(values) {
                 .then(async (output) => {
                     let soundList = output.soundList;
                     for (let i = 0; i < soundList.length; i++) {
-                        let path = `${output.path}/${soundList[i].name}`
+                        let path = `${output.path}/${soundList[i].name}`;
+                        let audioWorkletNode = new WAMAudioWorkletNode(audioCtx);
                         asyncAddTrack.push(mainAudio.addTrack(
-                            new AudioTrack(audioCtx, new WAMAudioWorkletNode(audioCtx), path)
+                            new AudioTrack(audioCtx, audioWorkletNode, path)
                         ));
                     }
                     let res = await Promise.all(
