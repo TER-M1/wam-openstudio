@@ -1,6 +1,6 @@
 import {MainAudio, AudioTrack, SimpleAudioWorkletNode, audioCtx, mainAudio} from "./src/js/audio_loader.js";
 import {activateMainVolume, exploreTracks} from "./src/js/page_init.js";
-import {updateCursorTracks} from "./src/js/playhead.js";
+import {onLoopBegginingInputChange, onLoopEndingInputChange, updateCursorTracks} from "./src/js/playhead.js";
 
 
 const btnStart = document.getElementById("btn-start");
@@ -134,5 +134,8 @@ var intervalCursorTracks = undefined;
             mainAudio.unMute();
         }
     };
+
+    loopBeginning.addEventListener("change", onLoopBegginingInputChange);
+    loopEnding.addEventListener("change", onLoopEndingInputChange);
 
 })();

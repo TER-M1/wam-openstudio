@@ -12,40 +12,51 @@ function millisToMinutesAndSeconds(millis) {
     return parts.map(s => String(s).padStart(2, '0')).join(':') + "." + String(d.getMilliseconds()).padStart(3, '0');
 }
 
-function updateCursorTracks() {
+export function updateCursorTracks() {
     let playHead;
     let maxPlayHead = 0;
-    for (let i = 0; i < mainAudio.tracks.length; i++) {
 
-        playHead = mainAudio.tracks[i].audioWorkletNode.playHeadPosition;
+    mainAudio.tracks.forEach(track => {
+        playHead = track.audioWorkletNode.playHeadPosition;
+        let loopBeggining = track.loopBeggining;
+        let loopEnding = track.loopEnding;
+
         maxPlayHead = Math.max(maxPlayHead, playHead);
         /**
          *
          * @type {HTMLCanvasElement}
          */
-        let trackCanvas = mainAudio.tracks[i].canvas;
+        let trackCanvas = track.canvas;
 
         let ctx = trackCanvas.getContext("2d");
         ctx.clearRect(0, 0, trackCanvas.width, trackCanvas.height);
         ctx.putImageData(trackCanvas.bufferState, 0, 0);
 
-        let rapport = (playHead * 100) / mainAudio.tracks[i].operableDecodedAudioBuffer.length;
-        let position = (trackCanvas.width / 100) * rapport;
-
+        let rapportPlayHead = (playHead * 100) / track.operableDecodedAudioBuffer.length;
+        let positionPlayHead = (trackCanvas.width / 100) * rapportPlayHead;
         ctx.fillStyle = "lightgrey";
-        ctx.fillRect(position, 0, 2, trackCanvas.height);
-    }
+        ctx.fillRect(positionPlayHead, 0, 2, trackCanvas.height);
+
+        let rapportLoopBeggining = (loopBeggining * 100) / track.operableDecodedAudioBuffer.length;
+        let positionLoopBeggining = (trackCanvas.width / 100) * rapportLoopBeggining;
+        ctx.fillStyle = "grey"
+        ctx.fillRect(positionLoopBeggining, 0, 1, trackCanvas.height);
+
+        let rapportLoopEnding = (loopEnding * 100) / track.operableDecodedAudioBuffer.length;
+        let positionLoopEnding = (trackCanvas.width / 100) * rapportLoopEnding;
+        ctx.fillStyle = "grey"
+        ctx.fillRect(positionLoopEnding, 0, 1, trackCanvas.height);
+    });
     updateAudioTimer((maxPlayHead / 48000) * 1000);
 }
 
-function canvasClickMoveCursor(event) {
+export function canvasClickMoveCursor(event) {
     let canvas = event.currentTarget;
     const rect = event.currentTarget.getBoundingClientRect()
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    for(let i = 0; i < mainAudio.tracks.length; i++) {
-        let track = mainAudio.tracks[i];
+    mainAudio.tracks.forEach(track => {
 
         let estimatedSeconds = x / MainAudio.PIXEL_PER_SECONDS;
         let newPlayHeadPosition = mainAudio.playHeadPositionFromTime(estimatedSeconds, track);
@@ -55,12 +66,29 @@ function canvasClickMoveCursor(event) {
         }
 
         track.audioWorkletNode.port.postMessage({position: newPlayHeadPosition});
-    }
+    });
 }
 
 export function updateAudioTimer(playHead) {
     timerDiv.innerHTML = millisToMinutesAndSeconds(playHead);
 }
 
-export {updateCursorTracks};
-export {canvasClickMoveCursor}
+export function onLoopBegginingInputChange(event) {
+    let time = event.target.value;
+
+    mainAudio.tracks.forEach(track => {
+        track.setLoopBeggining(mainAudio.playHeadPositionFromTime(time, track));
+    });
+
+    updateCursorTracks()
+}
+
+export function onLoopEndingInputChange(event) {
+    let time = event.target.value;
+
+    mainAudio.tracks.forEach(track => {
+        track.setLoopEnding(mainAudio.playHeadPositionFromTime(time, track));
+    });
+
+    updateCursorTracks()
+}
