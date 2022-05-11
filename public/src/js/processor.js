@@ -124,7 +124,7 @@ class SimpleProcessor extends AudioWorkletProcessor {
             if (this.playhead >= this.loopEnding || this.playhead < this.loopBeggining) {
                 // Play was finished
                 if (loop) {
-                    console.log("actual beggining : " + this.loopBeggining)
+                    // console.log("actual beggining : " + this.loopBeggining)
                     this.playhead = this.loopBeggining; // Loop just enabled, reset playhead
                 } else continue; // EOF without loop
             }
