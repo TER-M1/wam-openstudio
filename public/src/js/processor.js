@@ -31,6 +31,11 @@ class SimpleProcessor extends AudioWorkletProcessor {
         this.audio = null;
         /** @type {number} */
         this.playhead = 0;
+        /** @type {number} */
+        this.loopBeggining = 0;
+        /** @type {number} */
+        this.loopEnding = 0;
+
         /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number;}>} e */
         this.port.onmessage = (e) => {
             if (e.data.audio) {
@@ -38,6 +43,16 @@ class SimpleProcessor extends AudioWorkletProcessor {
             } else if (e.data.position && typeof e.data.position === "number") {
                 this.playhead = e.data.position; // * sampleRate;
                 this.port.postMessage({playhead: this.playhead})
+            } else if (e.data.loopBeggining && typeof e.data.loopBeggining === "number") {
+                if (e.data.loopBeggining === -1)
+                    this.loopBeggining = 0;
+                else
+                    this.loopBeggining = e.data.loopBeggining;
+            } else if (e.data.loopEnding && typeof e.data.loopEnding === "number") {
+                if (e.data.loopEnding === -1)
+                    this.loopEnding = this.audio[0].length;
+                else
+                    this.loopEnding = e.data.loopEnding;
             }
         };
         this._heapInputBuffer = new HeapAudioBuffer(
@@ -106,10 +121,11 @@ class SimpleProcessor extends AudioWorkletProcessor {
                 ? parameters.loop[i]
                 : parameters.loop[0]);
             if (!playing) continue; // Not playing
-            if (this.playhead >= audioLength) {
+            if (this.playhead >= this.loopEnding || this.playhead < this.loopBeggining) {
                 // Play was finished
                 if (loop) {
-                    this.playhead = 0; // Loop just enabled, reset playhead
+                    console.log("actual beggining : " + this.loopBeggining)
+                    this.playhead = this.loopBeggining; // Loop just enabled, reset playhead
                 } else continue; // EOF without loop
             }
 
