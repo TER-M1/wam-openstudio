@@ -1,5 +1,7 @@
-import {audioCtx, AudioTrack, mainAudio, SimpleAudioWorkletNode} from "./audio_loader.js";
-import {Selector} from "./listener.js";
+import TrackSelector from "./track-utils/TrackSelector.js";
+import AudioTrack from "./audio/AudioTrack.js";
+import {audioCtx, mainAudio} from "./audio/Utils.js";
+import WAMAudioWorkletNode from "./audio/WAMAudioWorkletNode.js";
 
 
 export function activateMainVolume(mainAudio, val) {
@@ -26,7 +28,6 @@ export function exploreTracks() {
     fetch('http://localhost:80/track')
         .then(res => res.json())
         .then((output) => {
-
             let values = output.tracks
                 .map(track => ({
                     name: track.trackname,
@@ -41,9 +42,7 @@ export function exploreTracks() {
             attachControl(values);
         })
         .catch(err => console.log(err));
-
 }
-
 
 function attachControl(values) {
     values.forEach(value => {
@@ -57,19 +56,15 @@ function attachControl(values) {
                     for (let i = 0; i < soundList.length; i++) {
                         let path = `${output.path}/${soundList[i].name}`
                         asyncAddTrack.push(mainAudio.addTrack(
-                            new AudioTrack(audioCtx, new SimpleAudioWorkletNode(audioCtx), path)
+                            new AudioTrack(audioCtx, new WAMAudioWorkletNode(audioCtx), path)
                         ));
                     }
                     let res = await Promise.all(
                         asyncAddTrack
                     );
-                    const selector = new Selector(mainAudio.tracks);
+                    const selector = new TrackSelector(mainAudio.tracks);
                 })
                 .catch(err => console.log(err));
-
-
         })
     })
-
-
 }

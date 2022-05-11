@@ -1,16 +1,14 @@
-
-
 function scrollSync(selector) {
     let active = null;
-    document.querySelectorAll(selector).forEach(function(element) {
-        element.addEventListener("mouseenter", function(e) {
+    document.querySelectorAll(selector).forEach(function (element) {
+        element.addEventListener("mouseenter", function (e) {
             active = e.target;
         });
 
-        element.addEventListener("scroll", function(e) {
+        element.addEventListener("scroll", function (e) {
             if (e.target !== active) return;
 
-            document.querySelectorAll(selector).forEach(function(target) {
+            document.querySelectorAll(selector).forEach(function (target) {
                 if (active === target) return;
 
                 target.scrollTop = active.scrollTop;

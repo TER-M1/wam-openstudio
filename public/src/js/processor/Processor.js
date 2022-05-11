@@ -1,31 +1,9 @@
-import Module from "./compiled_processor_perf.js";
-import {
-    RENDER_QUANTUM_FRAMES,
-    MAX_CHANNEL_COUNT,
-    HeapAudioBuffer,
-} from "../../lib/wasm-audio-helper.js";
+import Module from "./CompiledProcessorModule.js";
+import {HeapAudioBuffer, MAX_CHANNEL_COUNT, RENDER_QUANTUM_FRAMES,} from "../../../lib/wasm-audio-helper.js";
 
 const sampleRate = 48000;
 
 class SimpleProcessor extends AudioWorkletProcessor {
-    /** @type {AudioParamDescriptor[]} */
-    static get parameterDescriptors() {
-        return [
-            {
-                name: "playing",
-                minValue: 0,
-                maxValue: 1,
-                defaultValue: 0,
-            },
-            {
-                name: "loop",
-                minValue: 0,
-                maxValue: 1,
-                defaultValue: 1,
-            },
-        ];
-    }
-
     constructor(options) {
         super(options);
         this.audio = null;
@@ -69,6 +47,24 @@ class SimpleProcessor extends AudioWorkletProcessor {
         );
 
         this._processPerf = new Module.ProcessorPerf();
+    }
+
+    /** @type {AudioParamDescriptor[]} */
+    static get parameterDescriptors() {
+        return [
+            {
+                name: "playing",
+                minValue: 0,
+                maxValue: 1,
+                defaultValue: 0,
+            },
+            {
+                name: "loop",
+                minValue: 0,
+                maxValue: 1,
+                defaultValue: 1,
+            },
+        ];
     }
 
     /**

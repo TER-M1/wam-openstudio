@@ -1,10 +1,10 @@
-# FLAGS =  -lembind -o compiled_processor_perf.js processor-perf.cpp --post-js ./mod.js -s ENVIRONMENT="shell"
+# FLAGS =  -lembind -o CompiledProcessorModule.js processor-perf.cpp --post-js ./mod.js -s ENVIRONMENT="shell"
 # CC = emcc
 
 
 DEPS = ./public/src/cpp/processor-perf.cpp
 
-OUTPUT_JS = ./public/src/js/compiled_processor_perf.js
+OUTPUT_JS = ./public/src/js/processor/CompiledProcessorModule.js
 
 CC = emcc
 
@@ -21,4 +21,4 @@ build: $(DEPS)
 	@$(CC) $(FLAGS)
 
 clean:
-	@rm -f ./public/src/js/compiled_processor_perf.js
+	@rm -rf $(OUTPUT_JS)

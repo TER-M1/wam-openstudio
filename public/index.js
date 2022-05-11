@@ -1,7 +1,8 @@
-import {MainAudio, AudioTrack, SimpleAudioWorkletNode, audioCtx, mainAudio} from "./src/js/audio_loader.js";
-import {activateMainVolume, exploreTracks} from "./src/js/page_init.js";
-import {onLoopBegginingInputChange, onLoopEndingInputChange, updateCursorTracks} from "./src/js/playhead.js";
-
+import {activateMainVolume, exploreTracks} from "./src/js/PageInitialization.js";
+import {onLoopBegginingInputChange, onLoopEndingInputChange, updateCursorTracks} from "./src/js/track-utils/PlayHead.js";
+import {audioCtx, mainAudio} from "./src/js/audio/Utils.js";
+import TrackElement from "./src/js/components/TrackElement.js";
+import WaveFormElement from "./src/js/components/WaveFormElement.js";
 
 
 const btnStart = document.getElementById("btn-start");
@@ -17,19 +18,23 @@ const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
 
+customElements.define(
+    "track-element",
+    TrackElement
+);
 
+customElements.define(
+    "wave-form",
+    WaveFormElement
+);
 
 
 (async () => {
     btnStart.hidden = false;
-    // var trackElements = $(".track.sound");
-    // let t = document.getElementsByClassName("track sound");
-
-
     /*
     PROCESSOR INITIALIZATION
      */
-    await audioCtx.audioWorklet.addModule("./src/js/processor.js");
+    await audioCtx.audioWorklet.addModule("./src/js/processor/CompiledProcessorModule.js");
 
 
     /*
@@ -37,40 +42,6 @@ var intervalCursorTracks = undefined;
      */
     activateMainVolume(mainAudio, startVolume);
     exploreTracks();
-
-
-    /*
-    PLUGIN CONNECTION
-     */
-    // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
-    // const [hostGroupId] = await initializeWamHost(audioCtx);
-    // const initializeWamHost = await import("../../plugins/testBern/utils/sdk/src/initializeWamHost.js");
-    // mainAudio.hostGroupId = await initializeWamHost(audioCtx);
-
-    // loadPlugs();
-    // const {default: initializeWamHost} = await import("./plugins/testBern/utils/sdk/src/initializeWamHost.js");
-    // const [hostGroupId] = await initializeWamHost(audioCtx);
-    //
-    // var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
-    // var instance = await WAM.createInstance(hostGroupId, audioCtx);
-    // connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, instance._audioNode);
-    // currentPluginAudioNode = instance._audioNode;
-    // connectPlugin(audioCtx, mainAudio.tracks[0].audioWorkletNode, mainAudio.masterVolumeNode);
-    // var pluginDomModel = await instance.createGui();
-    // mountPlugin(document.querySelector("#mount2"), pluginDomModel);
-
-    /*
-    PLUGIN PARAMETERS CONNECTION
-     */
-    // await populateParamSelector(instance._audioNode);
-    //
-    // pluginParamSelector.onclick = () => {
-    //     populateParamSelector(instance._audioNode);
-    // };
-    //
-    // addEventOnPlugin(currentPluginAudioNode);
-
-
     /*
     EVENT LISTENERS
      */
@@ -95,17 +66,11 @@ var intervalCursorTracks = undefined;
                         updateCursorTracks();
                     }, 33);
                 }
-                // if(track.bpf.className != null){
-                //     track.bpf.querySelector("webaudiomodules-host-bpf").apply(track.pluginInstance._audioNode,track.bpf.className)}
-
             });
             btnStart.playing = true
-        }
-        else {
+        } else {
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 0;
-                // if(track.bpf.className != null){
-                // track.bpf.querySelector("webaudiomodules-host-bpf").apply(track.pluginInstance._audioNode,track.bpf.className)}
                 if (intervalCursorTracks !== undefined) {
                     updateCursorTracks();
                     clearInterval(intervalCursorTracks);
@@ -132,9 +97,6 @@ var intervalCursorTracks = undefined;
     inputMute.onclick = () => {
         if (!mainAudio.isMuted) {
             console.log("mute");
-            // mainAudio.tracks.forEach((track) => {
-            // track.gainOutNode.value = 0;
-            // });
             mainAudio.mute();
         } else {
             console.log("unmute");

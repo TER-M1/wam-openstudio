@@ -1,5 +1,4 @@
-import {AudioTrack} from "./audio_loader.js";
-import {populateParamSelector} from "./plugin_parameters.js";
+import {populateParamSelector} from "../automation/PluginParameters.js";
 
 const mountPlugin = (mount, domModel) => {
     mount.innerHTML = '';
@@ -10,12 +9,12 @@ const uMountPlugin = (mount) => {
     mount.innerHTML = '';
 }
 
-function populateDropDown(track, mount,pluginParamSelector) {
-    populateParamSelector(track.pluginInstance._audioNode,mount,pluginParamSelector,track)
+function populateDropDown(track, mount, pluginParamSelector) {
+    populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
 }
 
 
-class Selector {
+export default class TrackSelector {
     /**
      *
      * @type {AudioTrack}
@@ -49,7 +48,7 @@ class Selector {
                 let can = document.querySelector(`.wave-form.${elem.id}`);
                 mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                 // console.log(this.selectedTrack.bpf)
-                populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
+                populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
             }
         })
         this.handlersCanvas();
@@ -77,7 +76,7 @@ class Selector {
                     this.selectedTrack = this.getTrack(idTrack);
                     mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                     let can = document.querySelector(`.wave-form.${e.id}`);
-                    populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
+                    populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
 
                 }
                 elems.push(e);
@@ -97,18 +96,18 @@ class Selector {
         return track;
     }
 
-   pop() {
-       let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
-       console.log(can)
-       populateDropDown(this.selectedTrack, this.selectedTrack.bpf,document.querySelector('.ui.dropdown.auto'));
-   }
+    pop() {
+        let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
+        console.log(can)
+        populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
+    }
 
 
-    defineHandler(){
-        this.automation.addEventListener("click", () => { console.log("need to update teh dropdown here too without deelting it ")})
+    defineHandler() {
+        this.automation.addEventListener("click", () => {
+            console.log("need to update teh dropdown here too without deelting it ")
+        })
 
     }
 
 }
-
-export {Selector} ;
