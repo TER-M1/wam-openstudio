@@ -1,6 +1,5 @@
 import {audioCtx, AudioTrack, mainAudio, SimpleAudioWorkletNode} from "./audio_loader.js";
 import {Selector} from "./listener.js";
-import {loadPlugs} from "./plugin_loader.js";
 
 
 export function activateMainVolume(mainAudio, val) {
@@ -65,8 +64,6 @@ function attachControl(values) {
                         asyncAddTrack
                     );
                     const selector = new Selector(mainAudio.tracks);
-                    await loadPlugs();
-                    // const pluginLoader = new PluginLoader();
                 })
                 .catch(err => console.log(err));
 

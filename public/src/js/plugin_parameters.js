@@ -80,7 +80,6 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
     let params = []
     for (const paramId in info) {
         const {minValue, maxValue, label} = info[paramId];
-        console.log("paramID : "+ paramId)
         params.push(paramId)
         // const option = new Option(`${paramId} (${label}): ${minValue} - ${maxValue}`, paramId);
         // const div = document.createElement('div');
@@ -130,13 +129,8 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
     });
     for(let i = 0 ; i < values.length; i++){
         let item = pluginParamSelector.querySelector(`.dropItem${i}`);
-        console.log(item);
-        console.log(values[i].name)
         let param = params[i]
-        console.log(param)
-        console.log(info[param])
         const {minValue, maxValue, label} = info[param];
-
         item.onclick = () =>{
             const bpf = document.createElement('webaudiomodules-host-bpf');
             bpf.setAttribute('min', minValue);

@@ -257,6 +257,14 @@ class AudioTrack {
     }
 
     async load() {
+        const {default: initializeWamHost} = await import("../../sdk/src/initializeWamHost.js");
+        var [hostGroupId] = await initializeWamHost(audioCtx);
+        var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
+        var instance = await WAM.createInstance(hostGroupId, audioCtx);
+        instance._descriptor.name = instance.name + ` ${this.id}`
+        this.pluginInstance = instance;
+        this.pluginDOM = await instance.createGui();
+
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
         this.decodedAudioBuffer = await this.audioCtx.decodeAudioData(audioArrayBuffer);
@@ -266,9 +274,9 @@ class AudioTrack {
             OperableAudioBuffer.prototype
         );
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
-        //TODO connect plugin entre audio worlket et panner node
-        this.audioWorkletNode.connect(this.pannerNode).connect(this.gainOutNode);
+        this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
     }
+
 
     get isMuted() {
         return this._isMuted;
