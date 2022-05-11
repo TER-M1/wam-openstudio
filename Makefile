@@ -2,13 +2,13 @@
 # CC = emcc
 
 
-DEPS = ./src/cpp/processor-perf.cpp
+DEPS = ./public/src/cpp/processor-perf.cpp
 
-OUTPUT_JS = ./src/js/compiled_processor_perf.js
+OUTPUT_JS = ./public/src/js/compiled_processor_perf.js
 
 CC = emcc
 
-EM_ES6_PATH = ./lib/em-es6-module.js
+EM_ES6_PATH = ./public/lib/em-es6-module.js
 
 FLAGS = --bind -O1 \
 	  -s WASM=1 \
@@ -21,4 +21,4 @@ build: $(DEPS)
 	@$(CC) $(FLAGS)
 
 clean:
-	@rm -f ./src/js/compiled_processor_perf.js
+	@rm -f ./public/src/js/compiled_processor_perf.js

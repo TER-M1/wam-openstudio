@@ -102,7 +102,8 @@ class MainAudio {
         for (let i = 0; i < this.tracks.length; i++) {
             if (track === this.tracks[i]) {
                 track.setVolume(track.oldGainValue);
-            } else {
+            }
+            else if (!this.tracks[i].isSoloTrack) {
                 this.tracks[i].setSoloTrack(false);
                 this.tracks[i].setVolume(0);
                 document.querySelector(`#track${this.tracks[i].id}`).shadowRoot.querySelector(".item.tool.solo").style.color = null;
@@ -110,11 +111,24 @@ class MainAudio {
         }
     }
 
-    unSoloTracks() {
-        this.tracks.forEach((track) => {
-            track.setVolume(track.oldGainValue);
-            track.setSoloTrack(false);
-        });
+    unSoloTrack(track) {
+        track.setVolume(0);
+        track.setSoloTrack(false);
+        this.checkSoloTrack();
+    }
+
+    checkSoloTrack() {
+        let res = 0;
+        for (let i = 0; i < this.tracks.length; i++) {
+            if (this.tracks[i].isSoloTrack) {
+                res++;
+            }
+        }
+        if (!res) {
+            for (let i = 0;i < this.tracks.length; i++) {
+                this.tracks[i].setVolume(this.tracks[i].oldGainValue);
+            }
+        }
     }
 
     /**
@@ -613,12 +627,12 @@ class TrackElement extends HTMLElement {
     soloTrackListeners() {
         let soloTrack = this.shadowRoot.querySelector(".item.tool.solo");
         soloTrack.onclick = () => {
-            soloTrack.style.color = "lime";
+            console.log(this.track.name + "selected")
             if (this.track.isSoloTrack) {
-                this.track.setSoloTrack(false);
                 soloTrack.style.color = null;
-                mainAudio.unSoloTracks();
+                mainAudio.unSoloTrack(this.track);
             } else {
+                soloTrack.style.color = "lime";
                 this.track.setSoloTrack(true);
                 mainAudio.soloTrack(this.track);
             }
