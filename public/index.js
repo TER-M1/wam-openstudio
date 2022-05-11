@@ -11,6 +11,8 @@ const btnRestart = document.getElementById("restart");
 const inputLoop = document.getElementById("loop");
 const volumeinput = document.getElementById("volume");
 const inputMute = document.getElementById("mute");
+const loopBeginning = document.getElementById("loop-beginning-input");
+const loopEnding = document.getElementById("loop-end-input");
 const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
@@ -72,35 +74,42 @@ var intervalCursorTracks = undefined;
     /*
     EVENT LISTENERS
      */
+    btnStart.playing = false;
     btnStart.onclick = () => {
-        mainAudio.tracks.forEach((track) => {
-            if (audioCtx.state === "suspended") {
-                audioCtx.resume();
-                if (intervalCursorTracks === undefined) {
-                    intervalCursorTracks = setInterval(() => {
-                        updateCursorTracks();
-                    }, 33);
-                }
-            }
-            const playing = track.audioWorkletNode.parameters.get("playing").value;
-            if (playing === 1) {
-                track.audioWorkletNode.parameters.get("playing").value = 0;
-                if (intervalCursorTracks !== undefined) {
+        console.log(btnStart.playing);
+
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+            if (intervalCursorTracks === undefined) {
+                intervalCursorTracks = setInterval(() => {
                     updateCursorTracks();
-                    clearInterval(intervalCursorTracks);
-                    intervalCursorTracks = undefined;
-                }
-                // lineDrawer.paused = true;
-            } else {
+                }, 33);
+            }
+        }
+
+        if (btnStart.playing === false) {
+            mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 1;
                 if (intervalCursorTracks === undefined) {
                     intervalCursorTracks = setInterval(() => {
                         updateCursorTracks();
                     }, 33);
                 }
-            }
-        });
-    };
+            });
+            btnStart.playing = true
+        }
+        else {
+            mainAudio.tracks.forEach((track) => {
+                track.audioWorkletNode.parameters.get("playing").value = 0;
+                if (intervalCursorTracks !== undefined) {
+                    updateCursorTracks();
+                    clearInterval(intervalCursorTracks);
+                    intervalCursorTracks = undefined;
+                }
+            });
+            btnStart.playing = false;
+        }
+    }
     inputLoop.onclick = () => {
         console.log("loop pressed")
         mainAudio.tracks.forEach((track) => {
