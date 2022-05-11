@@ -675,7 +675,6 @@ class WaveForm extends HTMLElement {
     }
 
     defClass() {
-        console.log("wave-form defined")
         this.className = `wave-form ${this.id}`
     }
 

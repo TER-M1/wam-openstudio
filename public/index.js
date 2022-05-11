@@ -95,12 +95,17 @@ var intervalCursorTracks = undefined;
                         updateCursorTracks();
                     }, 33);
                 }
+                // if(track.bpf.className != null){
+                //     track.bpf.querySelector("webaudiomodules-host-bpf").apply(track.pluginInstance._audioNode,track.bpf.className)}
+
             });
             btnStart.playing = true
         }
         else {
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 0;
+                // if(track.bpf.className != null){
+                // track.bpf.querySelector("webaudiomodules-host-bpf").apply(track.pluginInstance._audioNode,track.bpf.className)}
                 if (intervalCursorTracks !== undefined) {
                     updateCursorTracks();
                     clearInterval(intervalCursorTracks);
