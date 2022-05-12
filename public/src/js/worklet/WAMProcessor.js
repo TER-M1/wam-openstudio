@@ -1,7 +1,5 @@
 // import Module from "./CompiledProcessorModule.js";
 import {RENDER_QUANTUM_FRAMES,} from "../../../lib/wasm-audio-helper.js";
-import {getWamProcessor} from "../../../lib/sdk/index.js";
-import {WamProcessor} from "../../../../sdk";
 
 const sampleRate = 48000;
 
@@ -14,7 +12,7 @@ const getProcessor = (moduleId) => {
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 
 
-    class MyWAMProcessor extends WamProcessor {
+    class MyWAMProcessor extends ModuleScope.WamProcessor {
         /**
          *
          * @param{AudioWorkletNodeOptions} options

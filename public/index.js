@@ -34,7 +34,8 @@ customElements.define(
     /*
     PROCESSOR INITIALIZATION
      */
-    await audioCtx.audioWorklet.addModule("./src/js/worklet/WAMProcessor.js");
+    let ini
+    // await audioCtx.audioWorklet.addModule("./src/js/worklet/WAMProcessor.js");
     /*
     INITIALIZATION PAGES ELEMENTS
      */

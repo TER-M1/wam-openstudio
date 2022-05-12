@@ -17,7 +17,7 @@ export default class WAMAudioWorkletNode extends WamNode {
     }
 
     /**
-     * @param {WebAudioModule<WamExampleNode>} module
+     * @param {WebAudioModule<WAMAudioWorkletNode>} module
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(module, options) {
