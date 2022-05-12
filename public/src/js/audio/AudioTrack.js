@@ -76,7 +76,7 @@ export default class AudioTrack {
     }
 
     async load() {
-        const {default: initializeWamHost} = await import("../../../sdk/src/initializeWamHost.js");
+        const {default: initializeWamHost} = await import("../../../../sdk/src/initializeWamHost.js");
         var [hostGroupId] = await initializeWamHost(audioCtx);
         var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
         var instance = await WAM.createInstance(hostGroupId, audioCtx);

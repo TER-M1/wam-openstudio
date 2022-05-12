@@ -98,10 +98,6 @@ requireNodeFS = () => {
 };
 
 read_ = function shell_read(filename, binary) {
-  var ret = tryParseAsDataURI(filename);
-  if (ret) {
-    return binary ? ret : ret.toString();
-  }
   requireNodeFS();
   filename = nodePath['normalize'](filename);
   return fs.readFileSync(filename, binary ? undefined : 'utf8');
@@ -116,10 +112,6 @@ readBinary = (filename) => {
 };
 
 readAsync = (filename, onload, onerror) => {
-  var ret = tryParseAsDataURI(filename);
-  if (ret) {
-    onload(ret);
-  }
   requireNodeFS();
   filename = nodePath['normalize'](filename);
   fs.readFile(filename, function(err, data) {
@@ -194,35 +186,19 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
 
 
   read_ = (url) => {
-    try {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', url, false);
       xhr.send(null);
       return xhr.responseText;
-    } catch (err) {
-      var data = tryParseAsDataURI(url);
-      if (data) {
-        return intArrayToString(data);
-      }
-      throw err;
-    }
   }
 
   if (ENVIRONMENT_IS_WORKER) {
     readBinary = (url) => {
-      try {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, false);
         xhr.responseType = 'arraybuffer';
         xhr.send(null);
         return new Uint8Array(/** @type{!ArrayBuffer} */(xhr.response));
-      } catch (err) {
-        var data = tryParseAsDataURI(url);
-        if (data) {
-          return data;
-        }
-        throw err;
-      }
     };
   }
 
@@ -233,11 +209,6 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
     xhr.onload = () => {
       if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
         onload(xhr.response);
-        return;
-      }
-      var data = tryParseAsDataURI(url);
-      if (data) {
-        onload(data.buffer);
         return;
       }
       onerror();
@@ -284,10 +255,10 @@ var POINTER_SIZE = 4;
 
 function getNativeTypeSize(type) {
   switch (type) {
-    case 'i1': case 'i8': case 'u8': return 1;
-    case 'i16': case 'u16': return 2;
-    case 'i32': case 'u32': return 4;
-    case 'i64': case 'u64': return 8;
+    case 'i1': case 'i8': return 1;
+    case 'i16': return 2;
+    case 'i32': return 4;
+    case 'i64': return 8;
     case 'float': return 4;
     case 'double': return 8;
     default: {
@@ -314,15 +285,6 @@ function warnOnce(text) {
 
 // include: runtime_functions.js
 
-
-// This gives correct answers for everything less than 2^{14} = 16384
-// I hope nobody is contemplating functions with 16384 arguments...
-function uleb128Encode(n) {
-  if (n < 128) {
-    return [n];
-  }
-  return [(n % 128) | 128, n >> 7];
-}
 
 // Wraps a JS function as a wasm function with a given signature.
 function convertJsFunctionToWasm(func, sig) {
@@ -351,6 +313,8 @@ function convertJsFunctionToWasm(func, sig) {
   // The module is static, with the exception of the type section, which is
   // generated based on the signature passed in.
   var typeSection = [
+    0x01, // id: section,
+    0x00, // length: 0 (placeholder)
     0x01, // count: 1
     0x60, // form: func
   ];
@@ -364,7 +328,7 @@ function convertJsFunctionToWasm(func, sig) {
   };
 
   // Parameters, length + signatures
-  typeSection = typeSection.concat(uleb128Encode(sigParam.length));
+  typeSection.push(sigParam.length);
   for (var i = 0; i < sigParam.length; ++i) {
     typeSection.push(typeCodes[sigParam[i]]);
   }
@@ -377,12 +341,9 @@ function convertJsFunctionToWasm(func, sig) {
     typeSection = typeSection.concat([0x01, typeCodes[sigRet]]);
   }
 
-  // Write the section code and overall length of the type section into the
-  // section header
-  typeSection = [0x01 /* Type section code */].concat(
-    uleb128Encode(typeSection.length),
-    typeSection
-  );
+  // Write the overall length of the type section back into the section header
+  // (excepting the 2 bytes for the section id and length)
+  typeSection[1] = typeSection.length - 2;
 
   // Rest of the module is static
   var bytes = new Uint8Array([
@@ -516,44 +477,43 @@ if (typeof WebAssembly != 'object') {
 // include: runtime_safe_heap.js
 
 
-// In MINIMAL_RUNTIME, setValue() and getValue() are only available when
-// building with safe heap enabled, for heap safety checking.
-// In traditional runtime, setValue() and getValue() are always available
-// (although their use is highly discouraged due to perf penalties)
+// In MINIMAL_RUNTIME, setValue() and getValue() are only available when building with safe heap enabled, for heap safety checking.
+// In traditional runtime, setValue() and getValue() are always available (although their use is highly discouraged due to perf penalties)
 
 /** @param {number} ptr
     @param {number} value
     @param {string} type
     @param {number|boolean=} noSafe */
 function setValue(ptr, value, type = 'i8', noSafe) {
-  if (type.endsWith('*')) type = 'i32';
-  switch (type) {
-    case 'i1': HEAP8[((ptr)>>0)] = value; break;
-    case 'i8': HEAP8[((ptr)>>0)] = value; break;
-    case 'i16': HEAP16[((ptr)>>1)] = value; break;
-    case 'i32': HEAP32[((ptr)>>2)] = value; break;
-    case 'i64': (tempI64 = [value>>>0,(tempDouble=value,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((ptr)>>2)] = tempI64[0],HEAP32[(((ptr)+(4))>>2)] = tempI64[1]); break;
-    case 'float': HEAPF32[((ptr)>>2)] = value; break;
-    case 'double': HEAPF64[((ptr)>>3)] = value; break;
-    default: abort('invalid type for setValue: ' + type);
-  }
+  if (type.charAt(type.length-1) === '*') type = 'i32';
+    switch (type) {
+      case 'i1': HEAP8[((ptr)>>0)] = value; break;
+      case 'i8': HEAP8[((ptr)>>0)] = value; break;
+      case 'i16': HEAP16[((ptr)>>1)] = value; break;
+      case 'i32': HEAP32[((ptr)>>2)] = value; break;
+      case 'i64': (tempI64 = [value>>>0,(tempDouble=value,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((ptr)>>2)] = tempI64[0],HEAP32[(((ptr)+(4))>>2)] = tempI64[1]); break;
+      case 'float': HEAPF32[((ptr)>>2)] = value; break;
+      case 'double': HEAPF64[((ptr)>>3)] = value; break;
+      default: abort('invalid type for setValue: ' + type);
+    }
 }
 
 /** @param {number} ptr
     @param {string} type
     @param {number|boolean=} noSafe */
 function getValue(ptr, type = 'i8', noSafe) {
-  if (type.endsWith('*')) type = 'i32';
-  switch (type) {
-    case 'i1': return HEAP8[((ptr)>>0)];
-    case 'i8': return HEAP8[((ptr)>>0)];
-    case 'i16': return HEAP16[((ptr)>>1)];
-    case 'i32': return HEAP32[((ptr)>>2)];
-    case 'i64': return HEAP32[((ptr)>>2)];
-    case 'float': return HEAPF32[((ptr)>>2)];
-    case 'double': return Number(HEAPF64[((ptr)>>3)]);
-    default: abort('invalid type for getValue: ' + type);
-  }
+  if (type.charAt(type.length-1) === '*') type = 'i32';
+    switch (type) {
+      case 'i1': return HEAP8[((ptr)>>0)];
+      case 'i8': return HEAP8[((ptr)>>0)];
+      case 'i16': return HEAP16[((ptr)>>1)];
+      case 'i32': return HEAP32[((ptr)>>2)];
+      case 'i64': return HEAP32[((ptr)>>2)];
+      case 'float': return HEAPF32[((ptr)>>2)];
+      case 'double': return Number(HEAPF64[((ptr)>>3)]);
+      default: abort('invalid type for getValue: ' + type);
+    }
+  return null;
 }
 
 // end include: runtime_safe_heap.js
@@ -699,26 +659,26 @@ function allocate(slab, allocator) {
 
 // runtime_strings.js: Strings related runtime functions that are part of both MINIMAL_RUNTIME and regular runtime.
 
-var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
-
 // Given a pointer 'ptr' to a null-terminated UTF8-encoded string in the given array that contains uint8 values, returns
 // a copy of that string as a Javascript String object.
+
+var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
+
 /**
- * heapOrArray is either a regular array, or a JavaScript typed array view.
  * @param {number} idx
  * @param {number=} maxBytesToRead
  * @return {string}
  */
-function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
+function UTF8ArrayToString(heap, idx, maxBytesToRead) {
   var endIdx = idx + maxBytesToRead;
   var endPtr = idx;
   // TextDecoder needs to know the byte length in advance, it doesn't stop on null terminator by itself.
   // Also, use the length info to avoid running tiny strings through TextDecoder, since .subarray() allocates garbage.
   // (As a tiny code save trick, compare endPtr against endIdx using a negation, so that undefined means Infinity)
-  while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
+  while (heap[endPtr] && !(endPtr >= endIdx)) ++endPtr;
 
-  if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
-    return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
+  if (endPtr - idx > 16 && heap.subarray && UTF8Decoder) {
+    return UTF8Decoder.decode(heap.subarray(idx, endPtr));
   } else {
     var str = '';
     // If building with TextDecoder, we have already computed the string length above, so test loop end condition against that
@@ -727,15 +687,15 @@ function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
       // http://en.wikipedia.org/wiki/UTF-8#Description
       // https://www.ietf.org/rfc/rfc2279.txt
       // https://tools.ietf.org/html/rfc3629
-      var u0 = heapOrArray[idx++];
+      var u0 = heap[idx++];
       if (!(u0 & 0x80)) { str += String.fromCharCode(u0); continue; }
-      var u1 = heapOrArray[idx++] & 63;
+      var u1 = heap[idx++] & 63;
       if ((u0 & 0xE0) == 0xC0) { str += String.fromCharCode(((u0 & 31) << 6) | u1); continue; }
-      var u2 = heapOrArray[idx++] & 63;
+      var u2 = heap[idx++] & 63;
       if ((u0 & 0xF0) == 0xE0) {
         u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
       } else {
-        u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (heapOrArray[idx++] & 63);
+        u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (heap[idx++] & 63);
       }
 
       if (u0 < 0x10000) {
@@ -1127,9 +1087,11 @@ var __ATEXIT__    = []; // functions called during shutdown
 var __ATPOSTRUN__ = []; // functions called after the main() is called
 
 var runtimeInitialized = false;
+var runtimeExited = false;
+var runtimeKeepaliveCounter = 0;
 
 function keepRuntimeAlive() {
-  return noExitRuntime;
+  return noExitRuntime || runtimeKeepaliveCounter > 0;
 }
 
 function preRun() {
@@ -1149,6 +1111,10 @@ function initRuntime() {
 
   
   callRuntimeCallbacks(__ATINIT__);
+}
+
+function exitRuntime() {
+  runtimeExited = true;
 }
 
 function postRun() {
@@ -1234,6 +1200,9 @@ function removeRunDependency(id) {
   }
 }
 
+Module["preloadedImages"] = {}; // maps url to image data
+Module["preloadedAudios"] = {}; // maps url to audio data
+
 /** @param {string|number=} what */
 function abort(what) {
   {
@@ -1250,7 +1219,7 @@ function abort(what) {
   ABORT = true;
   EXITSTATUS = 1;
 
-  what += '. Build with -sASSERTIONS for more info.';
+  what += '. Build with -s ASSERTIONS=1 for more info.';
 
   // Use a wasm runtime error, because a JS error might be seen as a foreign
   // exception, which means we'd run destructors on it. We need the error to
@@ -1295,7 +1264,7 @@ function isFileURI(filename) {
 
 // end include: URIUtils.js
 var wasmBinaryFile;
-  wasmBinaryFile = 'data:application/octet-stream;base64,AGFzbQEAAAAB9oCAgAAQYAF/AX9gBH9/f38AYAV/f39/fwBgAX8AYAZ/f39/f38AYAN/f38Bf2AAAX9gAABgA39/fwBgAn9/AX9gAn9/AGANf39/f39/f39/f39/fwBgCH9/f39/f39/AGAEf39/fwF/YAV/f39+fgBgB39/f39/f38AAsmDgIAADwNlbnYWX2VtYmluZF9yZWdpc3Rlcl9jbGFzcwALA2VudiJfZW1iaW5kX3JlZ2lzdGVyX2NsYXNzX2NvbnN0cnVjdG9yAAQDZW52H19lbWJpbmRfcmVnaXN0ZXJfY2xhc3NfZnVuY3Rpb24ADANlbnYVX2VtYmluZF9yZWdpc3Rlcl92b2lkAAoDZW52FV9lbWJpbmRfcmVnaXN0ZXJfYm9vbAACA2VudhhfZW1iaW5kX3JlZ2lzdGVyX2ludGVnZXIAAgNlbnYWX2VtYmluZF9yZWdpc3Rlcl9mbG9hdAAIA2VudhtfZW1iaW5kX3JlZ2lzdGVyX3N0ZF9zdHJpbmcACgNlbnYcX2VtYmluZF9yZWdpc3Rlcl9zdGRfd3N0cmluZwAIA2VudhZfZW1iaW5kX3JlZ2lzdGVyX2VtdmFsAAoDZW52HF9lbWJpbmRfcmVnaXN0ZXJfbWVtb3J5X3ZpZXcACANlbnYVZW1zY3JpcHRlbl9tZW1jcHlfYmlnAAgDZW52FmVtc2NyaXB0ZW5fcmVzaXplX2hlYXAAAANlbnYFYWJvcnQABwNlbnYXX2VtYmluZF9yZWdpc3Rlcl9iaWdpbnQADwO/gICAAD4HBwADAAYBAgAHBQAABgUAAwYAAAMABgkAAwMDAwMDAwUFAAUNAQEBAQkBBQUJCQIBAgQCAgIEBAQABgMADgSFgICAAAFwARsbBYaAgIAAAQGAAoACBomAgIAAAX8BQcChwAILB8KBgIAACwZtZW1vcnkCABFfX3dhc21fY2FsbF9jdG9ycwAPGV9faW5kaXJlY3RfZnVuY3Rpb25fdGFibGUBAA1fX2dldFR5cGVOYW1lABcqX19lbWJpbmRfcmVnaXN0ZXJfbmF0aXZlX2FuZF9idWlsdGluX3R5cGVzABgQX19lcnJub19sb2NhdGlvbgAcBm1hbGxvYwAeBGZyZWUAHwlzdGFja1NhdmUASQxzdGFja1Jlc3RvcmUASgpzdGFja0FsbG9jAEsJoICAgAABAEEBCxoREhMUFRYnKigpLysyR0Q1LEZDNi1FQDkuOwrB6ICAAD4GABAQEBgLYQEBf0GsDkHIDkHsDkEAQfwOQQFB/w5BAEH/DkEAQZ8JQYEPQQIQAEGsDkEBQYQPQfwOQQNBBBABQQgQIiIAQQA2AgQgAEEFNgIAQawOQZMJQQVBkA9BpA9BBiAAQQAQAgsFAEGsDgsOAAJAIABFDQAgABAjCwsHACAAEQYACwYAQQEQIgs0AQJ/AkAgA0UNAEEAIQQDQCACIARBCXQiBWogASAFakGABBAZGiAEQQFqIgQgA0cNAAsLCz8BAX8gASAAKAIEIgVBAXVqIQEgACgCACEAAkAgBUEBcUUNACABKAIAIABqKAIAIQALIAEgAiADIAQgABEBAAsJACAAKAIEEBoL0wMAQfAZQbQJEANBiBpBuQhBAUEBQQAQBEGUGkG0CEEBQYB/Qf8AEAVBrBpBrQhBAUGAf0H/ABAFQaAaQasIQQFBAEH/ARAFQbgaQYkIQQJBgIB+Qf//ARAFQcQaQYAIQQJBAEH//wMQBUHQGkGYCEEEQYCAgIB4Qf////8HEAVB3BpBjwhBBEEAQX8QBUHoGkHXCEEEQYCAgIB4Qf////8HEAVB9BpBzghBBEEAQX8QBUGAG0GjCEEIQoCAgICAgICAgH9C////////////ABBMQYwbQaIIQQhCAEJ/EExBmBtBnAhBBBAGQaQbQa0JQQgQBkGYEEHpCBAHQfAQQe4MEAdByBFBBEHcCBAIQaQSQQJB9QgQCEGAE0EEQYQJEAhBrBNBvggQCUHUE0EAQakMEApB/BNBAEGPDRAKQaQUQQFBxwwQCkHMFEECQbkJEApB9BRBA0HYCRAKQZwVQQRBgAoQCkHEFUEFQZ0KEApB7BVBBEG0DRAKQZQWQQVB0g0QCkH8E0EAQYMLEApBpBRBAUHiChAKQcwUQQJBxQsQCkH0FEEDQaMLEApBnBVBBEGIDBAKQcQVQQVB5gsQCkG8FkEGQcMKEApB5BZBB0H5DRAKC44EAQN/AkAgAkGABEkNACAAIAEgAhALIAAPCyAAIAJqIQMCQAJAIAEgAHNBA3ENAAJAAkAgAEEDcQ0AIAAhAgwBCwJAIAINACAAIQIMAQsgACECA0AgAiABLQAAOgAAIAFBAWohASACQQFqIgJBA3FFDQEgAiADSQ0ACwsCQCADQXxxIgRBwABJDQAgAiAEQUBqIgVLDQADQCACIAEoAgA2AgAgAiABKAIENgIEIAIgASgCCDYCCCACIAEoAgw2AgwgAiABKAIQNgIQIAIgASgCFDYCFCACIAEoAhg2AhggAiABKAIcNgIcIAIgASgCIDYCICACIAEoAiQ2AiQgAiABKAIoNgIoIAIgASgCLDYCLCACIAEoAjA2AjAgAiABKAI0NgI0IAIgASgCODYCOCACIAEoAjw2AjwgAUHAAGohASACQcAAaiICIAVNDQALCyACIARPDQEDQCACIAEoAgA2AgAgAUEEaiEBIAJBBGoiAiAESQ0ADAILAAsCQCADQQRPDQAgACECDAELAkAgA0F8aiIEIABPDQAgACECDAELIAAhAgNAIAIgAS0AADoAACACIAEtAAE6AAEgAiABLQACOgACIAIgAS0AAzoAAyABQQRqIQEgAkEEaiICIARNDQALCwJAIAIgA08NAANAIAIgAS0AADoAACABQQFqIQEgAkEBaiICIANHDQALCyAACyEBAn8CQCAAEBtBAWoiARAeIgINAEEADwsgAiAAIAEQGQuHAQEDfyAAIQECQAJAIABBA3FFDQAgACEBA0AgAS0AAEUNAiABQQFqIgFBA3ENAAsLA0AgASICQQRqIQEgAigCACIDQX9zIANB//37d2pxQYCBgoR4cUUNAAsCQCADQf8BcQ0AIAIgAGsPCwNAIAItAAEhAyACQQFqIgEhAiADDQALCyABIABrCwUAQcQdC/ICAgN/AX4CQCACRQ0AIAAgAToAACACIABqIgNBf2ogAToAACACQQNJDQAgACABOgACIAAgAToAASADQX1qIAE6AAAgA0F+aiABOgAAIAJBB0kNACAAIAE6AAMgA0F8aiABOgAAIAJBCUkNACAAQQAgAGtBA3EiBGoiAyABQf8BcUGBgoQIbCIBNgIAIAMgAiAEa0F8cSIEaiICQXxqIAE2AgAgBEEJSQ0AIAMgATYCCCADIAE2AgQgAkF4aiABNgIAIAJBdGogATYCACAEQRlJDQAgAyABNgIYIAMgATYCFCADIAE2AhAgAyABNgIMIAJBcGogATYCACACQWxqIAE2AgAgAkFoaiABNgIAIAJBZGogATYCACAEIANBBHFBGHIiBWsiAkEgSQ0AIAGtQoGAgIAQfiEG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bXNjcmlwdGVuOjp2YWwAdW5zaWduZWQgbG9uZwBzdGQ6OndzdHJpbmcAc3RkOjpzdHJpbmcAc3RkOjp1MTZzdHJpbmcAc3RkOjp1MzJzdHJpbmcAcHJvY2Vzc1BlcmYAUHJvY2Vzc29yUGVyZgBkb3VibGUAdm9pZABlbXNjcmlwdGVuOjptZW1vcnlfdmlldzxzaG9ydD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8dW5zaWduZWQgc2hvcnQ+AGVtc2NyaXB0ZW46Om1lbW9yeV92aWV3PGludD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8dW5zaWduZWQgaW50PgBlbXNjcmlwdGVuOjptZW1vcnlfdmlldzxmbG9hdD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8dWludDhfdD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8aW50OF90PgBlbXNjcmlwdGVuOjptZW1vcnlfdmlldzx1aW50MTZfdD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8aW50MTZfdD4AZW1zY3JpcHRlbjo6bWVtb3J5X3ZpZXc8dWludDMyX3Q+AGVtc2NyaXB0ZW46Om1lbW9yeV92aWV3PGludDMyX3Q+AGVtc2NyaXB0ZW46Om1lbW9yeV92aWV3PGNoYXI+AGVtc2NyaXB0ZW46Om1lbW9yeV92aWV3PHVuc2lnbmVkIGNoYXI+AHN0ZDo6YmFzaWNfc3RyaW5nPHVuc2lnbmVkIGNoYXI+AGVtc2NyaXB0ZW46Om1lbW9yeV92aWV3PHNpZ25lZCBjaGFyPgBlbXNjcmlwdGVuOjptZW1vcnlfdmlldzxsb25nPgBlbXNjcmlwdGVuOjptZW1vcnlfdmlldzx1bnNpZ25lZCBsb25nPgBlbXNjcmlwdGVuOjptZW1vcnlfdmlldzxkb3VibGU+ADEzUHJvY2Vzc29yUGVyZgAAAAC0DQAAGQcAAFAxM1Byb2Nlc3NvclBlcmYAAAAAlA4AADQHAAAAAAAALAcAAFBLMTNQcm9jZXNzb3JQZXJmAAAAlA4AAFgHAAABAAAALAcAAGlpAHYAdmkASAcAAAAAAAAAAAAA8AwAAEgHAAB0DQAAdA0AAFANAAB2aWlpaWkATlN0M19fMjEyYmFzaWNfc3RyaW5nSWNOU18xMWNoYXJfdHJhaXRzSWNFRU5TXzlhbGxvY2F0b3JJY0VFRUUATlN0M19fMjIxX19iYXNpY19zdHJpbmdfY29tbW9uSUxiMUVFRQC0DQAA6gcAADgOAACrBwAAAAAAAAEAAAAQCAAAAAAAAE5TdDNfXzIxMmJhc2ljX3N0cmluZ0loTlNfMTFjaGFyX3RyYWl0c0loRUVOU185YWxsb2NhdG9ySWhFRUVFAAA4DgAAMAgAAAAAAAABAAAAEAgAAAAAAABOU3QzX18yMTJiYXNpY19zdHJpbmdJd05TXzExY2hhcl90cmFpdHNJd0VFTlNfOWFsbG9jYXRvckl3RUVFRQAAOA4AAIgIAAAAAAAAAQAAABAIAAAAAAAATlN0M19fMjEyYmFzaWNfc3RyaW5nSURzTlNfMTFjaGFyX3RyYWl0c0lEc0VFTlNfOWFsbG9jYXRvcklEc0VFRUUAAAA4DgAA4AgAAAAAAAABAAAAEAgAAAAAAABOU3QzX18yMTJiYXNpY19zdHJpbmdJRGlOU18xMWNoYXJfdHJhaXRzSURpRUVOU185YWxsb2NhdG9ySURpRUVFRQAAADgOAAA8CQAAAAAAAAEAAAAQCAAAAAAAAE4xMGVtc2NyaXB0ZW4zdmFsRQAAtA0AAJgJAABOMTBlbXNjcmlwdGVuMTFtZW1vcnlfdmlld0ljRUUAALQNAAC0CQAATjEwZW1zY3JpcHRlbjExbWVtb3J5X3ZpZXdJYUVFAAC0DQAA3AkAAE4xMGVtc2NyaXB0ZW4xMW1lbW9yeV92aWV3SWhFRQAAtA0AAAQKAABOMTBlbXNjcmlwdGVuMTFtZW1vcnlfdmlld0lzRUUAALQNAAAsCgAATjEwZW1zY3JpcHRlbjExbWVtb3J5X3ZpZXdJdEVFAAC0DQAAVAoAAE4xMGVtc2NyaXB0ZW4xMW1lbW9yeV92aWV3SWlFRQAAtA0AAHwKAABOMTBlbXNjcmlwdGVuMTFtZW1vcnlfdmlld0lqRUUAALQNAACkCgAATjEwZW1zY3JpcHRlbjExbWVtb3J5X3ZpZXdJbEVFAAC0DQAAzAoAAE4xMGVtc2NyaXB0ZW4xMW1lbW9yeV92aWV3SW1FRQAAtA0AAPQKAABOMTBlbXNjcmlwdGVuMTFtZW1vcnlfdmlld0lmRUUAALQNAAAcCwAATjEwZW1zY3JpcHRlbjExbWVtb3J5X3ZpZXdJZEVFAAC0DQAARAsAAE4xMF9fY3h4YWJpdjExNl9fc2hpbV90eXBlX2luZm9FAAAAANwNAABsCwAAuA4AAE4xMF9fY3h4YWJpdjExN19fY2xhc3NfdHlwZV9pbmZvRQAAANwNAACcCwAAkAsAAE4xMF9fY3h4YWJpdjExN19fcGJhc2VfdHlwZV9pbmZvRQAAANwNAADMCwAAkAsAAE4xMF9fY3h4YWJpdjExOV9fcG9pbnRlcl90eXBlX2luZm9FANwNAAD8CwAA8AsAAE4xMF9fY3h4YWJpdjEyMF9fZnVuY3Rpb25fdHlwZV9pbmZvRQAAAADcDQAALAwAAJALAABOMTBfX2N4eGFiaXYxMjlfX3BvaW50ZXJfdG9fbWVtYmVyX3R5cGVfaW5mb0UAAADcDQAAYAwAAPALAAAAAAAA4AwAAAcAAAAIAAAACQAAAAoAAAALAAAATjEwX19jeHhhYml2MTIzX19mdW5kYW1lbnRhbF90eXBlX2luZm9FANwNAAC4DAAAkAsAAHYAAACkDAAA7AwAAERuAACkDAAA+AwAAGIAAACkDAAABA0AAGMAAACkDAAAEA0AAGgAAACkDAAAHA0AAGEAAACkDAAAKA0AAHMAAACkDAAANA0AAHQAAACkDAAAQA0AAGkAAACkDAAATA0AAGoAAACkDAAAWA0AAGwAAACkDAAAZA0AAG0AAACkDAAAcA0AAHgAAACkDAAAfA0AAHkAAACkDAAAiA0AAGYAAACkDAAAlA0AAGQAAACkDAAAoA0AAAAAAADACwAABwAAAAwAAAAJAAAACgAAAA0AAAAOAAAADwAAABAAAAAAAAAAJA4AAAcAAAARAAAACQAAAAoAAAANAAAAEgAAABMAAAAUAAAATjEwX19jeHhhYml2MTIwX19zaV9jbGFzc190eXBlX2luZm9FAAAAANwNAAD8DQAAwAsAAAAAAACADgAABwAAABUAAAAJAAAACgAAAA0AAAAWAAAAFwAAABgAAABOMTBfX2N4eGFiaXYxMjFfX3ZtaV9jbGFzc190eXBlX2luZm9FAAAA3A0AAFgOAADACwAAAAAAACAMAAAHAAAAGQAAAAkAAAAKAAAAGgAAAFN0OXR5cGVfaW5mbwAAAAC0DQAAqA4AAABBwB0LBMAQUAA=';
+  wasmBinaryFile = 'CompiledProcessorModule.wasm';
   if (!isDataURI(wasmBinaryFile)) {
     wasmBinaryFile = locateFile(wasmBinaryFile);
   }
@@ -1304,10 +1273,6 @@ function getBinary(file) {
   try {
     if (file == wasmBinaryFile && wasmBinary) {
       return new Uint8Array(wasmBinary);
-    }
-    var binary = tryParseAsDataURI(file);
-    if (binary) {
-      return binary;
     }
     if (readBinary) {
       return readBinary(file);
@@ -1398,7 +1363,6 @@ function createWasm() {
     addOnInit(Module['asm']['__wasm_call_ctors']);
 
     removeRunDependency('wasm-instantiate');
-
   }
   // we can't run yet (except in a pthread, where we have a custom sync instantiator)
   addRunDependency('wasm-instantiate');
@@ -1512,8 +1476,8 @@ var ASM_CONSTS = {
   function jsStackTrace() {
       var error = new Error();
       if (!error.stack) {
-        // IE10+ special cases: It does have callstack info, but it is only
-        // populated if an Error object is thrown, so try that as a special-case.
+        // IE10+ special cases: It does have callstack info, but it is only populated if an Error object is thrown,
+        // so try that as a special-case.
         try {
           throw new Error();
         } catch(e) {
@@ -1528,10 +1492,7 @@ var ASM_CONSTS = {
 
   function setWasmTableEntry(idx, func) {
       wasmTable.set(idx, func);
-      // With ABORT_ON_WASM_EXCEPTIONS wasmTable.get is overriden to return wrapped
-      // functions so we need to call it here to retrieve the potential wrapper correctly
-      // instead of just storing 'func' directly into wasmTableMirror
-      wasmTableMirror[idx] = wasmTable.get(idx);
+      wasmTableMirror[idx] = func;
     }
 
   function stackTrace() {
@@ -1582,14 +1543,15 @@ var ASM_CONSTS = {
   var char_9 = 57;
   function makeLegalFunctionName(name) {
       if (undefined === name) {
-        return '_unknown';
+          return '_unknown';
       }
       name = name.replace(/[^a-zA-Z0-9_]/g, '$');
       var f = name.charCodeAt(0);
       if (f >= char_0 && f <= char_9) {
-        return '_' + name;
+          return '_' + name;
+      } else {
+          return name;
       }
-      return name;
     }
   function createNamedFunction(name, body) {
       name = makeLegalFunctionName(name);
@@ -1652,25 +1614,25 @@ var ASM_CONSTS = {
       var typeConverters = new Array(dependentTypes.length);
       var unregisteredTypes = [];
       var registered = 0;
-      dependentTypes.forEach((dt, i) => {
-        if (registeredTypes.hasOwnProperty(dt)) {
-          typeConverters[i] = registeredTypes[dt];
-        } else {
-          unregisteredTypes.push(dt);
-          if (!awaitingDependencies.hasOwnProperty(dt)) {
-            awaitingDependencies[dt] = [];
+      dependentTypes.forEach(function(dt, i) {
+          if (registeredTypes.hasOwnProperty(dt)) {
+              typeConverters[i] = registeredTypes[dt];
+          } else {
+              unregisteredTypes.push(dt);
+              if (!awaitingDependencies.hasOwnProperty(dt)) {
+                  awaitingDependencies[dt] = [];
+              }
+              awaitingDependencies[dt].push(function() {
+                  typeConverters[i] = registeredTypes[dt];
+                  ++registered;
+                  if (registered === unregisteredTypes.length) {
+                      onComplete(typeConverters);
+                  }
+              });
           }
-          awaitingDependencies[dt].push(() => {
-            typeConverters[i] = registeredTypes[dt];
-            ++registered;
-            if (registered === unregisteredTypes.length) {
-              onComplete(typeConverters);
-            }
-          });
-        }
       });
       if (0 === unregisteredTypes.length) {
-        onComplete(typeConverters);
+          onComplete(typeConverters);
       }
     }
   /** @param {Object=} options */
@@ -1695,9 +1657,11 @@ var ASM_CONSTS = {
       delete typeDependencies[rawType];
   
       if (awaitingDependencies.hasOwnProperty(rawType)) {
-        var callbacks = awaitingDependencies[rawType];
-        delete awaitingDependencies[rawType];
-        callbacks.forEach((cb) => cb());
+          var callbacks = awaitingDependencies[rawType];
+          delete awaitingDependencies[rawType];
+          callbacks.forEach(function(cb) {
+              cb();
+          });
       }
     }
   function __embind_register_bool(rawType, name, size, trueValue, falseValue) {
@@ -1735,10 +1699,10 @@ var ASM_CONSTS = {
 
   function ClassHandle_isAliasOf(other) {
       if (!(this instanceof ClassHandle)) {
-        return false;
+          return false;
       }
       if (!(other instanceof ClassHandle)) {
-        return false;
+          return false;
       }
   
       var leftClass = this.$$.ptrType.registeredClass;
@@ -1747,13 +1711,13 @@ var ASM_CONSTS = {
       var right = other.$$.ptr;
   
       while (leftClass.baseClass) {
-        left = leftClass.upcast(left);
-        leftClass = leftClass.baseClass;
+          left = leftClass.upcast(left);
+          leftClass = leftClass.baseClass;
       }
   
       while (rightClass.baseClass) {
-        right = rightClass.upcast(right);
-        rightClass = rightClass.baseClass;
+          right = rightClass.upcast(right);
+          rightClass = rightClass.baseClass;
       }
   
       return leftClass === rightClass && left === right;
@@ -1793,16 +1757,16 @@ var ASM_CONSTS = {
       $$.count.value -= 1;
       var toDelete = 0 === $$.count.value;
       if (toDelete) {
-        runDestructor($$);
+          runDestructor($$);
       }
     }
   
   function downcastPointer(ptr, ptrClass, desiredClass) {
       if (ptrClass === desiredClass) {
-        return ptr;
+          return ptr;
       }
       if (undefined === desiredClass.baseClass) {
-        return null; // no conversion
+          return null; // no conversion
       }
   
       var rv = downcastPointer(ptr, ptrClass, desiredClass.baseClass);
@@ -1831,9 +1795,9 @@ var ASM_CONSTS = {
   var deletionQueue = [];
   function flushPendingDeletes() {
       while (deletionQueue.length) {
-        var obj = deletionQueue.pop();
-        obj.$$.deleteScheduled = false;
-        obj['delete']();
+          var obj = deletionQueue.pop();
+          obj.$$.deleteScheduled = false;
+          obj['delete']();
       }
     }
   
@@ -1841,7 +1805,7 @@ var ASM_CONSTS = {
   function setDelayFunction(fn) {
       delayFunction = fn;
       if (deletionQueue.length && delayFunction) {
-        delayFunction(flushPendingDeletes);
+          delayFunction(flushPendingDeletes);
       }
     }
   function init_embind() {
@@ -1869,18 +1833,18 @@ var ASM_CONSTS = {
   
   function makeClassHandle(prototype, record) {
       if (!record.ptrType || !record.ptr) {
-        throwInternalError('makeClassHandle requires ptr and ptrType');
+          throwInternalError('makeClassHandle requires ptr and ptrType');
       }
       var hasSmartPtrType = !!record.smartPtrType;
       var hasSmartPtr = !!record.smartPtr;
       if (hasSmartPtrType !== hasSmartPtr) {
-        throwInternalError('Both smartPtrType and smartPtr must be specified');
+          throwInternalError('Both smartPtrType and smartPtr must be specified');
       }
       record.count = { value: 1 };
       return attachFinalizer(Object.create(prototype, {
-        $$: {
-            value: record,
-        },
+          $$: {
+              value: record,
+          },
       }));
     }
   function RegisteredPointer_fromWireType(ptr) {
@@ -1889,53 +1853,53 @@ var ASM_CONSTS = {
       // rawPointer is a maybe-null raw pointer
       var rawPointer = this.getPointee(ptr);
       if (!rawPointer) {
-        this.destructor(ptr);
-        return null;
+          this.destructor(ptr);
+          return null;
       }
   
       var registeredInstance = getInheritedInstance(this.registeredClass, rawPointer);
       if (undefined !== registeredInstance) {
-        // JS object has been neutered, time to repopulate it
-        if (0 === registeredInstance.$$.count.value) {
-          registeredInstance.$$.ptr = rawPointer;
-          registeredInstance.$$.smartPtr = ptr;
-          return registeredInstance['clone']();
-        } else {
-          // else, just increment reference count on existing object
-          // it already has a reference to the smart pointer
-          var rv = registeredInstance['clone']();
-          this.destructor(ptr);
-          return rv;
-        }
+          // JS object has been neutered, time to repopulate it
+          if (0 === registeredInstance.$$.count.value) {
+              registeredInstance.$$.ptr = rawPointer;
+              registeredInstance.$$.smartPtr = ptr;
+              return registeredInstance['clone']();
+          } else {
+              // else, just increment reference count on existing object
+              // it already has a reference to the smart pointer
+              var rv = registeredInstance['clone']();
+              this.destructor(ptr);
+              return rv;
+          }
       }
   
       function makeDefaultHandle() {
-        if (this.isSmartPointer) {
-          return makeClassHandle(this.registeredClass.instancePrototype, {
-            ptrType: this.pointeeType,
-            ptr: rawPointer,
-            smartPtrType: this,
-            smartPtr: ptr,
-          });
-        } else {
-          return makeClassHandle(this.registeredClass.instancePrototype, {
-            ptrType: this,
-            ptr: ptr,
-          });
-        }
+          if (this.isSmartPointer) {
+              return makeClassHandle(this.registeredClass.instancePrototype, {
+                  ptrType: this.pointeeType,
+                  ptr: rawPointer,
+                  smartPtrType: this,
+                  smartPtr: ptr,
+              });
+          } else {
+              return makeClassHandle(this.registeredClass.instancePrototype, {
+                  ptrType: this,
+                  ptr: ptr,
+              });
+          }
       }
   
       var actualType = this.registeredClass.getActualType(rawPointer);
       var registeredPointerRecord = registeredPointers[actualType];
       if (!registeredPointerRecord) {
-        return makeDefaultHandle.call(this);
+          return makeDefaultHandle.call(this);
       }
   
       var toType;
       if (this.isConst) {
-        toType = registeredPointerRecord.constPointerType;
+          toType = registeredPointerRecord.constPointerType;
       } else {
-        toType = registeredPointerRecord.pointerType;
+          toType = registeredPointerRecord.pointerType;
       }
       var dp = downcastPointer(
           rawPointer,
@@ -1945,17 +1909,17 @@ var ASM_CONSTS = {
           return makeDefaultHandle.call(this);
       }
       if (this.isSmartPointer) {
-        return makeClassHandle(toType.registeredClass.instancePrototype, {
-          ptrType: toType,
-          ptr: dp,
-          smartPtrType: this,
-          smartPtr: ptr,
-        });
+          return makeClassHandle(toType.registeredClass.instancePrototype, {
+              ptrType: toType,
+              ptr: dp,
+              smartPtrType: this,
+              smartPtr: ptr,
+          });
       } else {
-        return makeClassHandle(toType.registeredClass.instancePrototype, {
-          ptrType: toType,
-          ptr: dp,
-        });
+          return makeClassHandle(toType.registeredClass.instancePrototype, {
+              ptrType: toType,
+              ptr: dp,
+          });
       }
     }
   function attachFinalizer(handle) {
@@ -1971,54 +1935,54 @@ var ASM_CONSTS = {
           releaseClassHandle(info.$$);
       });
       attachFinalizer = (handle) => {
-        var $$ = handle.$$;
-        var hasSmartPtr = !!$$.smartPtr;
-        if (hasSmartPtr) {
-          // We should not call the destructor on raw pointers in case other code expects the pointee to live
-          var info = { $$: $$ };
-          finalizationRegistry.register(handle, info, handle);
-        }
-        return handle;
+          var $$ = handle.$$;
+          var hasSmartPtr = !!$$.smartPtr;
+          if (hasSmartPtr) {
+              // We should not call the destructor on raw pointers in case other code expects the pointee to live
+              var info = { $$: $$ };
+              finalizationRegistry.register(handle, info, handle);
+          }
+          return handle;
       };
       detachFinalizer = (handle) => finalizationRegistry.unregister(handle);
       return attachFinalizer(handle);
     }
   function ClassHandle_clone() {
       if (!this.$$.ptr) {
-        throwInstanceAlreadyDeleted(this);
+          throwInstanceAlreadyDeleted(this);
       }
   
       if (this.$$.preservePointerOnDelete) {
-        this.$$.count.value += 1;
-        return this;
+          this.$$.count.value += 1;
+          return this;
       } else {
-        var clone = attachFinalizer(Object.create(Object.getPrototypeOf(this), {
-          $$: {
-            value: shallowCopyInternalPointer(this.$$),
-          }
-        }));
+          var clone = attachFinalizer(Object.create(Object.getPrototypeOf(this), {
+              $$: {
+                  value: shallowCopyInternalPointer(this.$$),
+              }
+          }));
   
-        clone.$$.count.value += 1;
-        clone.$$.deleteScheduled = false;
-        return clone;
+          clone.$$.count.value += 1;
+          clone.$$.deleteScheduled = false;
+          return clone;
       }
     }
   
   function ClassHandle_delete() {
       if (!this.$$.ptr) {
-        throwInstanceAlreadyDeleted(this);
+          throwInstanceAlreadyDeleted(this);
       }
   
       if (this.$$.deleteScheduled && !this.$$.preservePointerOnDelete) {
-        throwBindingError('Object already scheduled for deletion');
+          throwBindingError('Object already scheduled for deletion');
       }
   
       detachFinalizer(this);
       releaseClassHandle(this.$$);
   
       if (!this.$$.preservePointerOnDelete) {
-        this.$$.smartPtr = undefined;
-        this.$$.ptr = undefined;
+          this.$$.smartPtr = undefined;
+          this.$$.ptr = undefined;
       }
     }
   
@@ -2028,14 +1992,14 @@ var ASM_CONSTS = {
   
   function ClassHandle_deleteLater() {
       if (!this.$$.ptr) {
-        throwInstanceAlreadyDeleted(this);
+          throwInstanceAlreadyDeleted(this);
       }
       if (this.$$.deleteScheduled && !this.$$.preservePointerOnDelete) {
-        throwBindingError('Object already scheduled for deletion');
+          throwBindingError('Object already scheduled for deletion');
       }
       deletionQueue.push(this);
       if (deletionQueue.length === 1 && delayFunction) {
-        delayFunction(flushPendingDeletes);
+          delayFunction(flushPendingDeletes);
       }
       this.$$.deleteScheduled = true;
       return this;
@@ -2052,53 +2016,55 @@ var ASM_CONSTS = {
   
   function ensureOverloadTable(proto, methodName, humanName) {
       if (undefined === proto[methodName].overloadTable) {
-        var prevFunc = proto[methodName];
-        // Inject an overload resolver function that routes to the appropriate overload based on the number of arguments.
-        proto[methodName] = function() {
-          // TODO This check can be removed in -O3 level "unsafe" optimizations.
-          if (!proto[methodName].overloadTable.hasOwnProperty(arguments.length)) {
-              throwBindingError("Function '" + humanName + "' called with an invalid number of arguments (" + arguments.length + ") - expects one of (" + proto[methodName].overloadTable + ")!");
-          }
-          return proto[methodName].overloadTable[arguments.length].apply(this, arguments);
-        };
-        // Move the previous function into the overload table.
-        proto[methodName].overloadTable = [];
-        proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
+          var prevFunc = proto[methodName];
+          // Inject an overload resolver function that routes to the appropriate overload based on the number of arguments.
+          proto[methodName] = function() {
+              // TODO This check can be removed in -O3 level "unsafe" optimizations.
+              if (!proto[methodName].overloadTable.hasOwnProperty(arguments.length)) {
+                  throwBindingError("Function '" + humanName + "' called with an invalid number of arguments (" + arguments.length + ") - expects one of (" + proto[methodName].overloadTable + ")!");
+              }
+              return proto[methodName].overloadTable[arguments.length].apply(this, arguments);
+          };
+          // Move the previous function into the overload table.
+          proto[methodName].overloadTable = [];
+          proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
       }
     }
   /** @param {number=} numArguments */
   function exposePublicSymbol(name, value, numArguments) {
       if (Module.hasOwnProperty(name)) {
-        if (undefined === numArguments || (undefined !== Module[name].overloadTable && undefined !== Module[name].overloadTable[numArguments])) {
-          throwBindingError("Cannot register public name '" + name + "' twice");
-        }
+          if (undefined === numArguments || (undefined !== Module[name].overloadTable && undefined !== Module[name].overloadTable[numArguments])) {
+              throwBindingError("Cannot register public name '" + name + "' twice");
+          }
   
-        // We are exposing a function with the same name as an existing function. Create an overload table and a function selector
-        // that routes between the two.
-        ensureOverloadTable(Module, name, name);
-        if (Module.hasOwnProperty(numArguments)) {
-            throwBindingError("Cannot register multiple overloads of a function with the same number of arguments (" + numArguments + ")!");
-        }
-        // Add the new function into the overload table.
-        Module[name].overloadTable[numArguments] = value;
+          // We are exposing a function with the same name as an existing function. Create an overload table and a function selector
+          // that routes between the two.
+          ensureOverloadTable(Module, name, name);
+          if (Module.hasOwnProperty(numArguments)) {
+              throwBindingError("Cannot register multiple overloads of a function with the same number of arguments (" + numArguments + ")!");
+          }
+          // Add the new function into the overload table.
+          Module[name].overloadTable[numArguments] = value;
       }
       else {
-        Module[name] = value;
-        if (undefined !== numArguments) {
-          Module[name].numArguments = numArguments;
-        }
+          Module[name] = value;
+          if (undefined !== numArguments) {
+              Module[name].numArguments = numArguments;
+          }
       }
     }
   
   /** @constructor */
-  function RegisteredClass(name,
-                               constructor,
-                               instancePrototype,
-                               rawDestructor,
-                               baseClass,
-                               getActualType,
-                               upcast,
-                               downcast) {
+  function RegisteredClass(
+      name,
+      constructor,
+      instancePrototype,
+      rawDestructor,
+      baseClass,
+      getActualType,
+      upcast,
+      downcast
+    ) {
       this.name = name;
       this.constructor = constructor;
       this.instancePrototype = instancePrototype;
@@ -2112,27 +2078,27 @@ var ASM_CONSTS = {
   
   function upcastPointer(ptr, ptrClass, desiredClass) {
       while (ptrClass !== desiredClass) {
-        if (!ptrClass.upcast) {
-          throwBindingError("Expected null or instance of " + desiredClass.name + ", got an instance of " + ptrClass.name);
-        }
-        ptr = ptrClass.upcast(ptr);
-        ptrClass = ptrClass.baseClass;
+          if (!ptrClass.upcast) {
+              throwBindingError("Expected null or instance of " + desiredClass.name + ", got an instance of " + ptrClass.name);
+          }
+          ptr = ptrClass.upcast(ptr);
+          ptrClass = ptrClass.baseClass;
       }
       return ptr;
     }
   function constNoSmartPtrRawPointerToWireType(destructors, handle) {
       if (handle === null) {
-        if (this.isReference) {
-          throwBindingError('null is not a valid ' + this.name);
-        }
-        return 0;
+          if (this.isReference) {
+              throwBindingError('null is not a valid ' + this.name);
+          }
+          return 0;
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+          throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
-        throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
+          throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
       }
       var handleClass = handle.$$.ptrType.registeredClass;
       var ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
@@ -2142,92 +2108,92 @@ var ASM_CONSTS = {
   function genericPointerToWireType(destructors, handle) {
       var ptr;
       if (handle === null) {
-        if (this.isReference) {
-          throwBindingError('null is not a valid ' + this.name);
-        }
-  
-        if (this.isSmartPointer) {
-          ptr = this.rawConstructor();
-          if (destructors !== null) {
-            destructors.push(this.rawDestructor, ptr);
+          if (this.isReference) {
+              throwBindingError('null is not a valid ' + this.name);
           }
-          return ptr;
-        } else {
-          return 0;
-        }
+  
+          if (this.isSmartPointer) {
+              ptr = this.rawConstructor();
+              if (destructors !== null) {
+                  destructors.push(this.rawDestructor, ptr);
+              }
+              return ptr;
+          } else {
+              return 0;
+          }
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+          throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
-        throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
+          throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
       }
       if (!this.isConst && handle.$$.ptrType.isConst) {
-        throwBindingError('Cannot convert argument of type ' + (handle.$$.smartPtrType ? handle.$$.smartPtrType.name : handle.$$.ptrType.name) + ' to parameter type ' + this.name);
+          throwBindingError('Cannot convert argument of type ' + (handle.$$.smartPtrType ? handle.$$.smartPtrType.name : handle.$$.ptrType.name) + ' to parameter type ' + this.name);
       }
       var handleClass = handle.$$.ptrType.registeredClass;
       ptr = upcastPointer(handle.$$.ptr, handleClass, this.registeredClass);
   
       if (this.isSmartPointer) {
-        // TODO: this is not strictly true
-        // We could support BY_EMVAL conversions from raw pointers to smart pointers
-        // because the smart pointer can hold a reference to the handle
-        if (undefined === handle.$$.smartPtr) {
-          throwBindingError('Passing raw pointer to smart pointer is illegal');
-        }
+          // TODO: this is not strictly true
+          // We could support BY_EMVAL conversions from raw pointers to smart pointers
+          // because the smart pointer can hold a reference to the handle
+          if (undefined === handle.$$.smartPtr) {
+              throwBindingError('Passing raw pointer to smart pointer is illegal');
+          }
   
-        switch (this.sharingPolicy) {
-          case 0: // NONE
-            // no upcasting
-            if (handle.$$.smartPtrType === this) {
-              ptr = handle.$$.smartPtr;
-            } else {
-              throwBindingError('Cannot convert argument of type ' + (handle.$$.smartPtrType ? handle.$$.smartPtrType.name : handle.$$.ptrType.name) + ' to parameter type ' + this.name);
-            }
-            break;
+          switch (this.sharingPolicy) {
+              case 0: // NONE
+                  // no upcasting
+                  if (handle.$$.smartPtrType === this) {
+                      ptr = handle.$$.smartPtr;
+                  } else {
+                      throwBindingError('Cannot convert argument of type ' + (handle.$$.smartPtrType ? handle.$$.smartPtrType.name : handle.$$.ptrType.name) + ' to parameter type ' + this.name);
+                  }
+                  break;
   
-          case 1: // INTRUSIVE
-            ptr = handle.$$.smartPtr;
-            break;
+              case 1: // INTRUSIVE
+                  ptr = handle.$$.smartPtr;
+                  break;
   
-          case 2: // BY_EMVAL
-            if (handle.$$.smartPtrType === this) {
-              ptr = handle.$$.smartPtr;
-            } else {
-              var clonedHandle = handle['clone']();
-              ptr = this.rawShare(
-                ptr,
-                Emval.toHandle(function() {
-                  clonedHandle['delete']();
-                })
-              );
-              if (destructors !== null) {
-                destructors.push(this.rawDestructor, ptr);
-              }
-            }
-            break;
+              case 2: // BY_EMVAL
+                  if (handle.$$.smartPtrType === this) {
+                      ptr = handle.$$.smartPtr;
+                  } else {
+                      var clonedHandle = handle['clone']();
+                      ptr = this.rawShare(
+                          ptr,
+                          Emval.toHandle(function() {
+                              clonedHandle['delete']();
+                          })
+                      );
+                      if (destructors !== null) {
+                          destructors.push(this.rawDestructor, ptr);
+                      }
+                  }
+                  break;
   
-          default:
-            throwBindingError('Unsupporting sharing policy');
-        }
+              default:
+                  throwBindingError('Unsupporting sharing policy');
+          }
       }
       return ptr;
     }
   
   function nonConstNoSmartPtrRawPointerToWireType(destructors, handle) {
       if (handle === null) {
-        if (this.isReference) {
-          throwBindingError('null is not a valid ' + this.name);
-        }
-        return 0;
+          if (this.isReference) {
+              throwBindingError('null is not a valid ' + this.name);
+          }
+          return 0;
       }
   
       if (!handle.$$) {
-        throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
+          throwBindingError('Cannot pass "' + _embind_repr(handle) + '" as a ' + this.name);
       }
       if (!handle.$$.ptr) {
-        throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
+          throwBindingError('Cannot pass deleted object as a pointer of type ' + this.name);
       }
       if (handle.$$.ptrType.isConst) {
           throwBindingError('Cannot convert argument of type ' + handle.$$.ptrType.name + ' to parameter type ' + this.name);
@@ -2243,20 +2209,20 @@ var ASM_CONSTS = {
   
   function RegisteredPointer_getPointee(ptr) {
       if (this.rawGetPointee) {
-        ptr = this.rawGetPointee(ptr);
+          ptr = this.rawGetPointee(ptr);
       }
       return ptr;
     }
   
   function RegisteredPointer_destructor(ptr) {
       if (this.rawDestructor) {
-        this.rawDestructor(ptr);
+          this.rawDestructor(ptr);
       }
     }
   
   function RegisteredPointer_deleteObject(handle) {
       if (handle !== null) {
-        handle['delete']();
+          handle['delete']();
       }
     }
   function init_RegisteredPointer() {
@@ -2305,34 +2271,34 @@ var ASM_CONSTS = {
       this.rawDestructor = rawDestructor;
   
       if (!isSmartPointer && registeredClass.baseClass === undefined) {
-        if (isConst) {
-          this['toWireType'] = constNoSmartPtrRawPointerToWireType;
-          this.destructorFunction = null;
-        } else {
-          this['toWireType'] = nonConstNoSmartPtrRawPointerToWireType;
-          this.destructorFunction = null;
-        }
+          if (isConst) {
+              this['toWireType'] = constNoSmartPtrRawPointerToWireType;
+              this.destructorFunction = null;
+          } else {
+              this['toWireType'] = nonConstNoSmartPtrRawPointerToWireType;
+              this.destructorFunction = null;
+          }
       } else {
-        this['toWireType'] = genericPointerToWireType;
-        // Here we must leave this.destructorFunction undefined, since whether genericPointerToWireType returns
-        // a pointer that needs to be freed up is runtime-dependent, and cannot be evaluated at registration time.
-        // TODO: Create an alternative mechanism that allows removing the use of var destructors = []; array in
-        //       craftInvokerFunction altogether.
+          this['toWireType'] = genericPointerToWireType;
+          // Here we must leave this.destructorFunction undefined, since whether genericPointerToWireType returns
+          // a pointer that needs to be freed up is runtime-dependent, and cannot be evaluated at registration time.
+          // TODO: Create an alternative mechanism that allows removing the use of var destructors = []; array in
+          //       craftInvokerFunction altogether.
       }
     }
   
   /** @param {number=} numArguments */
   function replacePublicSymbol(name, value, numArguments) {
       if (!Module.hasOwnProperty(name)) {
-        throwInternalError('Replacing nonexistant public symbol');
+          throwInternalError('Replacing nonexistant public symbol');
       }
       // If there's an overload table for this symbol, replace the symbol in the overload table instead.
       if (undefined !== Module[name].overloadTable && undefined !== numArguments) {
-        Module[name].overloadTable[numArguments] = value;
+          Module[name].overloadTable[numArguments] = value;
       }
       else {
-        Module[name] = value;
-        Module[name].argCount = numArguments;
+          Module[name] = value;
+          Module[name].argCount = numArguments;
       }
     }
   
@@ -2387,123 +2353,129 @@ var ASM_CONSTS = {
       var unboundTypes = [];
       var seen = {};
       function visit(type) {
-        if (seen[type]) {
-          return;
-        }
-        if (registeredTypes[type]) {
-          return;
-        }
-        if (typeDependencies[type]) {
-          typeDependencies[type].forEach(visit);
-          return;
-        }
-        unboundTypes.push(type);
-        seen[type] = true;
+          if (seen[type]) {
+              return;
+          }
+          if (registeredTypes[type]) {
+              return;
+          }
+          if (typeDependencies[type]) {
+              typeDependencies[type].forEach(visit);
+              return;
+          }
+          unboundTypes.push(type);
+          seen[type] = true;
       }
       types.forEach(visit);
   
       throw new UnboundTypeError(message + ': ' + unboundTypes.map(getTypeName).join([', ']));
     }
-  function __embind_register_class(rawType,
-                                     rawPointerType,
-                                     rawConstPointerType,
-                                     baseClassRawType,
-                                     getActualTypeSignature,
-                                     getActualType,
-                                     upcastSignature,
-                                     upcast,
-                                     downcastSignature,
-                                     downcast,
-                                     name,
-                                     destructorSignature,
-                                     rawDestructor) {
+  function __embind_register_class(
+      rawType,
+      rawPointerType,
+      rawConstPointerType,
+      baseClassRawType,
+      getActualTypeSignature,
+      getActualType,
+      upcastSignature,
+      upcast,
+      downcastSignature,
+      downcast,
+      name,
+      destructorSignature,
+      rawDestructor
+    ) {
       name = readLatin1String(name);
       getActualType = embind__requireFunction(getActualTypeSignature, getActualType);
       if (upcast) {
-        upcast = embind__requireFunction(upcastSignature, upcast);
+          upcast = embind__requireFunction(upcastSignature, upcast);
       }
       if (downcast) {
-        downcast = embind__requireFunction(downcastSignature, downcast);
+          downcast = embind__requireFunction(downcastSignature, downcast);
       }
       rawDestructor = embind__requireFunction(destructorSignature, rawDestructor);
       var legalFunctionName = makeLegalFunctionName(name);
   
       exposePublicSymbol(legalFunctionName, function() {
-        // this code cannot run if baseClassRawType is zero
-        throwUnboundTypeError('Cannot construct ' + name + ' due to unbound types', [baseClassRawType]);
+          // this code cannot run if baseClassRawType is zero
+          throwUnboundTypeError('Cannot construct ' + name + ' due to unbound types', [baseClassRawType]);
       });
   
       whenDependentTypesAreResolved(
-        [rawType, rawPointerType, rawConstPointerType],
-        baseClassRawType ? [baseClassRawType] : [],
-        function(base) {
-          base = base[0];
+          [rawType, rawPointerType, rawConstPointerType],
+          baseClassRawType ? [baseClassRawType] : [],
+          function(base) {
+              base = base[0];
   
-          var baseClass;
-          var basePrototype;
-          if (baseClassRawType) {
-            baseClass = base.registeredClass;
-            basePrototype = baseClass.instancePrototype;
-          } else {
-            basePrototype = ClassHandle.prototype;
+              var baseClass;
+              var basePrototype;
+              if (baseClassRawType) {
+                  baseClass = base.registeredClass;
+                  basePrototype = baseClass.instancePrototype;
+              } else {
+                  basePrototype = ClassHandle.prototype;
+              }
+  
+              var constructor = createNamedFunction(legalFunctionName, function() {
+                  if (Object.getPrototypeOf(this) !== instancePrototype) {
+                      throw new BindingError("Use 'new' to construct " + name);
+                  }
+                  if (undefined === registeredClass.constructor_body) {
+                      throw new BindingError(name + " has no accessible constructor");
+                  }
+                  var body = registeredClass.constructor_body[arguments.length];
+                  if (undefined === body) {
+                      throw new BindingError("Tried to invoke ctor of " + name + " with invalid number of parameters (" + arguments.length + ") - expected (" + Object.keys(registeredClass.constructor_body).toString() + ") parameters instead!");
+                  }
+                  return body.apply(this, arguments);
+              });
+  
+              var instancePrototype = Object.create(basePrototype, {
+                  constructor: { value: constructor },
+              });
+  
+              constructor.prototype = instancePrototype;
+  
+              var registeredClass = new RegisteredClass(
+                  name,
+                  constructor,
+                  instancePrototype,
+                  rawDestructor,
+                  baseClass,
+                  getActualType,
+                  upcast,
+                  downcast);
+  
+              var referenceConverter = new RegisteredPointer(
+                  name,
+                  registeredClass,
+                  true,
+                  false,
+                  false);
+  
+              var pointerConverter = new RegisteredPointer(
+                  name + '*',
+                  registeredClass,
+                  false,
+                  false,
+                  false);
+  
+              var constPointerConverter = new RegisteredPointer(
+                  name + ' const*',
+                  registeredClass,
+                  false,
+                  true,
+                  false);
+  
+              registeredPointers[rawType] = {
+                  pointerType: pointerConverter,
+                  constPointerType: constPointerConverter
+              };
+  
+              replacePublicSymbol(legalFunctionName, constructor);
+  
+              return [referenceConverter, pointerConverter, constPointerConverter];
           }
-  
-          var constructor = createNamedFunction(legalFunctionName, function() {
-            if (Object.getPrototypeOf(this) !== instancePrototype) {
-              throw new BindingError("Use 'new' to construct " + name);
-            }
-            if (undefined === registeredClass.constructor_body) {
-              throw new BindingError(name + " has no accessible constructor");
-            }
-            var body = registeredClass.constructor_body[arguments.length];
-            if (undefined === body) {
-              throw new BindingError("Tried to invoke ctor of " + name + " with invalid number of parameters (" + arguments.length + ") - expected (" + Object.keys(registeredClass.constructor_body).toString() + ") parameters instead!");
-            }
-            return body.apply(this, arguments);
-          });
-  
-          var instancePrototype = Object.create(basePrototype, {
-            constructor: { value: constructor },
-          });
-  
-          constructor.prototype = instancePrototype;
-  
-          var registeredClass = new RegisteredClass(name,
-                                                    constructor,
-                                                    instancePrototype,
-                                                    rawDestructor,
-                                                    baseClass,
-                                                    getActualType,
-                                                    upcast,
-                                                    downcast);
-  
-          var referenceConverter = new RegisteredPointer(name,
-                                                         registeredClass,
-                                                         true,
-                                                         false,
-                                                         false);
-  
-          var pointerConverter = new RegisteredPointer(name + '*',
-                                                       registeredClass,
-                                                       false,
-                                                       false,
-                                                       false);
-  
-          var constPointerConverter = new RegisteredPointer(name + ' const*',
-                                                            registeredClass,
-                                                            false,
-                                                            true,
-                                                            false);
-  
-          registeredPointers[rawType] = {
-            pointerType: pointerConverter,
-            constPointerType: constPointerConverter
-          };
-  
-          replacePublicSymbol(legalFunctionName, constructor);
-  
-          return [referenceConverter, pointerConverter, constPointerConverter];
-        }
       );
     }
 
@@ -2518,9 +2490,9 @@ var ASM_CONSTS = {
   
   function runDestructors(destructors) {
       while (destructors.length) {
-        var ptr = destructors.pop();
-        var del = destructors.pop();
-        del(ptr);
+          var ptr = destructors.pop();
+          var del = destructors.pop();
+          del(ptr);
       }
     }
   function __embind_register_class_constructor(
@@ -2538,42 +2510,43 @@ var ASM_CONSTS = {
       var destructors = [];
   
       whenDependentTypesAreResolved([], [rawClassType], function(classType) {
-        classType = classType[0];
-        var humanName = 'constructor ' + classType.name;
+          classType = classType[0];
+          var humanName = 'constructor ' + classType.name;
   
-        if (undefined === classType.registeredClass.constructor_body) {
-          classType.registeredClass.constructor_body = [];
-        }
-        if (undefined !== classType.registeredClass.constructor_body[argCount - 1]) {
-          throw new BindingError("Cannot register multiple constructors with identical number of parameters (" + (argCount-1) + ") for class '" + classType.name + "'! Overload resolution is currently only performed using the parameter count, not actual type info!");
-        }
-        classType.registeredClass.constructor_body[argCount - 1] = () => {
-          throwUnboundTypeError('Cannot construct ' + classType.name + ' due to unbound types', rawArgTypes);
-        };
+          if (undefined === classType.registeredClass.constructor_body) {
+              classType.registeredClass.constructor_body = [];
+          }
+          if (undefined !== classType.registeredClass.constructor_body[argCount - 1]) {
+              throw new BindingError("Cannot register multiple constructors with identical number of parameters (" + (argCount-1) + ") for class '" + classType.name + "'! Overload resolution is currently only performed using the parameter count, not actual type info!");
+          }
+          classType.registeredClass.constructor_body[argCount - 1] = () => {
+              throwUnboundTypeError('Cannot construct ' + classType.name + ' due to unbound types', rawArgTypes);
+          };
   
-        whenDependentTypesAreResolved([], rawArgTypes, function(argTypes) {
-          // Insert empty slot for context type (argTypes[1]).
-          argTypes.splice(1, 0, null);
-          classType.registeredClass.constructor_body[argCount - 1] = craftInvokerFunction(humanName, argTypes, null, invoker, rawConstructor);
+          whenDependentTypesAreResolved([], rawArgTypes, function(argTypes) {
+              // Insert empty slot for context type (argTypes[1]).
+              argTypes.splice(1, 0, null);
+              classType.registeredClass.constructor_body[argCount - 1] = craftInvokerFunction(humanName, argTypes, null, invoker, rawConstructor);
+              return [];
+          });
           return [];
-        });
-        return [];
       });
     }
 
   function new_(constructor, argumentList) {
       if (!(constructor instanceof Function)) {
-        throw new TypeError('new_ called with constructor type ' + typeof(constructor) + " which is not a function");
+          throw new TypeError('new_ called with constructor type ' + typeof(constructor) + " which is not a function");
       }
+  
       /*
        * Previously, the following line was just:
-       *   function dummy() {};
-       * Unfortunately, Chrome was preserving 'dummy' as the object's name, even
-       * though at creation, the 'dummy' has the correct constructor name.  Thus,
-       * objects created with IMVU.new would show up in the debugger as 'dummy',
-       * which isn't very helpful.  Using IMVU.createNamedFunction addresses the
-       * issue.  Doublely-unfortunately, there's no way to write a test for this
-       * behavior.  -NRD 2013.02.22
+  
+       function dummy() {};
+  
+       * Unfortunately, Chrome was preserving 'dummy' as the object's name, even though at creation, the 'dummy' has the
+       * correct constructor name.  Thus, objects created with IMVU.new would show up in the debugger as 'dummy', which
+       * isn't very helpful.  Using IMVU.createNamedFunction addresses the issue.  Doublely-unfortunately, there's no way
+       * to write a test for this behavior.  -NRD 2013.02.22
        */
       var dummy = createNamedFunction(constructor.name || 'unknownFunctionName', function(){});
       dummy.prototype = constructor.prototype;
@@ -2594,7 +2567,7 @@ var ASM_CONSTS = {
       var argCount = argTypes.length;
   
       if (argCount < 2) {
-        throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
+          throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
       }
   
       var isClassMethodFunc = (argTypes[1] !== null && classType !== null);
@@ -2610,10 +2583,10 @@ var ASM_CONSTS = {
       var needsDestructorStack = false;
   
       for (var i = 1; i < argTypes.length; ++i) { // Skip return value at index 0 - it's not deleted here.
-        if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) { // The type does not define a destructor function - must use dynamic stack
-          needsDestructorStack = true;
-          break;
-        }
+          if (argTypes[i] !== null && argTypes[i].destructorFunction === undefined) { // The type does not define a destructor function - must use dynamic stack
+              needsDestructorStack = true;
+              break;
+          }
       }
   
       var returns = (argTypes[0].name !== "void");
@@ -2621,8 +2594,8 @@ var ASM_CONSTS = {
       var argsList = "";
       var argsListWired = "";
       for (var i = 0; i < argCount - 2; ++i) {
-        argsList += (i!==0?", ":"")+"arg"+i;
-        argsListWired += (i!==0?", ":"")+"arg"+i+"Wired";
+          argsList += (i!==0?", ":"")+"arg"+i;
+          argsListWired += (i!==0?", ":"")+"arg"+i+"Wired";
       }
   
       var invokerFnBody =
@@ -2632,7 +2605,8 @@ var ASM_CONSTS = {
           "}\n";
   
       if (needsDestructorStack) {
-        invokerFnBody += "var destructors = [];\n";
+          invokerFnBody +=
+              "var destructors = [];\n";
       }
   
       var dtorStack = needsDestructorStack ? "destructors" : "null";
@@ -2640,38 +2614,38 @@ var ASM_CONSTS = {
       var args2 = [throwBindingError, cppInvokerFunc, cppTargetFunc, runDestructors, argTypes[0], argTypes[1]];
   
       if (isClassMethodFunc) {
-        invokerFnBody += "var thisWired = classParam.toWireType("+dtorStack+", this);\n";
+          invokerFnBody += "var thisWired = classParam.toWireType("+dtorStack+", this);\n";
       }
   
       for (var i = 0; i < argCount - 2; ++i) {
-        invokerFnBody += "var arg"+i+"Wired = argType"+i+".toWireType("+dtorStack+", arg"+i+"); // "+argTypes[i+2].name+"\n";
-        args1.push("argType"+i);
-        args2.push(argTypes[i+2]);
+          invokerFnBody += "var arg"+i+"Wired = argType"+i+".toWireType("+dtorStack+", arg"+i+"); // "+argTypes[i+2].name+"\n";
+          args1.push("argType"+i);
+          args2.push(argTypes[i+2]);
       }
   
       if (isClassMethodFunc) {
-        argsListWired = "thisWired" + (argsListWired.length > 0 ? ", " : "") + argsListWired;
+          argsListWired = "thisWired" + (argsListWired.length > 0 ? ", " : "") + argsListWired;
       }
   
       invokerFnBody +=
           (returns?"var rv = ":"") + "invoker(fn"+(argsListWired.length>0?", ":"")+argsListWired+");\n";
   
       if (needsDestructorStack) {
-        invokerFnBody += "runDestructors(destructors);\n";
+          invokerFnBody += "runDestructors(destructors);\n";
       } else {
-        for (var i = isClassMethodFunc?1:2; i < argTypes.length; ++i) { // Skip return value at index 0 - it's not deleted here. Also skip class type if not a method.
-          var paramName = (i === 1 ? "thisWired" : ("arg"+(i - 2)+"Wired"));
-          if (argTypes[i].destructorFunction !== null) {
-            invokerFnBody += paramName+"_dtor("+paramName+"); // "+argTypes[i].name+"\n";
-            args1.push(paramName+"_dtor");
-            args2.push(argTypes[i].destructorFunction);
+          for (var i = isClassMethodFunc?1:2; i < argTypes.length; ++i) { // Skip return value at index 0 - it's not deleted here. Also skip class type if not a method.
+              var paramName = (i === 1 ? "thisWired" : ("arg"+(i - 2)+"Wired"));
+              if (argTypes[i].destructorFunction !== null) {
+                  invokerFnBody += paramName+"_dtor("+paramName+"); // "+argTypes[i].name+"\n";
+                  args1.push(paramName+"_dtor");
+                  args2.push(argTypes[i].destructorFunction);
+              }
           }
-        }
       }
   
       if (returns) {
-        invokerFnBody += "var ret = retType.fromWireType(rv);\n" +
-                         "return ret;\n";
+          invokerFnBody += "var ret = retType.fromWireType(rv);\n" +
+                           "return ret;\n";
       } else {
       }
   
@@ -2682,65 +2656,66 @@ var ASM_CONSTS = {
       var invokerFunction = new_(Function, args1).apply(null, args2);
       return invokerFunction;
     }
-  function __embind_register_class_function(rawClassType,
-                                              methodName,
-                                              argCount,
-                                              rawArgTypesAddr, // [ReturnType, ThisType, Args...]
-                                              invokerSignature,
-                                              rawInvoker,
-                                              context,
-                                              isPureVirtual) {
+  function __embind_register_class_function(
+      rawClassType,
+      methodName,
+      argCount,
+      rawArgTypesAddr, // [ReturnType, ThisType, Args...]
+      invokerSignature,
+      rawInvoker,
+      context,
+      isPureVirtual
+    ) {
       var rawArgTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
       methodName = readLatin1String(methodName);
       rawInvoker = embind__requireFunction(invokerSignature, rawInvoker);
   
       whenDependentTypesAreResolved([], [rawClassType], function(classType) {
-        classType = classType[0];
-        var humanName = classType.name + '.' + methodName;
+          classType = classType[0];
+          var humanName = classType.name + '.' + methodName;
   
-        if (methodName.startsWith("@@")) {
-          methodName = Symbol[methodName.substring(2)];
-        }
-  
-        if (isPureVirtual) {
-          classType.registeredClass.pureVirtualFunctions.push(methodName);
-        }
-  
-        function unboundTypesHandler() {
-          throwUnboundTypeError('Cannot call ' + humanName + ' due to unbound types', rawArgTypes);
-        }
-  
-        var proto = classType.registeredClass.instancePrototype;
-        var method = proto[methodName];
-        if (undefined === method || (undefined === method.overloadTable && method.className !== classType.name && method.argCount === argCount - 2)) {
-          // This is the first overload to be registered, OR we are replacing a
-          // function in the base class with a function in the derived class.
-          unboundTypesHandler.argCount = argCount - 2;
-          unboundTypesHandler.className = classType.name;
-          proto[methodName] = unboundTypesHandler;
-        } else {
-          // There was an existing function with the same name registered. Set up
-          // a function overload routing table.
-          ensureOverloadTable(proto, methodName, humanName);
-          proto[methodName].overloadTable[argCount - 2] = unboundTypesHandler;
-        }
-  
-        whenDependentTypesAreResolved([], rawArgTypes, function(argTypes) {
-          var memberFunction = craftInvokerFunction(humanName, argTypes, classType, rawInvoker, context);
-  
-          // Replace the initial unbound-handler-stub function with the appropriate member function, now that all types
-          // are resolved. If multiple overloads are registered for this function, the function goes into an overload table.
-          if (undefined === proto[methodName].overloadTable) {
-            // Set argCount in case an overload is registered later
-            memberFunction.argCount = argCount - 2;
-            proto[methodName] = memberFunction;
-          } else {
-            proto[methodName].overloadTable[argCount - 2] = memberFunction;
+          if (methodName.startsWith("@@")) {
+              methodName = Symbol[methodName.substring(2)];
           }
   
+          if (isPureVirtual) {
+              classType.registeredClass.pureVirtualFunctions.push(methodName);
+          }
+  
+          function unboundTypesHandler() {
+              throwUnboundTypeError('Cannot call ' + humanName + ' due to unbound types', rawArgTypes);
+          }
+  
+          var proto = classType.registeredClass.instancePrototype;
+          var method = proto[methodName];
+          if (undefined === method || (undefined === method.overloadTable && method.className !== classType.name && method.argCount === argCount - 2)) {
+              // This is the first overload to be registered, OR we are replacing a function in the base class with a function in the derived class.
+              unboundTypesHandler.argCount = argCount - 2;
+              unboundTypesHandler.className = classType.name;
+              proto[methodName] = unboundTypesHandler;
+          } else {
+              // There was an existing function with the same name registered. Set up a function overload routing table.
+              ensureOverloadTable(proto, methodName, humanName);
+              proto[methodName].overloadTable[argCount - 2] = unboundTypesHandler;
+          }
+  
+          whenDependentTypesAreResolved([], rawArgTypes, function(argTypes) {
+  
+              var memberFunction = craftInvokerFunction(humanName, argTypes, classType, rawInvoker, context);
+  
+              // Replace the initial unbound-handler-stub function with the appropriate member function, now that all types
+              // are resolved. If multiple overloads are registered for this function, the function goes into an overload table.
+              if (undefined === proto[methodName].overloadTable) {
+                  // Set argCount in case an overload is registered later
+                  memberFunction.argCount = argCount - 2;
+                  proto[methodName] = memberFunction;
+              } else {
+                  proto[methodName].overloadTable[argCount - 2] = memberFunction;
+              }
+  
+              return [];
+          });
           return [];
-        });
-        return [];
       });
     }
 
@@ -2749,26 +2724,26 @@ var ASM_CONSTS = {
   var emval_handle_array = [{},{value:undefined},{value:null},{value:true},{value:false}];
   function __emval_decref(handle) {
       if (handle > 4 && 0 === --emval_handle_array[handle].refcount) {
-        emval_handle_array[handle] = undefined;
-        emval_free_list.push(handle);
+          emval_handle_array[handle] = undefined;
+          emval_free_list.push(handle);
       }
     }
   
   function count_emval_handles() {
       var count = 0;
       for (var i = 5; i < emval_handle_array.length; ++i) {
-        if (emval_handle_array[i] !== undefined) {
-          ++count;
-        }
+          if (emval_handle_array[i] !== undefined) {
+              ++count;
+          }
       }
       return count;
     }
   
   function get_first_emval() {
       for (var i = 5; i < emval_handle_array.length; ++i) {
-        if (emval_handle_array[i] !== undefined) {
-          return emval_handle_array[i];
-        }
+          if (emval_handle_array[i] !== undefined) {
+              return emval_handle_array[i];
+          }
       }
       return null;
     }
@@ -2776,45 +2751,45 @@ var ASM_CONSTS = {
       Module['count_emval_handles'] = count_emval_handles;
       Module['get_first_emval'] = get_first_emval;
     }
-  var Emval = {toValue:(handle) => {
+  var Emval = {toValue:function(handle) {
         if (!handle) {
             throwBindingError('Cannot use deleted val. handle = ' + handle);
         }
         return emval_handle_array[handle].value;
-      },toHandle:(value) => {
+      },toHandle:function(value) {
         switch (value) {
-          case undefined: return 1;
-          case null: return 2;
-          case true: return 3;
-          case false: return 4;
+          case undefined :{ return 1; }
+          case null :{ return 2; }
+          case true :{ return 3; }
+          case false :{ return 4; }
           default:{
             var handle = emval_free_list.length ?
                 emval_free_list.pop() :
                 emval_handle_array.length;
-  
+    
             emval_handle_array[handle] = {refcount: 1, value: value};
             return handle;
+            }
           }
-        }
       }};
   function __embind_register_emval(rawType, name) {
       name = readLatin1String(name);
       registerType(rawType, {
-        name: name,
-        'fromWireType': function(handle) {
-          var rv = Emval.toValue(handle);
-          __emval_decref(handle);
-          return rv;
-        },
-        'toWireType': function(destructors, value) {
-          return Emval.toHandle(value);
-        },
-        'argPackAdvance': 8,
-        'readValueFromPointer': simpleReadValueFromPointer,
-        destructorFunction: null, // This type does not need a destructor
+          name: name,
+          'fromWireType': function(handle) {
+              var rv = Emval.toValue(handle);
+              __emval_decref(handle);
+              return rv;
+          },
+          'toWireType': function(destructors, value) {
+              return Emval.toHandle(value);
+          },
+          'argPackAdvance': 8,
+          'readValueFromPointer': simpleReadValueFromPointer,
+          destructorFunction: null, // This type does not need a destructor
   
-        // TODO: do we need a deleteObject here?  write a test where
-        // emval is passed into JS via an interface
+          // TODO: do we need a deleteObject here?  write a test where
+          // emval is passed into JS via an interface
       });
     }
 
@@ -2921,34 +2896,34 @@ var ASM_CONSTS = {
 
   function __embind_register_memory_view(rawType, dataTypeIndex, name) {
       var typeMapping = [
-        Int8Array,
-        Uint8Array,
-        Int16Array,
-        Uint16Array,
-        Int32Array,
-        Uint32Array,
-        Float32Array,
-        Float64Array,
+          Int8Array,
+          Uint8Array,
+          Int16Array,
+          Uint16Array,
+          Int32Array,
+          Uint32Array,
+          Float32Array,
+          Float64Array,
       ];
   
       var TA = typeMapping[dataTypeIndex];
   
       function decodeMemoryView(handle) {
-        handle = handle >> 2;
-        var heap = HEAPU32;
-        var size = heap[handle]; // in elements
-        var data = heap[handle + 1]; // byte offset into emscripten heap
-        return new TA(buffer, data, size);
+          handle = handle >> 2;
+          var heap = HEAPU32;
+          var size = heap[handle]; // in elements
+          var data = heap[handle + 1]; // byte offset into emscripten heap
+          return new TA(buffer, data, size);
       }
   
       name = readLatin1String(name);
       registerType(rawType, {
-        name: name,
-        'fromWireType': decodeMemoryView,
-        'argPackAdvance': 8,
-        'readValueFromPointer': decodeMemoryView,
+          name: name,
+          'fromWireType': decodeMemoryView,
+          'argPackAdvance': 8,
+          'readValueFromPointer': decodeMemoryView,
       }, {
-        ignoreDuplicateRegistrations: true,
+          ignoreDuplicateRegistrations: true,
       });
     }
 
@@ -3048,67 +3023,67 @@ var ASM_CONSTS = {
       name = readLatin1String(name);
       var decodeString, encodeString, getHeap, lengthBytesUTF, shift;
       if (charSize === 2) {
-        decodeString = UTF16ToString;
-        encodeString = stringToUTF16;
-        lengthBytesUTF = lengthBytesUTF16;
-        getHeap = () => HEAPU16;
-        shift = 1;
+          decodeString = UTF16ToString;
+          encodeString = stringToUTF16;
+          lengthBytesUTF = lengthBytesUTF16;
+          getHeap = () => HEAPU16;
+          shift = 1;
       } else if (charSize === 4) {
-        decodeString = UTF32ToString;
-        encodeString = stringToUTF32;
-        lengthBytesUTF = lengthBytesUTF32;
-        getHeap = () => HEAPU32;
-        shift = 2;
+          decodeString = UTF32ToString;
+          encodeString = stringToUTF32;
+          lengthBytesUTF = lengthBytesUTF32;
+          getHeap = () => HEAPU32;
+          shift = 2;
       }
       registerType(rawType, {
-        name: name,
-        'fromWireType': function(value) {
-          // Code mostly taken from _embind_register_std_string fromWireType
-          var length = HEAPU32[value >> 2];
-          var HEAP = getHeap();
-          var str;
+          name: name,
+          'fromWireType': function(value) {
+              // Code mostly taken from _embind_register_std_string fromWireType
+              var length = HEAPU32[value >> 2];
+              var HEAP = getHeap();
+              var str;
   
-          var decodeStartPtr = value + 4;
-          // Looping here to support possible embedded '0' bytes
-          for (var i = 0; i <= length; ++i) {
-            var currentBytePtr = value + 4 + i * charSize;
-            if (i == length || HEAP[currentBytePtr >> shift] == 0) {
-              var maxReadBytes = currentBytePtr - decodeStartPtr;
-              var stringSegment = decodeString(decodeStartPtr, maxReadBytes);
-              if (str === undefined) {
-                str = stringSegment;
-              } else {
-                str += String.fromCharCode(0);
-                str += stringSegment;
+              var decodeStartPtr = value + 4;
+              // Looping here to support possible embedded '0' bytes
+              for (var i = 0; i <= length; ++i) {
+                  var currentBytePtr = value + 4 + i * charSize;
+                  if (i == length || HEAP[currentBytePtr >> shift] == 0) {
+                      var maxReadBytes = currentBytePtr - decodeStartPtr;
+                      var stringSegment = decodeString(decodeStartPtr, maxReadBytes);
+                      if (str === undefined) {
+                          str = stringSegment;
+                      } else {
+                          str += String.fromCharCode(0);
+                          str += stringSegment;
+                      }
+                      decodeStartPtr = currentBytePtr + charSize;
+                  }
               }
-              decodeStartPtr = currentBytePtr + charSize;
-            }
-          }
   
-          _free(value);
+              _free(value);
   
-          return str;
-        },
-        'toWireType': function(destructors, value) {
-          if (!(typeof value == 'string')) {
-            throwBindingError('Cannot pass non-string to C++ string type ' + name);
-          }
+              return str;
+          },
+          'toWireType': function(destructors, value) {
+              if (!(typeof value == 'string')) {
+                  throwBindingError('Cannot pass non-string to C++ string type ' + name);
+              }
   
-          // assumes 4-byte alignment
-          var length = lengthBytesUTF(value);
-          var ptr = _malloc(4 + length + charSize);
-          HEAPU32[ptr >> 2] = length >> shift;
+              // assumes 4-byte alignment
+              var length = lengthBytesUTF(value);
+              var ptr = _malloc(4 + length + charSize);
+              HEAPU32[ptr >> 2] = length >> shift;
   
-          encodeString(value, ptr + 4, length + charSize);
+              encodeString(value, ptr + 4, length + charSize);
   
-          if (destructors !== null) {
-            destructors.push(_free, ptr);
-          }
-          return ptr;
-        },
-        'argPackAdvance': 8,
-        'readValueFromPointer': simpleReadValueFromPointer,
-        destructorFunction: function(ptr) { _free(ptr); },
+              if (destructors !== null) {
+                  destructors.push(_free, ptr);
+              }
+              return ptr;
+          },
+          'argPackAdvance': 8,
+          'readValueFromPointer': simpleReadValueFromPointer,
+          destructorFunction: function(ptr) { _free(ptr); },
       });
     }
 
@@ -3182,78 +3157,6 @@ function intArrayToString(array) {
     ret.push(String.fromCharCode(chr));
   }
   return ret.join('');
-}
-
-
-// Copied from https://github.com/strophe/strophejs/blob/e06d027/src/polyfills.js#L149
-
-// This code was written by Tyler Akins and has been placed in the
-// public domain.  It would be nice if you left this header intact.
-// Base64 code from Tyler Akins -- http://rumkin.com
-
-/**
- * Decodes a base64 string.
- * @param {string} input The string to decode.
- */
-var decodeBase64 = typeof atob == 'function' ? atob : function (input) {
-  var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-  var output = '';
-  var chr1, chr2, chr3;
-  var enc1, enc2, enc3, enc4;
-  var i = 0;
-  // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-  input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
-  do {
-    enc1 = keyStr.indexOf(input.charAt(i++));
-    enc2 = keyStr.indexOf(input.charAt(i++));
-    enc3 = keyStr.indexOf(input.charAt(i++));
-    enc4 = keyStr.indexOf(input.charAt(i++));
-
-    chr1 = (enc1 << 2) | (enc2 >> 4);
-    chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-    chr3 = ((enc3 & 3) << 6) | enc4;
-
-    output = output + String.fromCharCode(chr1);
-
-    if (enc3 !== 64) {
-      output = output + String.fromCharCode(chr2);
-    }
-    if (enc4 !== 64) {
-      output = output + String.fromCharCode(chr3);
-    }
-  } while (i < input.length);
-  return output;
-};
-
-// Converts a string of base64 into a byte array.
-// Throws error on invalid input.
-function intArrayFromBase64(s) {
-  if (typeof ENVIRONMENT_IS_NODE == 'boolean' && ENVIRONMENT_IS_NODE) {
-    var buf = Buffer.from(s, 'base64');
-    return new Uint8Array(buf['buffer'], buf['byteOffset'], buf['byteLength']);
-  }
-
-  try {
-    var decoded = decodeBase64(s);
-    var bytes = new Uint8Array(decoded.length);
-    for (var i = 0 ; i < decoded.length ; ++i) {
-      bytes[i] = decoded.charCodeAt(i);
-    }
-    return bytes;
-  } catch (_) {
-    throw new Error('Converting base64 string to bytes failed.');
-  }
-}
-
-// If filename is a base64 data URI, parses and returns data (Buffer on node,
-// Uint8Array otherwise). If filename is not a base64 data URI, returns undefined.
-function tryParseAsDataURI(filename) {
-  if (!isDataURI(filename)) {
-    return;
-  }
-
-  return intArrayFromBase64(filename.slice(dataURIPrefix.length));
 }
 
 
@@ -3379,6 +3282,11 @@ Module['run'] = run;
 /** @param {boolean|number=} implicit */
 function exit(status, implicit) {
   EXITSTATUS = status;
+
+  if (keepRuntimeAlive()) {
+  } else {
+    exitRuntime();
+  }
 
   procExit(status);
 }
