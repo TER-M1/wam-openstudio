@@ -1,5 +1,6 @@
 import {canvasClickMoveCursor} from "../track-utils/PlayHead.js";
 import {drawBuffer} from "../track-utils/DrawBuffer.js";
+import {initWam} from "./Utils.js";
 
 
 export default class MainAudio {
@@ -34,7 +35,15 @@ export default class MainAudio {
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
 
+
     }
+
+
+    async loadWam(){
+        const {hostGroupId} = await initWam()
+        this.hostGroupId = hostGroupId;
+    }
+
 
     /**
      *

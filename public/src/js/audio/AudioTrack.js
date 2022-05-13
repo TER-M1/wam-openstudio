@@ -1,5 +1,5 @@
 import OperableAudioBuffer from "./OperableAudioBuffer.js";
-import {audioCtx} from "./Utils.js";
+import {audioCtx, mainAudio} from "./Utils.js";
 
 export default class AudioTrack {
     /**
@@ -76,10 +76,9 @@ export default class AudioTrack {
     }
 
     async load() {
-        const {default: initializeWamHost} = await import("../../../../sdk/src/initializeWamHost.js");
-        var [hostGroupId] = await initializeWamHost(audioCtx);
+
         var {default: WAM} = await import ("https://michael-marynowicz.github.io/TER/pedalboard/index.js");
-        var instance = await WAM.createInstance(hostGroupId, audioCtx);
+        var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
         instance._descriptor.name = instance.name + ` ${this.id}`
         this.pluginInstance = instance;
         this.pluginDOM = await instance.createGui();

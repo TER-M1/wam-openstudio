@@ -5,8 +5,10 @@ import WAMAudioWorkletNode from "./WAMAudioWorkletNode.js";
 //@ts-check
 
 export default class WamEventDestination extends WebAudioModule {
-    static async createAudioNode(initialState) {
-        await addFunctionModule(audioCtx.audioWorklet, getProcessor, this.moduleId);
+    async createAudioNode(initialState) {
+        console.log(this.moduleId)
+        await WAMAudioWorkletNode.addModules(this.moduleId)
+        // await addFunctionModule(audioCtx.audioWorklet, getProcessor, this.moduleId);
         const node = new WAMAudioWorkletNode(this, {});
 
         return node;

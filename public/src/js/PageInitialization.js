@@ -55,7 +55,9 @@ function attachControl(values) {
                     let soundList = output.soundList;
                     for (let i = 0; i < soundList.length; i++) {
                         let path = `${output.path}/${soundList[i].name}`;
-                        let node = await WamEventDestination.createAudioNode({});
+                        // let node = await WamEventDestination.createAudioNode({});
+                        let WAM = await WamEventDestination.createInstance(mainAudio.hostGroupId,audioCtx);
+                        let node = WAM.audioNode;
                         // let audioWorkletNode = new WAMAudioWorkletNode();
                         asyncAddTrack.push(mainAudio.addTrack(
                             new AudioTrack(audioCtx, node, path)

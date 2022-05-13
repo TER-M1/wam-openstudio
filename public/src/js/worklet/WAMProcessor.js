@@ -1,7 +1,7 @@
 // import Module from "./CompiledProcessorModule.js";
 import {RENDER_QUANTUM_FRAMES,} from "../../../lib/wasm-audio-helper.js";
 
-const sampleRate = 48000;
+// const sampleRate = 48000;
 
 const getProcessor = (moduleId) => {
     /** @type {AudioWorkletGlobalScope} */
@@ -250,7 +250,7 @@ const getProcessor = (moduleId) => {
     }
 
     try {
-        registerProcessor("wam-processor", MyWAMProcessor);
+        registerProcessor(moduleId, MyWAMProcessor);
     } catch (e) {
         console.log(e);
     }
