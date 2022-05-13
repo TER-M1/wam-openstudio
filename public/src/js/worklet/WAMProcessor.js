@@ -58,6 +58,28 @@ const getProcessor = (moduleId) => {
                      * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
                      */
 
+                    // WebAssembly.instantiate(e.data.mod,{module: {}, env: {}})
+                    //     .then(instance => {
+                    //         console.log(instance);
+                    //         console.log(instance.exports.bite())
+                    //         console.log(instance.exports.stackAlloc(150)) // Il faudra remplacer les malloc de l'HeapAudioBuffer par stackAlloc
+                    //         this.audioWorkletNode.port.postMessage({instance: instance });
+                    //             this.instance = instance.exports;
+                    //             this._processPerf = new this.instance.processPerf;
+                    //             this._heapInputBuffer = new HeapAudioBuffer(
+                    //                 this.instance,
+                    //                 128,
+                    //                 2,
+                    //                 32
+                    //             );
+                    //             this._heapOutputBuffer = new HeapAudioBuffer(
+                    //                 this.instance,
+                    //                 128,
+                    //                 2,
+                    //                 32
+                    //             );
+                    //     })
+
                     this.instance = e.data.instance;
                     this._processPerf = new this.instance.processPerf;
                     this._heapInputBuffer = new HeapAudioBuffer(
