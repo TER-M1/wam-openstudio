@@ -51,6 +51,13 @@ const getProcessor = (moduleId) => {
                 } else if (e.data.mod) {
                     console.log("recu")
                     console.log(e.data.mod)
+
+
+                    /**
+                     * IL FAUT RECEVOIR LE MODULE, ET FAIRE LE WEBASSEMBLY.INSTIANTIATE ICI
+                     * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
+                     */
+
                     this.instance = e.data.instance;
                     this._processPerf = new this.instance.processPerf;
                     this._heapInputBuffer = new HeapAudioBuffer(
