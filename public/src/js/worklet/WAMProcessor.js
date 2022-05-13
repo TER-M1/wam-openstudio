@@ -46,35 +46,24 @@ const getProcessor = (moduleId) => {
                         this.loopEnding = this.audio[0].length;
                     else
                         this.loopEnding = e.data.loopEnding;
+                } else if (e.data.instance) {
+                    this.instance = e.data.instance;
+                    this._processPerf = new this.instance.exports.ProcessorPerf();
+                    this._heapInputBuffer = new HeapAudioBuffer(
+                        this.module,
+                        RENDER_QUANTUM_FRAMES,
+                        2,
+                        MAX_CHANNEL_COUNT
+                    );
+                    this._heapOutputBuffer = new HeapAudioBuffer(
+                        this.module,
+                        RENDER_QUANTUM_FRAMES,
+                        2,
+                        MAX_CHANNEL_COUNT
+                    );
                 }
             };
-            // this._heapInputBuffer = new HeapAudioBuffer(
-            //     this.module,
-            //     RENDER_QUANTUM_FRAMES,
-            //     2,
-            //     MAX_CHANNEL_COUNT
-            // );
-            // this._heapOutputBuffer = new HeapAudioBuffer(
-            //     this.module,
-            //     RENDER_QUANTUM_FRAMES,
-            //     2,
-            //     MAX_CHANNEL_COUNT
-            // );
-            console.log(this.module)
-            // this._processPerf = new Module.ProcessorPerf();
-
         }
-
-        async loadModule() {
-            const response = await fetch("./public/src/js/worklet/CompiledProcessorModule.wasm");
-            this.module = await WebAssembly.compileStreaming(response);
-            const instance = await WebAssembly.instantiate(this.module);
-            // const result = instance.exports.fibonacci(42);
-            // console.log(result);
-            this._processPerf = new instance.exports.ProcessorPerf();
-        }
-
-
 
         /** @type {AudioParamDescriptor[]} */
         static get parameterDescriptors() {

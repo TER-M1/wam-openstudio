@@ -94,6 +94,14 @@ export default class AudioTrack {
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
+        await this.loadModule();
+    }
+
+    async loadModule() {
+        const response = await fetch("./public/src/js/worklet/CompiledProcessorModule.wasm");
+        this.module = await WebAssembly.compileStreaming(response);
+        const instance = await WebAssembly.instantiate(this.module);
+        this.audioWorkletNode.port.postMessage({instance: instance});
     }
 
     mute() {
