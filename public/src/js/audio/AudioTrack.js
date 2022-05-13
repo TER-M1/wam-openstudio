@@ -95,7 +95,7 @@ export default class AudioTrack {
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
 
-        this.audioWorkletNode.port.postMessage({mod: mainAudio.moduleWasm });
+        this.audioWorkletNode.port.postMessage({mod: mainAudio.moduleWasm }); // N'ARRIVE JAMAIS A DESTINATION WTF
 
         // WebAssembly.instantiate(mainAudio.moduleWasm,{module: {}, env: {}})
         //     .then(instance => {

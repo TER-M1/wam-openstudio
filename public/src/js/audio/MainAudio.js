@@ -61,6 +61,7 @@ export default class MainAudio {
                 //     .then(instance => {
                 //         console.log(instance);
                 //         console.log(instance.exports.bite())
+                //         console.log(instance.exports.stackAlloc(150)) // Il faudra remplacer les malloc de l'HeapAudioBuffer par stackAlloc
                 //         this.instanceWasm = instance;
                 //     })
             });
