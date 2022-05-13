@@ -20,9 +20,16 @@ extern "C" {
             {
                 float *destination = output_buffer + (channel * kRenderQuantumFrames);
                 float *source = input_buffer + (channel * kRenderQuantumFrames);
-                memcpy(destination, source, kBytesPerChannel);
+
+                for(int i = 0; i < kBytesPerChannel; i++) {
+                    *(destination + i) = *(source + i);
+                }
             }
         }
+
+    int bite() {
+        return 5;
+    }
 
 }
 // EMSCRIPTEN_BINDINGS(my_module) {

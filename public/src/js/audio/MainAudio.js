@@ -1,6 +1,6 @@
 import {canvasClickMoveCursor} from "../track-utils/PlayHead.js";
 import {drawBuffer} from "../track-utils/DrawBuffer.js";
-import {initWam} from "./Utils.js";
+import {initWam, mainAudio} from "./Utils.js";
 
 
 export default class MainAudio {
@@ -42,21 +42,28 @@ export default class MainAudio {
         const {hostGroupId} = await initWam()
         this.hostGroupId = hostGroupId;
 
+        const importObject = {
+            module: {},
+            env: {
+
+            }
+        }
+
         WebAssembly.compileStreaming(fetch("./src/js/worklet/CompiledProcessorModule.wasm"))
             .then(module => {
                 let imports = WebAssembly.Module.imports(module);
                 let exports = WebAssembly.Module.exports(module);
                 console.table(imports);
                 console.table(exports);
-
                 this.moduleWasm = module;
-            });
-        // const instance = WebAssembly.instantiate(module, {env: {}})
-        // this.moduleWasm = module;
-        // this.instanceWasm = instance;
 
-        console.log(module)
-        console.log(instance)
+                // WebAssembly.instantiate(module, importObject)
+                //     .then(instance => {
+                //         console.log(instance);
+                //         console.log(instance.exports.bite())
+                //         this.instanceWasm = instance;
+                //     })
+            });
     }
 
 
@@ -117,6 +124,7 @@ export default class MainAudio {
         return new Promise(async (resolve, reject) => {
             try {
                 await track.load();
+
                 this.maxGlobalTimer = Math.max(track.duration, this.maxGlobalTimer)
                 track.gainOutNode.connect(this.masterVolumeNode);
                 this.tracks.push(track);

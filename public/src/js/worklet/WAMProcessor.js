@@ -1,7 +1,8 @@
 // import Module from "./CompiledProcessorModule.js";
-import {RENDER_QUANTUM_FRAMES,} from "../../../lib/wasm-audio-helper.js";
 
 // const sampleRate = 48000;
+
+import {HeapAudioBuffer} from "../../../lib/wasm-audio-helper.js";
 
 const getProcessor = (moduleId) => {
     /** @type {AudioWorkletGlobalScope} */
@@ -31,6 +32,7 @@ const getProcessor = (moduleId) => {
             /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number;}>} e */
 
             this.port.onmessage = (e) => {
+                console.log(e);
                 if (e.data.audio) {
                     this.audio = e.data.audio;
                 } else if (e.data.position && typeof e.data.position === "number") {
@@ -46,20 +48,22 @@ const getProcessor = (moduleId) => {
                         this.loopEnding = this.audio[0].length;
                     else
                         this.loopEnding = e.data.loopEnding;
-                } else if (e.data.instance) {
+                } else if (e.data.mod) {
+                    console.log("recu")
+                    console.log(e.data.mod)
                     this.instance = e.data.instance;
-                    this._processPerf = new this.instance.exports.ProcessorPerf();
+                    this._processPerf = new this.instance.processPerf;
                     this._heapInputBuffer = new HeapAudioBuffer(
-                        this.module,
-                        RENDER_QUANTUM_FRAMES,
+                        this.instance,
+                        128,
                         2,
-                        MAX_CHANNEL_COUNT
+                        32
                     );
                     this._heapOutputBuffer = new HeapAudioBuffer(
-                        this.module,
-                        RENDER_QUANTUM_FRAMES,
+                        this.instance,
+                        128,
                         2,
-                        MAX_CHANNEL_COUNT
+                        32
                     );
                 }
             };

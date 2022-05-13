@@ -94,7 +94,33 @@ export default class AudioTrack {
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
-        this.audioWorkletNode.port.postMessage({instance: mainAudio.instanceWasm });
+
+        this.audioWorkletNode.port.postMessage({mod: mainAudio.moduleWasm });
+
+        // WebAssembly.instantiate(mainAudio.moduleWasm,{module: {}, env: {}})
+        //     .then(instance => {
+        //         console.log(instance);
+        //         console.log(instance.exports.bite())
+        //         console.log(instance.exports.stackAlloc(150)) // Il faudra remplacer les malloc de l'HeapAudioBuffer par stackAlloc
+        //         this.audioWorkletNode.port.postMessage({instance: instance });
+        //     })
+
+        // WebAssembly.compileStreaming(fetch("./src/js/worklet/CompiledProcessorModule.wasm"))
+        //     .then(module => {
+        //         let imports = WebAssembly.Module.imports(module);
+        //         let exports = WebAssembly.Module.exports(module);
+        //         console.table(imports);
+        //         console.table(exports);
+        //         this.audioWorkletNode.port.postMessage({mod: module});
+        //
+        //         // WebAssembly.instantiate(module, importObject)
+        //         //     .then(instance => {
+        //         //         console.log(instance);
+        //         //         console.log(instance.exports.bite())
+        //         //         this.instanceWasm = instance;
+        //         //     })
+        //     });
+
     }
 
     mute() {
