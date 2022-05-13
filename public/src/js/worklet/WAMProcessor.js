@@ -29,7 +29,7 @@ const getProcessor = (moduleId) => {
             this.loopEnding = 0;
 
             /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number;}>} e */
-            // this.loadModule();
+
             this.port.onmessage = (e) => {
                 if (e.data.audio) {
                     this.audio = e.data.audio;
@@ -123,9 +123,9 @@ const getProcessor = (moduleId) => {
             this._heapOutputBuffer.adaptChannel(channelCount);
 
             // Copy-in the current block
-            // for (let channel = 0; channel < channelCount; ++channel) {
-            //     this._heapInputBuffer.getChannelData(channel).set(input[channel]);
-            // }
+            for (let channel = 0; channel < channelCount; ++channel) {
+                this._heapInputBuffer.getChannelData(channel).set(input[channel]);
+            }
             // Copy-in, process and copy-out.
             for (let i = 0; i < bufferSize; i++) {
                 const playing = !!(i < parameters.playing.length
@@ -144,17 +144,17 @@ const getProcessor = (moduleId) => {
                 }
 
                 // Process the block
-                // this._processPerf.processPerf(
-                //     this._heapInputBuffer.getHeapAddress(),
-                //     this._heapOutputBuffer.getHeapAddress(),
-                //     channelCount
-                // );
-                // // Copy-out the current block
-                // for (let channel = 0; channel < channelCountMin; ++channel) {
-                //     output[channel].set(
-                //         this._heapOutputBuffer.getChannelData(channel)
-                //     );
-                // }
+                this._processPerf.processPerf(
+                    this._heapInputBuffer.getHeapAddress(),
+                    this._heapOutputBuffer.getHeapAddress(),
+                    channelCount
+                );
+                // Copy-out the current block
+                for (let channel = 0; channel < channelCountMin; ++channel) {
+                    output[channel].set(
+                        this._heapOutputBuffer.getChannelData(channel)
+                    );
+                }
                 this.playhead++;
             }
             this.port.postMessage({playhead: this.playhead});

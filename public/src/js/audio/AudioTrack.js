@@ -98,7 +98,7 @@ export default class AudioTrack {
     }
 
     async loadModule() {
-        const response = await fetch("./public/src/js/worklet/CompiledProcessorModule.wasm");
+        const response = await fetch("./src/js/worklet/CompiledProcessorModule.wasm");
         this.module = await WebAssembly.compileStreaming(response);
         const instance = await WebAssembly.instantiate(this.module);
         this.audioWorkletNode.port.postMessage({instance: instance});
