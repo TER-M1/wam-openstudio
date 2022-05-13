@@ -6,12 +6,12 @@ CC = emcc
 
 EM_ES6_PATH = ./public/lib/em-es6-module.js
 
-FLAGS = --bind -O1 \
-	  -s WASM=1 \
-		-s BINARYEN_ASYNC_COMPILATION=0 \
-		-s SINGLE_FILE=1 \
-		-o $(OUTPUT_JS) $(DEPS) \
-		--post-js $(EM_ES6_PATH)
+FLAGS = -lembind \
+	-s WASM=1 \
+    -s BINARYEN_ASYNC_COMPILATION=0 \
+    -s EXPORTED_FUNCTIONS=_processPerf \
+    -s EXPORTED_RUNTIME_METHODS=ccall,cwrap \
+    -o $(OUTPUT_JS) $(DEPS) \
 
 build: $(DEPS)
 	@$(CC) $(FLAGS)

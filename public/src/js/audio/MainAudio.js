@@ -35,13 +35,28 @@ export default class MainAudio {
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
 
-
     }
 
 
     async loadWam(){
         const {hostGroupId} = await initWam()
         this.hostGroupId = hostGroupId;
+
+        WebAssembly.compileStreaming(fetch("./src/js/worklet/CompiledProcessorModule.wasm"))
+            .then(module => {
+                let imports = WebAssembly.Module.imports(module);
+                let exports = WebAssembly.Module.exports(module);
+                console.table(imports);
+                console.table(exports);
+
+                this.moduleWasm = module;
+            });
+        // const instance = WebAssembly.instantiate(module, {env: {}})
+        // this.moduleWasm = module;
+        // this.instanceWasm = instance;
+
+        console.log(module)
+        console.log(instance)
     }
 
 
