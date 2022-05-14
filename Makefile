@@ -6,8 +6,10 @@ CC = emcc
 
 EM_ES6_PATH = ./public/lib/em-es6-module.js
 
-FLAGS = -s WASM=1 \
-    -s EXPORTED_FUNCTIONS=_bite,_processPerf \
+FLAGS = \
+    -s WASM=1 \
+    -s EXPORTED_FUNCTIONS=_processPerf \
+    -s ALLOW_MEMORY_GROWTH=1 \
     -o $(OUTPUT_JS) $(DEPS) \
 
 build: $(DEPS)

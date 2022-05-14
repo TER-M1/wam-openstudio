@@ -2,7 +2,6 @@ import {canvasClickMoveCursor} from "../track-utils/PlayHead.js";
 import {drawBuffer} from "../track-utils/DrawBuffer.js";
 import {initWam, mainAudio} from "./Utils.js";
 
-
 export default class MainAudio {
     /**
      *
@@ -34,7 +33,6 @@ export default class MainAudio {
         this.masterVolumeNode = audioCtx.createGain();
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
-
     }
 
 
@@ -42,28 +40,9 @@ export default class MainAudio {
         const {hostGroupId} = await initWam()
         this.hostGroupId = hostGroupId;
 
-        const importObject = {
-            module: {},
-            env: {
-
-            }
-        }
-
         WebAssembly.compileStreaming(fetch("./src/js/worklet/CompiledProcessorModule.wasm"))
             .then(module => {
-                let imports = WebAssembly.Module.imports(module);
-                let exports = WebAssembly.Module.exports(module);
-                console.table(imports);
-                console.table(exports);
                 this.moduleWasm = module;
-
-                // WebAssembly.instantiate(module, importObject)
-                //     .then(instance => {
-                //         console.log(instance);
-                //         console.log(instance.exports.bite())
-                //         console.log(instance.exports.stackAlloc(150)) // Il faudra remplacer les malloc de l'HeapAudioBuffer par stackAlloc
-                //         this.instanceWasm = instance;
-                //     })
             });
     }
 

@@ -1,6 +1,5 @@
 import OperableAudioBuffer from "./OperableAudioBuffer.js";
 import {audioCtx, mainAudio} from "./Utils.js";
-import {HeapAudioBuffer} from "../../../lib/wasm-audio-helper.js";
 
 export default class AudioTrack {
     /**
@@ -95,12 +94,6 @@ export default class AudioTrack {
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
-
-        let hab = new HeapAudioBuffer();
-        console.log("hab avant envoi : ")
-        console.log(hab)
-        this.audioWorkletNode.port.postMessage({input: hab});
-        this.audioWorkletNode.port.postMessage({mod: mainAudio.moduleWasm }); // N'ARRIVE JAMAIS A DESTINATION WTF
 
         // WebAssembly.instantiate(mainAudio.moduleWasm,{module: {}, env: {}})
         //     .then(instance => {

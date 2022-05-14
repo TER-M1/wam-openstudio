@@ -29,8 +29,7 @@ export default class WAMAudioWorkletNode extends WamNode {
         //     // useSab: true,
         // };
         super(module, options);
-        console.log("worklet constructor")
-        console.log(options);
+
         this.port.onmessage = (e) => {
             if (e.data.playhead) {
                 this._playhead = e.data.playhead;
