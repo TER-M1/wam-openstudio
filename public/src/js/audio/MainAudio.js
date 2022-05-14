@@ -40,7 +40,7 @@ export default class MainAudio {
         const {hostGroupId} = await initWam()
         this.hostGroupId = hostGroupId;
 
-        WebAssembly.compileStreaming(fetch("./src/js/worklet/CompiledProcessorModule.wasm"))
+        WebAssembly.compileStreaming(fetch("./src/js/worklet/ProcessWasm.wasm"))
             .then(module => {
                 this.moduleWasm = module;
             });

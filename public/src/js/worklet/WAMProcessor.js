@@ -17,8 +17,7 @@ const getProcessor = (moduleId) => {
 
 // WebAudio's render quantum size.
     const RENDER_QUANTUM_FRAMES = 128;
-
-
+    
     /**
      * A WASM HEAP wrapper for AudioBuffer class. This breaks down the AudioBuffer
      * into an Array of Float32Array for the convinient WASM opearion.
@@ -177,11 +176,51 @@ const getProcessor = (moduleId) => {
             /** @type {number} */
             this.loopEnding = 0;
 
-            /** @param {MessageEvent<{ audio?: Float32Array[]; position?: number;}>} e */
-
             this.setupMessages();
+            this.setupWasm(options);
+        }
 
-            WebAssembly.instantiate(options.processorOptions.moduleWasm,{module: {}, env: {}})
+        setupWasm(options) {
+            const memory = new WebAssembly.Memory({
+                initial: 256,
+                maximum: 512
+            });
+
+            const heap = new Float32Array(memory.buffer);
+
+            const imports = {
+                env: {
+                    memory: memory,
+                    DYNAMICTOP_PTR: 4096,
+                    abort: function(err) {
+                        throw new Error('abort ' + err);
+                    },
+                    abortOnCannotGrowMemory: function(err) {
+                        throw new Error('abortOnCannotGrowMemory ' + err);
+                    },
+                    ___cxa_throw: function(ptr, type, destructor) {
+                        console.error('cxa_throw: throwing an exception, ' + [ptr,type,destructor]);
+                    },
+                    ___cxa_allocate_exception: function(size) {
+                        console.error('cxa_allocate_exception' + size);
+                        return false; // always fail
+                    },
+                    ___setErrNo: function(err) {
+                        throw new Error('ErrNo ' + err);
+                    },
+                    _emscripten_get_heap_size: function() {
+                        return heap.length;
+                    },
+                    _emscripten_resize_heap: function(size) {
+                        return false; // always fail
+                    },
+                    _emscripten_memcpy_big: function(dest, src, count) {
+                        heap.set(heap.subarray(src, src + count), dest);
+                    }
+                }
+            };
+
+            WebAssembly.instantiate(options.processorOptions.moduleWasm,imports)
                 .then(instance => {
                     console.log(instance);
 
@@ -252,78 +291,6 @@ const getProcessor = (moduleId) => {
             }
         }
 
-        // process(startSample, endSample, inputs, outputs, parameters) {
-        //     console.log("process method");
-        //     // If no audio detected skip then process
-        //     if (!this.audio) return true;
-        //
-        //     // Prepare the input array
-        //     let input = [];
-        //     let output = outputs[0];
-        //     let channelCount = this.audio.length;
-        //     const channelCountMin = Math.min(this.audio.length, output.length);
-        //
-        //     // Slice the global audio with a RENDER_QUANTUM_FRAMES
-        //     // to send the input to output by block of 128
-        //     for (let i = 0; i < channelCount; i++) {
-        //         input.push(
-        //             this.audio[i].slice(
-        //                 this.playhead - RENDER_QUANTUM_FRAMES,
-        //                 this.playhead
-        //             )
-        //         );
-        //     }
-        //
-        //     const bufferSize = outputs[0][0].length;
-        //     const audioLength = this.audio[0].length;
-        //
-        //     // For this given render quantum, the channel count of the node is fixed
-        //     // and identical for the input and the output.
-        //
-        //     // Prepare HeapAudioBuffer for the channel count change in the current
-        //     // render quantum.
-        //     this._heapInputBuffer.adaptChannel(channelCount);
-        //     this._heapOutputBuffer.adaptChannel(channelCount);
-        //
-        //     // Copy-in the current block
-        //     for (let channel = 0; channel < channelCount; ++channel) {
-        //         this._heapInputBuffer.getChannelData(channel).set(input[channel]);
-        //     }
-        //     // Copy-in, process and copy-out.
-        //     for (let i = 0; i < bufferSize; i++) {
-        //         const playing = !!(i < parameters.playing.length
-        //             ? parameters.playing[i]
-        //             : parameters.playing[0]);
-        //         const loop = !!(i < parameters.loop.length
-        //             ? parameters.loop[i]
-        //             : parameters.loop[0]);
-        //         if (!playing) continue; // Not playing
-        //         if (this.playhead >= this.loopEnding || this.playhead < this.loopBeggining) {
-        //             // Play was finished
-        //             if (loop) {
-        //                 // console.log("actual beggining : " + this.loopBeggining)
-        //                 this.playhead = this.loopBeggining; // Loop just enabled, reset playhead
-        //             } else continue; // EOF without loop
-        //         }
-        //
-        //         // Process the block
-        //         this._processPerf.processPerf(
-        //             this._heapInputBuffer.getHeapAddress(),
-        //             this._heapOutputBuffer.getHeapAddress(),
-        //             channelCount
-        //         );
-        //         // Copy-out the current block
-        //         for (let channel = 0; channel < channelCountMin; ++channel) {
-        //             output[channel].set(
-        //                 this._heapOutputBuffer.getChannelData(channel)
-        //             );
-        //         }
-        //         this.playhead++;
-        //     }
-        //     this.port.postMessage({playhead: this.playhead});
-        //     return true;
-        // }
-
         /**
          * @param {Float32Array[][]} inputs
          * @param {Float32Array[][]} outputs
@@ -361,14 +328,10 @@ const getProcessor = (moduleId) => {
             this._heapInputBuffer.adaptChannel(channelCount);
             this._heapOutputBuffer.adaptChannel(channelCount);
 
-            console.log("input");
-            console.log(input);
             // Copy-in the current block
             for (let channel = 0; channel < channelCount; ++channel) {
                 this._heapInputBuffer.getChannelData(channel).set(input[channel]);
             }
-            console.log("heap input");
-            console.log(this._heapInputBuffer);
 
             // Copy-in, process and copy-out.
             for (let i = 0; i < bufferSize; i++) {
@@ -398,26 +361,17 @@ const getProcessor = (moduleId) => {
                     channelCount
                 );
 
-                console.log("heap output");
-                console.log(this._heapOutputBuffer);
                 // Copy-out the current block
                 for (let channel = 0; channel < channelCountMin; ++channel) {
                     output[channel].set(
                         this._heapOutputBuffer.getChannelData(channel)
                     );
                 }
-                console.log("output");
-                console.log(output);
 
-
-                // output.forEach(channel => {
-                //     for (let i = 0; i < channel.length; i++) {
-                //         channel[i] = Math.random() * 2 - 1
-                //     }
-                // })
                 this.playhead++;
             }
             this.port.postMessage({playhead: this.playhead});
+
             return true;
         }
     }

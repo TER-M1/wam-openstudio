@@ -12,15 +12,11 @@ extern "C" {
         float *input_buffer = reinterpret_cast<float *>(input_ptr);
         float *output_buffer = reinterpret_cast<float *>(output_ptr);
 
-//         emscripten_run_script("console.log('processCPP')");
         for (unsigned channel = 0; channel < channel_count; ++channel)
         {
             float *destination = output_buffer + (channel * kRenderQuantumFrames);
             float *source = input_buffer + (channel * kRenderQuantumFrames);
-
-            for(int i = 0; i < kBytesPerChannel; i++) {
-                destination[i] = source[i];
-            }
+            memcpy(destination, source, kBytesPerChannel);
         }
 
         return 1;
