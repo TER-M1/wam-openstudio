@@ -1,5 +1,4 @@
 import MainAudio from "../audio/MainAudio.js";
-// import {initializeWamHost} from "../../../lib/sdk";
 
 export const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 export const mainAudio = new MainAudio(audioCtx);

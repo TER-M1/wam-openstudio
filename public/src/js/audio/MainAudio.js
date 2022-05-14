@@ -1,6 +1,6 @@
 import {canvasClickMoveCursor} from "../track-utils/PlayHead.js";
 import {drawBuffer} from "../track-utils/DrawBuffer.js";
-import {initWam, mainAudio} from "./Utils.js";
+import {initWam} from "./Utils.js";
 
 export default class MainAudio {
     /**
