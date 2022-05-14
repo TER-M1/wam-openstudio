@@ -21,14 +21,16 @@ export default class WAMAudioWorkletNode extends WamNode {
      * @param {AudioWorkletNodeOptions} options
      */
     constructor(module, options) {
-        // super(context, "wam-processor");
-        options.processorOptions = {
-            numberOfInputs: 1,
-            numberOfOutputs: 1,
-            outputChannelCount: [2],
-            // useSab: true,
-        };
+        // // super(context, "wam-processor");
+        // options.processorOptions = {
+        //     numberOfInputs: 1,
+        //     numberOfOutputs: 1,
+        //     outputChannelCount: [2],
+        //     // useSab: true,
+        // };
         super(module, options);
+        console.log("worklet constructor")
+        console.log(options);
         this.port.onmessage = (e) => {
             if (e.data.playhead) {
                 this._playhead = e.data.playhead;

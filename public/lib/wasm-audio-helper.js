@@ -39,7 +39,11 @@ class HeapAudioBuffer {
    * @param  {number} channelCount Number of channels.
    * @param  {number=} maxChannelCount Maximum number of channels.
    */
-  constructor(wasmModule, length, channelCount, maxChannelCount) {
+  constructor() {
+    this.init = false;
+  }
+
+  init(wasmModule, length, channelCount, maxChannelCount) {
     // The |channelCount| must be greater than 0, and less than or equal to
     // the maximum channel count.
     this._isInitialized = false;
@@ -49,6 +53,7 @@ class HeapAudioBuffer {
         ? Math.min(maxChannelCount, MAX_CHANNEL_COUNT)
         : channelCount;
     this._channelCount = channelCount;
+    console.log("constructeur buffer");
     this._allocateHeap();
     this._isInitialized = true;
   }
@@ -61,7 +66,7 @@ class HeapAudioBuffer {
    */
   _allocateHeap() {
     const dataByteSize = this._channelCount * this._length * BYTES_PER_SAMPLE;
-    this._dataPtr = this._module._malloc(dataByteSize);
+    this._dataPtr = this._module.stackAlloc(dataByteSize);
     this._channelData = [];
     for (let i = 0; i < this._channelCount; ++i) {
       // convert pointer to HEAPF32 index
@@ -152,8 +157,8 @@ class HeapAudioBuffer {
    */
   free() {
     this._isInitialized = false;
-    this._module._free(this._dataPtr);
-    this._module._free(this._pointerArrayPtr);
+    this._module.stackFree(this._dataPtr);
+    this._module.stackFree(this._pointerArrayPtr);
     this._channelData = null;
   }
 } // class HeapAudioBuffer
