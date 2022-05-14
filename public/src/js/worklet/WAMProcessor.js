@@ -361,10 +361,15 @@ const getProcessor = (moduleId) => {
             this._heapInputBuffer.adaptChannel(channelCount);
             this._heapOutputBuffer.adaptChannel(channelCount);
 
+            console.log("input");
+            console.log(input);
             // Copy-in the current block
             for (let channel = 0; channel < channelCount; ++channel) {
                 this._heapInputBuffer.getChannelData(channel).set(input[channel]);
             }
+            console.log("heap input");
+            console.log(this._heapInputBuffer);
+
             // Copy-in, process and copy-out.
             for (let i = 0; i < bufferSize; i++) {
                 const playing = !!(i < parameters.playing.length
@@ -392,12 +397,19 @@ const getProcessor = (moduleId) => {
                     this._heapOutputBuffer.getHeapAddress(),
                     channelCount
                 );
+
+                console.log("heap output");
+                console.log(this._heapOutputBuffer);
                 // Copy-out the current block
                 for (let channel = 0; channel < channelCountMin; ++channel) {
                     output[channel].set(
                         this._heapOutputBuffer.getChannelData(channel)
                     );
                 }
+                console.log("output");
+                console.log(output);
+
+
                 // output.forEach(channel => {
                 //     for (let i = 0; i < channel.length; i++) {
                 //         channel[i] = Math.random() * 2 - 1
