@@ -31,7 +31,6 @@ customElements.define(
 
 (async () => {
     await mainAudio.loadWam();
-    console.log(mainAudio.hostGroupId)
     btnStart.hidden = false;
     /*
     PROCESSOR INITIALIZATION

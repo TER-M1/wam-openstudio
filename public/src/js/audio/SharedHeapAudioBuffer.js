@@ -1,5 +1,4 @@
 const getHeapAudioBuffer = () => {
-
     class HeapAudioBuffer {
         /**
          * @constructor
@@ -126,8 +125,6 @@ const getHeapAudioBuffer = () => {
             this._channelData = null;
         }
     } // class HeapAudioBuffer
-
     return HeapAudioBuffer;
 }
-
 export default getHeapAudioBuffer;
