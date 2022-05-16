@@ -1,6 +1,6 @@
 import {canvasClickMoveCursor} from "../track-utils/PlayHead.js";
 import {drawBuffer} from "../track-utils/DrawBuffer.js";
-
+import {initWam} from "./Utils.js";
 
 export default class MainAudio {
     /**
@@ -33,8 +33,19 @@ export default class MainAudio {
         this.masterVolumeNode = audioCtx.createGain();
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
-
     }
+
+
+    async loadWam(){
+        const {hostGroupId} = await initWam()
+        this.hostGroupId = hostGroupId;
+
+        WebAssembly.compileStreaming(fetch("./src/js/worklet/ProcessWasm.wasm"))
+            .then(module => {
+                this.moduleWasm = module;
+            });
+    }
+
 
     /**
      *
@@ -93,6 +104,7 @@ export default class MainAudio {
         return new Promise(async (resolve, reject) => {
             try {
                 await track.load();
+
                 this.maxGlobalTimer = Math.max(track.duration, this.maxGlobalTimer)
                 track.gainOutNode.connect(this.masterVolumeNode);
                 this.tracks.push(track);

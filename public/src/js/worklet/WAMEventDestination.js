@@ -1,0 +1,31 @@
+import {mainAudio} from "../audio/Utils.js";
+import {WebAudioModule} from "../../../lib/sdk/index.js";
+import WAMAudioWorkletNode from "./WAMAudioWorkletNode.js";
+//@ts-check
+
+export default class WamEventDestination extends WebAudioModule {
+    async createAudioNode(initialState) {
+        console.log(this.moduleId)
+        await WAMAudioWorkletNode.addModules(this.moduleId)
+        // await addFunctionModule(audioCtx.audioWorklet, getProcessor, this.moduleId);
+
+
+        const node = new WAMAudioWorkletNode(
+            this,
+            {
+                processorOptions: {
+                    moduleWasm: mainAudio.moduleWasm,
+                    numberOfInputs: 1,
+                    numberOfOutputs: 1,
+                    outputChannelCount: [2],
+                }
+            });
+
+        return node;
+    }
+
+    async createGui() {
+        const root = document.createElement('div');
+        return root;
+    }
+}

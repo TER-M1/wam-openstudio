@@ -30,11 +30,13 @@ customElements.define(
 
 
 (async () => {
+    await mainAudio.loadWam();
     btnStart.hidden = false;
     /*
     PROCESSOR INITIALIZATION
      */
-    await audioCtx.audioWorklet.addModule("./src/js/worklet/Processor.js");
+    let ini
+    // await audioCtx.audioWorklet.addModule("./src/js/worklet/WAMProcessor.js");
     /*
     INITIALIZATION PAGES ELEMENTS
      */
