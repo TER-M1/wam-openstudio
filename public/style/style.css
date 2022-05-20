@@ -1,6 +1,5 @@
 body, html {
     background-color: black;
-    overflow: unset;
 }
 
 .music-app {
@@ -10,6 +9,7 @@ body, html {
     flex-wrap: nowrap;
     height: 100%;
     background-color: #1C1E21;
+    overflow: hidden;
 }
 
 .track-editor {
@@ -195,17 +195,14 @@ body, html {
 }
 
 .plugin-rack {
-    padding-top: 6em;
-    height: 100%;
+    padding-top: 30px;
+    /*height: 100%;*/
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
 }
 
-#mount1 {
-    max-height: 330px !important;
-}
 
 .timer {
     font-weight: bold;
@@ -270,6 +267,4 @@ i.icon {
    /*background-color: grey;*/
    /* border-color: grey;*/
     border: 1px solid lightgrey;
-
-
 }
