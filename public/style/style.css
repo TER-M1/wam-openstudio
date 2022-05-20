@@ -1,5 +1,6 @@
 body, html {
     background-color: black;
+    overflow: unset;
 }
 
 .music-app {
@@ -200,6 +201,10 @@ body, html {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+}
+
+#mount1 {
+    max-height: 330px !important;
 }
 
 .timer {
