@@ -83,6 +83,8 @@ export default class AudioTrack {
         this.pluginInstance = instance;
         this.pluginDOM = await instance.createGui();
 
+        console.log(this.pluginInstance)
+
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
         this.decodedAudioBuffer = await this.audioCtx.decodeAudioData(audioArrayBuffer);
@@ -94,6 +96,7 @@ export default class AudioTrack {
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
+        this.audioWorkletNode.port.postMessage({plugin: this.pluginInstance._groupId})
     }
 
     mute() {

@@ -322,6 +322,7 @@ class BPF extends HTMLElement {
         });
         for (let t = 0; t < this.domain; t += 0.01) {
             const value = this.getYfromX(t);
+
             wamNode.scheduleEvents({type: 'wam-automation', data: {id: wamParamId, value}, time: currentTime + t});
         }
     }

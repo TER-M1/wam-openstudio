@@ -89,7 +89,8 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
             class: `item dropItem${values.length}`
         });
 
-
+        console.log("wam node : ")
+        track.audioWorkletNode.port.postMessage({pluginInstance: wamNode.module.groupId})
     }
 
 
@@ -105,6 +106,7 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         const {minValue, maxValue, label} = info[param];
         item.onclick = () => {
             const bpf = document.createElement('webaudiomodules-host-bpf');
+            track.bpf = bpf;
             bpf.className = param;
             bpf.setAttribute('min', minValue);
             bpf.setAttribute('max', maxValue);
