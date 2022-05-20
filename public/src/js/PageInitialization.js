@@ -25,7 +25,7 @@ export function activateMainVolume(mainAudio, val) {
 }
 
 export function exploreTracks() {
-    fetch('http://localhost:80/track')
+    fetch('http://localhost:5002/track')
         .then(res => res.json())
         .then((output) => {
             let values = output.tracks
@@ -49,7 +49,7 @@ function attachControl(values) {
         let el = document.querySelector('.item.multitrack-item' + value.value);
         el.addEventListener('click', () => {
             let asyncAddTrack = [];
-            fetch('http://localhost:80/track/' + value.value)
+            fetch('http://localhost:5002/track/' + value.value)
                 .then(res => res.json())
                 .then(async (output) => {
                     let soundList = output.soundList;
@@ -57,6 +57,7 @@ function attachControl(values) {
                         let path = `${output.path}/${soundList[i].name}`;
                         let WAM = await WamEventDestination.createInstance(mainAudio.hostGroupId,audioCtx);
                         let node = WAM.audioNode;
+
 
                         asyncAddTrack.push(mainAudio.addTrack(
                             new AudioTrack(audioCtx, node, path)

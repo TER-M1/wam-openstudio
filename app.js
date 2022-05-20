@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const PORT = 80;
+const PORT = 5002;
 const TRACK_PATH = './public/song/multitrack';
 const LOCAL_TRACK_PATH = './song/multitrack';
 
@@ -20,7 +20,7 @@ app.use(function (req, res, next) {
 });
 
 
-app.listen(PORT, () => console.log("Server is started and listening on port 80."));
+app.listen(PORT, () => console.log(`Server is started and listening on port ${PORT}.`));
 
 /*
 ROUTING
