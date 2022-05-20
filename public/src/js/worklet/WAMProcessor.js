@@ -134,16 +134,15 @@ const getProcessor = (moduleId) => {
                         this.loopEnding = this.audio[0].length;
                     else
                         this.loopEnding = e.data.loopEnding;
-                } else if (e.data.mod) {
-                    /**
-                     * IL FAUT RECEVOIR LE MODULE, ET FAIRE LE WEBASSEMBLY.INSTIANTIATE ICI
-                     * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
-                     */
+                } else if (e.data.node) {
+                    this.audioNode = e.data.node;
+                    console.log(this.audioNode);
                 } else if (e.data.input) {
 
                 }
             }
         }
+
 
         /**
          * @param {Float32Array[][]} inputs

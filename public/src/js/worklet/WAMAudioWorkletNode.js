@@ -50,4 +50,12 @@ export default class WAMAudioWorkletNode extends WamNode {
     setAudio(audio) {
         this.port.postMessage({audio});
     }
+
+    /**
+     *
+     * @param {WAMAudioWorkletNode} node
+     */
+    setNode(node) {
+        this.port.postMessage({node});
+    }
 }

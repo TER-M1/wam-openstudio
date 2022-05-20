@@ -1,0 +1,10 @@
+version: "3.5"
+
+services:
+  wam-daw:
+    image: wam-openstudio
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    build: .
+    command: node app.js
