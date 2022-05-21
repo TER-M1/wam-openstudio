@@ -1,14 +1,29 @@
 import {populateParamSelector} from "../automation/PluginParameters.js";
 
+/**
+ * This function helps to attach the DOM of the plugin to the web page
+ * @param mount
+ * @param domModel
+ */
 const mountPlugin = (mount, domModel) => {
     mount.innerHTML = '';
     mount.appendChild(domModel);
 };
-
+/**
+ * this function clear the proper mounting div by removing the html of the plugin in the webpage
+ * @param mount
+ */
 const uMountPlugin = (mount) => {
     mount.innerHTML = '';
 }
 
+
+/**
+ * this function calls a filler for the dropdown to update the available parameter of the plugin
+ * @param track
+ * @param mount
+ * @param pluginParamSelector
+ */
 function populateDropDown(track, mount, pluginParamSelector) {
     populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
 }
@@ -16,6 +31,8 @@ function populateDropDown(track, mount, pluginParamSelector) {
 
 export default class TrackSelector {
     /**
+     * this class is the handler for clicks on the track, it registers
+     * the given track and mount the associated plugin into the webpage
      *
      * @type {AudioTrack}
      */
@@ -55,7 +72,9 @@ export default class TrackSelector {
         this.defineHandler();
     }
 
-
+    /**
+     * this method is the definition of the clicks handler for each canvas
+     */
     handlersCanvas() {
         let elems = [];
         this.tracksId.forEach((id) => {
@@ -85,6 +104,11 @@ export default class TrackSelector {
         // console.log(elems)
     }
 
+    /**
+     *
+     * @param id
+     * @returns {AudioTrack}
+     */
     getTrack(id) {
         let track = undefined;
         this.tracks.forEach((t) => {

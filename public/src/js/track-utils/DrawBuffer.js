@@ -1,5 +1,5 @@
 /**
- *
+ * Utilitary function to draw a waveFrom into a canvas with an audio Buffer
  * @param{HTMLCanvasElement} canvas
  * @param{AudioBuffer} buffer
  * @param{String} color
