@@ -15,14 +15,13 @@ main {
   color: var(--text-color, white);
   font-family: "helvetica", sans-serif, cursive;
   height: 280px;
-  /*height: auto;*/
   border: 1px solid var(--border-color, #31353A);
   border-radius: 0.25rem;
 }
 
 img {
-  /*max-width: 100%;*/
-  /*max-height: 300px;*/
+  max-width: 100%;
+  max-height: 8rem;
 }
 
 #board {

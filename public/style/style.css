@@ -23,11 +23,11 @@ body, html {
 }
 
 .plugin-editor {
-    /*margin-top: 28px;*/
     height: 33%;
     background: #1C1E21;
     border: 1px solid black;
     border-top: none;
+    overflow-y: auto;
     z-index: 2;
 }
 
@@ -196,13 +196,16 @@ body, html {
 
 .plugin-rack {
     padding-top: 30px;
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*flex-wrap: nowrap;*/
+    /*align-items: center;*/
     /*height: 100%;*/
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
 }
 
+#mount1 {
+    width: 100%;
+}
 
 .timer {
     font-weight: bold;
