@@ -1,4 +1,8 @@
-export default class WAMAudioWorkletNode extends AudioWorkletNode {
+import {addFunctionModule, WamNode} from "../../../lib/sdk/index.js";
+import getProcessor from "./WAMProcessor.js";
+import {audioCtx} from "../audio/Utils.js";
+
+export default class WAMAudioWorkletNode extends WamNode {
     /**
      *
      * @type {number}
@@ -6,16 +10,25 @@ export default class WAMAudioWorkletNode extends AudioWorkletNode {
      */
     _playhead = 0;
 
+    static async addModules(moduleId) {
+        const { audioWorklet } = audioCtx;
+        await super.addModules(audioCtx, moduleId);
+        await addFunctionModule(audioWorklet, getProcessor, moduleId);
+    }
+
     /**
-     * @param {BaseAudioContext} context
+     * @param {WebAudioModule<WAMAudioWorkletNode>} module
+     * @param {AudioWorkletNodeOptions} options
      */
-    constructor(context) {
-        super(context, "wam-processor");
+    constructor(module, options) {
+        super(module, options);
+
         this.port.onmessage = (e) => {
             if (e.data.playhead) {
                 this._playhead = e.data.playhead;
             }
         }
+        this._supportedEventTypes = new Set(['wam-automation']);
     }
 
     /**
@@ -36,5 +49,13 @@ export default class WAMAudioWorkletNode extends AudioWorkletNode {
      */
     setAudio(audio) {
         this.port.postMessage({audio});
+    }
+
+    /**
+     *
+     * @param {WAMAudioWorkletNode} node
+     */
+    setNode(node) {
+        this.port.postMessage({node});
     }
 }

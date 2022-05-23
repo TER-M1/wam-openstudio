@@ -1,7 +1,7 @@
 import TrackSelector from "./track-utils/TrackSelector.js";
 import AudioTrack from "./audio/AudioTrack.js";
 import {audioCtx, mainAudio} from "./audio/Utils.js";
-import WAMAudioWorkletNode from "./worklet/WAMAudioWorkletNode.js";
+import WamEventDestination from "./worklet/WAMEventDestination.js";
 
 
 export function activateMainVolume(mainAudio, val) {
@@ -25,7 +25,7 @@ export function activateMainVolume(mainAudio, val) {
 }
 
 export function exploreTracks() {
-    fetch('http://localhost:80/track')
+    fetch('https://wam-openstudio.dylann.fr/track')
         .then(res => res.json())
         .then((output) => {
             let values = output.tracks
@@ -49,15 +49,18 @@ function attachControl(values) {
         let el = document.querySelector('.item.multitrack-item' + value.value);
         el.addEventListener('click', () => {
             let asyncAddTrack = [];
-            fetch('http://localhost:80/track/' + value.value)
+            fetch('https://wam-openstudio.dylann.fr/track/' + value.value)
                 .then(res => res.json())
                 .then(async (output) => {
                     let soundList = output.soundList;
                     for (let i = 0; i < soundList.length; i++) {
                         let path = `${output.path}/${soundList[i].name}`;
-                        let audioWorkletNode = new WAMAudioWorkletNode(audioCtx);
+                        let WAM = await WamEventDestination.createInstance(mainAudio.hostGroupId,audioCtx);
+                        let node = WAM.audioNode;
+
+
                         asyncAddTrack.push(mainAudio.addTrack(
-                            new AudioTrack(audioCtx, audioWorkletNode, path)
+                            new AudioTrack(audioCtx, node, path)
                         ));
                     }
                     let res = await Promise.all(
