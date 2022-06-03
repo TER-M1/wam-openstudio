@@ -160,7 +160,7 @@ const getProcessor = (moduleId) => {
                 let wamParamId = e.data.wamParamId;
 
                 let group = audioWorkletGlobalScope.webAudioModules.getGroup(hostGroupId, groupKey);
-                console.log(group);
+
                 let events = [];
                 let inc = 0;
                 for (let i =0; i < scheduleList.length; i++) {
@@ -224,12 +224,16 @@ const getProcessor = (moduleId) => {
         //     }
         // }
 
+
         /**
+         * Override this to implement custom DSP.
+         * @param {number} startSample beginning of processing slice
+         * @param {number} endSample end of processing slice
          * @param {Float32Array[][]} inputs
          * @param {Float32Array[][]} outputs
-         * @param {Record<string, Float32Array>} parameters
+         * @param {{[x: string]: Float32Array}} parameters
          */
-        process(inputs, outputs, parameters) {
+        _process(startSample, endSample, inputs, outputs, parameters) {
             // If no audio detected skip then process
             if (!this.audio) return true;
 
@@ -289,10 +293,10 @@ const getProcessor = (moduleId) => {
 
                     // Process the block
                 let returnCode = this._processPerf(
-                    this._heapInputBuffer.getHeapAddress(),
-                    this._heapOutputBuffer.getHeapAddress(),
-                    channelCount
-                );
+                        this._heapInputBuffer.getHeapAddress(),
+                        this._heapOutputBuffer.getHeapAddress(),
+                        channelCount
+                    );
 
                 // Copy-out the current block
                 for (let channel = 0; channel < channelCountMin; ++channel) {
@@ -306,6 +310,16 @@ const getProcessor = (moduleId) => {
             this.port.postMessage({playhead: this.playhead});
 
             return true;
+        }
+
+        /**
+         * @param {Float32Array[][]} inputs
+         * @param {Float32Array[][]} outputs
+         * @param {Record<string, Float32Array>} parameters
+         */
+        process(inputs, outputs, parameters) {
+            console.log()
+            super.process(inputs, outputs, parameters);
         }
     }
 

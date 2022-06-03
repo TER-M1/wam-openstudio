@@ -109,10 +109,10 @@ export default class AudioTrack {
     }
 
     async load() {
-        var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
+        // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
         var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/quadrafuzz/dist/index.js");
         var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
-        instance._descriptor.name = instance.name + ` ${this.id}`
+        // instance._descriptor.name = instance.name + ` ${this.id}`
         this.pluginInstance = instance;
         this.pluginDOM = await instance.createGui();
 
