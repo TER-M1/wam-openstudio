@@ -178,6 +178,7 @@ class BPF extends HTMLElement {
                 document.addEventListener('mouseup', handleMouseUp);
             }
         };
+
         /**
          * @param {MouseEvent} e
          */

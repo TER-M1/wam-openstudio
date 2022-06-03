@@ -29,25 +29,29 @@ export default class TrackSelector {
     automation = document.querySelector(".auto.ui.dropdown");
 
     constructor(tracks = []) {
+
         this.tracks = tracks;
-        let trackDivs = document.querySelectorAll(".track-element");
+        let trackDivs = document.querySelectorAll(".track-element")
+
         trackDivs.forEach((elem) => {
             this.tracksId.push(elem.id);
             let idTrack = elem.id.split('')[elem.id.length - 1];
             elem.onclick = () => {
-                uMountPlugin(document.querySelector("#mount1"));
-                let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
-                let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
-                if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
-                    toRemoveSElectionTrackElem.className = this.trackElementClass;
-                    toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id;
+                if (this.getTrack(idTrack) !== this.selectedTrack) {
+                    uMountPlugin(document.querySelector("#mount1"));
+                    let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
+                    let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
+                    if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
+                        toRemoveSElectionTrackElem.className = this.trackElementClass;
+                        toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id;
+                    }
+                    elem.className += this.selectClass;
+                    document.querySelector('.' + elem.id).className += this.selectClass;
+                    this.selectedTrack = this.getTrack(idTrack);
+                    let can = document.querySelector(`.wave-form.${elem.id}`);
+                    mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
+                    // console.log(this.selectedTrack.bpf)
                 }
-                elem.className += this.selectClass;
-                document.querySelector('.' + elem.id).className += this.selectClass;
-                this.selectedTrack = this.getTrack(idTrack);
-                let can = document.querySelector(`.wave-form.${elem.id}`);
-                mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
-                // console.log(this.selectedTrack.bpf)
                 populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
             }
         })
@@ -64,20 +68,21 @@ export default class TrackSelector {
 
                 let idTrack = e.id.split('')[e.id.length - 1];
                 e.onclick = () => {
-                    uMountPlugin(document.querySelector("#mount1"));
-                    let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
-                    let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
-                    if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
-                        toRemoveSElectionTrackElem.className = this.trackElementClass
-                        toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id
+                    if (this.getTrack(idTrack) !== this.selectedTrack) {
+                        uMountPlugin(document.querySelector("#mount1"));
+                        let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
+                        let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
+                        if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
+                            toRemoveSElectionTrackElem.className = this.trackElementClass
+                            toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id
+                        }
+                        e.className += this.selectClass;
+                        document.querySelector('#' + e.id).className += this.selectClass;
+                        this.selectedTrack = this.getTrack(idTrack);
+                        mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
+                        let can = document.querySelector(`.wave-form.${e.id}`);
                     }
-                    e.className += this.selectClass;
-                    document.querySelector('#' + e.id).className += this.selectClass;
-                    this.selectedTrack = this.getTrack(idTrack);
-                    mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
-                    let can = document.querySelector(`.wave-form.${e.id}`);
                     populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
-
                 }
                 elems.push(e);
             })
@@ -88,7 +93,7 @@ export default class TrackSelector {
     getTrack(id) {
         let track = undefined;
         this.tracks.forEach((t) => {
-            if (String(t.id) == id) {
+            if (String(t.id) === id) {
                 track = t;
             }
 
