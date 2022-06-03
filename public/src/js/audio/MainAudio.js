@@ -116,7 +116,7 @@ export default class MainAudio {
                 this.canvasDiv.appendChild(waveForm);
                 // waveForm.innerHTML = `` //${waveForm.id}
                 track.canvas = waveForm.canvas;
-                track.bpf = waveForm.bpf;
+                track.bpfContainer = waveForm.bpfContainer;
                 // track.canvas.width = MainAudio.CANVAS_WIDTH;
                 track.canvas.width = this.pixelAmountFromBufferLength(track);
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;

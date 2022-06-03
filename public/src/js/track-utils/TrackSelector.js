@@ -52,7 +52,7 @@ export default class TrackSelector {
                     mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                     // console.log(this.selectedTrack.bpf)
                 }
-                populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
+                populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
             }
         })
         this.handlersCanvas();
@@ -82,7 +82,7 @@ export default class TrackSelector {
                         mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
                         let can = document.querySelector(`.wave-form.${e.id}`);
                     }
-                    populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
+                    populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
                 }
                 elems.push(e);
             })
@@ -104,7 +104,7 @@ export default class TrackSelector {
     pop() {
         let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
         console.log(can)
-        populateDropDown(this.selectedTrack, this.selectedTrack.bpf, document.querySelector('.ui.dropdown.auto'));
+        populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
     }
 
 

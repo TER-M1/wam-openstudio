@@ -100,14 +100,17 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         action: 'hide',
         values: values
     });
+
     for (let i = 0; i < values.length; i++) {
         let item = pluginParamSelector.querySelector(`.dropItem${i}`);
         let param = params[i]
         const {minValue, maxValue, label} = info[param];
         item.onclick = () => {
+            console.log("item: ", item);
             if (track.hasBPF(param)) {
+                console.log("in?")
                 let bpf = track.getBPF(param);
-                // show bpf
+                bpf.style.display = "block";
             }
             else {
                 const bpf = document.createElement('webaudiomodules-host-bpf');
@@ -119,6 +122,8 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
                 bpf.setAttribute('default', defaultValue);
                 bpf.setAttribute('domain', track.duration);
                 bpfContainer.appendChild(bpf);
+                track.addBPF(bpf);
+                track.bpf = bpf;
             }
         }
     }

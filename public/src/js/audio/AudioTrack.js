@@ -52,6 +52,7 @@ export default class AudioTrack {
         this.loopBeggining = 0;
         this.loopEnding = 0;
         this.bpfList = [];
+        this.bpfContainer = undefined;
     }
 
     /**
