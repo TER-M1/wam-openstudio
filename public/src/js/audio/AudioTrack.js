@@ -51,6 +51,8 @@ export default class AudioTrack {
         this.wamIndexPath = wamIndexPath;
         this.loopBeggining = 0;
         this.loopEnding = 0;
+        this.bpfList = [];
+        this.bpfContainer = undefined;
     }
 
     /**
@@ -75,12 +77,49 @@ export default class AudioTrack {
         return this._isSoloTrack;
     }
 
+    addBPF(bpf) {
+        if (!this.bpfList.includes(bpf)) {
+            this.bpfList.push(bpf);
+        }
+    }
+
+    removeBPF(bpf) {
+        let index = this.bpfList.indexOf(bpf);
+        this.bpfList.splice(index, 1);
+    }
+
+    getBPF(bpfParamID) {
+        let selected = null;
+        this.bpfList.forEach((bpf) => {
+            if (bpf.paramID === bpfParamID) {
+                selected = bpf;
+            }
+        });
+        return selected
+    }
+
+    hasBPF(bpfParamID) {
+        let isPresent = false;
+        this.bpfList.forEach((bpf) => {
+            if (bpf.paramID === bpfParamID) {
+                isPresent = true;
+            }
+        });
+        return isPresent;
+    }
+
     async load() {
-        var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
+        // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
+        // var {default: WAM} = await import ("https://wam-bank.herokuapp.com/pedalboard/index.js");
+        var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
+
         var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
-        instance._descriptor.name = instance.name + ` ${this.id}`
+
+        // instance._descriptor.name = instance.name + ` ${this.id}`
         this.pluginInstance = instance;
         this.pluginDOM = await instance.createGui();
+
+        console.log(this.pluginInstance)
 
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
@@ -93,6 +132,7 @@ export default class AudioTrack {
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
         this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
+        this.audioWorkletNode.port.postMessage({plugin: this.pluginInstance._groupId})
     }
 
     mute() {

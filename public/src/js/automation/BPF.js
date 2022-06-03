@@ -35,6 +35,7 @@ class BPF extends HTMLElement {
         };
         this.dragged = false;
         this.mouseDown = false;
+        this.paramID = undefined;
         /**
          * @type {{ texts: SVGTextElement[]; ghostText: SVGTextElement; circles: SVGCircleElement[]; ghostCircle: SVGCircleElement; lines: SVGLineElement[]; linesEvents: SVGLineElement[] }}
          */
@@ -323,6 +324,7 @@ class BPF extends HTMLElement {
         });
         for (let t = 0; t < this.domain; t += 0.01) {
             const value = this.getYfromX(t);
+
             wamNode.scheduleEvents({type: 'wam-automation', data: {id: wamParamId, value}, time: currentTime + t});
         }
     }
