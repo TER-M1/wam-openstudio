@@ -143,15 +143,6 @@ const getProcessor = (moduleId) => {
                  * IL FAUT RECEVOIR LE MODULE, ET FAIRE LE WEBASSEMBLY.INSTIANTIATE ICI
                  * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
                  */
-            } else if (e.data.pluginInstance) {
-                // console.log("plugin recu")
-                // console.log(e.data.plugin)
-                // this.pluginInstanceId = e.data.pluginInstanceId
-                //
-                // this.disconnectEvents(this.pluginInstanceId)
-                // this.connectEvents(e.data.pluginInstance);
-
-                // console.log(this);
             } else if (e.data.scheduleList) {
                 console.log("liste de schedule reçue")
                 let scheduleList = e.data.scheduleList;
