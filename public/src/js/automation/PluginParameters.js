@@ -105,15 +105,21 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         let param = params[i]
         const {minValue, maxValue, label} = info[param];
         item.onclick = () => {
-            const bpf = document.createElement('webaudiomodules-host-bpf');
-            track.bpf = bpf;
-            bpf.className = param;
-            bpf.setAttribute('min', minValue);
-            bpf.setAttribute('max', maxValue);
-            let defaultValue = (maxValue - minValue) / 2;
-            bpf.setAttribute('default', defaultValue);
-            bpf.setAttribute('domain', track.duration);
-            bpfContainer.appendChild(bpf);
+            if (track.hasBPF(param)) {
+                let bpf = track.getBPF(param);
+                // show bpf
+            }
+            else {
+                const bpf = document.createElement('webaudiomodules-host-bpf');
+                bpf.className = param;
+                bpf.paramID = param;
+                bpf.setAttribute('min', minValue);
+                bpf.setAttribute('max', maxValue);
+                let defaultValue = (maxValue - minValue) / 2;
+                bpf.setAttribute('default', defaultValue);
+                bpf.setAttribute('domain', track.duration);
+                bpfContainer.appendChild(bpf);
+            }
         }
     }
 

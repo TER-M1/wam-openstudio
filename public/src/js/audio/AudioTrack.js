@@ -51,6 +51,7 @@ export default class AudioTrack {
         this.wamIndexPath = wamIndexPath;
         this.loopBeggining = 0;
         this.loopEnding = 0;
+        this.bpfList = [];
     }
 
     /**
@@ -73,6 +74,37 @@ export default class AudioTrack {
 
     get isSoloTrack() {
         return this._isSoloTrack;
+    }
+
+    addBPF(bpf) {
+        if (!this.bpfList.includes(bpf)) {
+            this.bpfList.push(bpf);
+        }
+    }
+
+    removeBPF(bpf) {
+        let index = this.bpfList.indexOf(bpf);
+        this.bpfList.splice(index, 1);
+    }
+
+    getBPF(bpfParamID) {
+        let selected = null;
+        this.bpfList.forEach((bpf) => {
+            if (bpf.paramID === bpfParamID) {
+                selected = bpf;
+            }
+        });
+        return selected
+    }
+
+    hasBPF(bpfParamID) {
+        let isPresent = false;
+        this.bpfList.forEach((bpf) => {
+            if (bpf.paramID === bpfParamID) {
+                isPresent = true;
+            }
+        });
+        return isPresent;
     }
 
     async load() {

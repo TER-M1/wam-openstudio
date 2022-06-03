@@ -117,6 +117,7 @@ customElements.define(
                     list.push(track.bpf.getYfromX(x));
                 }
             }
+            track.bpf.style.display = "none";
             track.audioWorkletNode.port.postMessage({scheduleList: list})
         })
     }

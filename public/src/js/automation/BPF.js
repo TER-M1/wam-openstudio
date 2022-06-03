@@ -35,6 +35,7 @@ class BPF extends HTMLElement {
         };
         this.dragged = false;
         this.mouseDown = false;
+        this.paramID = undefined;
         /**
          * @type {{ texts: SVGTextElement[]; ghostText: SVGTextElement; circles: SVGCircleElement[]; ghostCircle: SVGCircleElement; lines: SVGLineElement[]; linesEvents: SVGLineElement[] }}
          */
