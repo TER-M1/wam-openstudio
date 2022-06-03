@@ -150,8 +150,6 @@ const getProcessor = (moduleId) => {
                 let groupKey = e.data.groupKey;
                 let wamParamId = e.data.wamParamId;
 
-                let group = audioWorkletGlobalScope.webAudioModules.getGroup(hostGroupId, groupKey);
-                console.log(group);
                 let events = [];
                 let inc = 0;
                 for (let i =0; i < scheduleList.length; i++) {
@@ -163,13 +161,81 @@ const getProcessor = (moduleId) => {
             }
         }
 
+        // setupMessages() {
+        //
+        //     this.port._onmessage = e => {
+        //         if (e.data.audio) {
+        //             this.audio = e.data.audio;
+        //         } else if (e.data.position && typeof e.data.position === "number") {
+        //             this.playhead = e.data.position; // * sampleRate;
+        //             this.port.postMessage({playhead: this.playhead})
+        //         } else if (e.data.loopBeggining && typeof e.data.loopBeggining === "number") {
+        //             if (e.data.loopBeggining === -1)
+        //                 this.loopBeggining = 0;
+        //             else
+        //                 this.loopBeggining = e.data.loopBeggining;
+        //         } else if (e.data.loopEnding && typeof e.data.loopEnding === "number") {
+        //             if (e.data.loopEnding === -1)
+        //                 this.loopEnding = this.audio[0].length;
+        //             else
+        //                 this.loopEnding = e.data.loopEnding;
+        //         } else if (e.data.mod) {
+        //             /**
+        //              * IL FAUT RECEVOIR LE MODULE, ET FAIRE LE WEBASSEMBLY.INSTIANTIATE ICI
+        //              * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
+        //              */
+        //         } else if (e.data.pluginInstance) {
+        //             // console.log("plugin recu")
+        //             // console.log(e.data.plugin)
+        //             // this.pluginInstanceId = e.data.pluginInstanceId
+        //             //
+        //             // this.disconnectEvents(this.pluginInstanceId)
+        //             // this.connectEvents(e.data.pluginInstance);
+        //
+        //             // console.log(this);
+        //         } else if (e.data.scheduleList) {
+        //             console.log("liste de schedule reçue")
+        //             let scheduleList = e.data.scheduleList;
+        //             let hostGroupId = e.data.hostGroupId;
+        //             let groupKey = e.data.groupKey;
+        //             let wamParamId = e.data.wamParamId;
+        //
+        //             // let group = audioWorkletGlobalScope.webAudioModules.getGroup(this.hostGroupId, this.groupKey);
+        //             let events = [];
+        //             let inc = 0;
+        //             for (let i =0; i < scheduleList.length; i++) {
+        //                 events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + inc })
+        //                 inc += 0.01;
+        //             }
+        //             console.log(events);
+        //             this.emitEvents(...events);
+        //         }
+        //     }
+        // }
+
+
+        // /**
+        //  * Override this to implement custom DSP.
+        //  * @param {number} startSample beginning of processing slice
+        //  * @param {number} endSample end of processing slice
+        //  * @param {Float32Array[][]} inputs
+        //  * @param {Float32Array[][]} outputs
+        //  * @param {{[x: string]: Float32Array}} parameters
+        //  */
+        // _process(startSample, endSample, inputs, outputs, parameters) {
+
+        // }
+
         /**
          * @param {Float32Array[][]} inputs
          * @param {Float32Array[][]} outputs
          * @param {Record<string, Float32Array>} parameters
          */
         process(inputs, outputs, parameters) {
+
+            super.process(inputs, outputs, parameters);
             // If no audio detected skip then process
+            // console.log("aezaeza");
             if (!this.audio) return true;
 
             // Prepare the input array
@@ -228,10 +294,10 @@ const getProcessor = (moduleId) => {
 
                     // Process the block
                 let returnCode = this._processPerf(
-                    this._heapInputBuffer.getHeapAddress(),
-                    this._heapOutputBuffer.getHeapAddress(),
-                    channelCount
-                );
+                        this._heapInputBuffer.getHeapAddress(),
+                        this._heapOutputBuffer.getHeapAddress(),
+                        channelCount
+                    );
 
                 // Copy-out the current block
                 for (let channel = 0; channel < channelCountMin; ++channel) {
@@ -245,6 +311,7 @@ const getProcessor = (moduleId) => {
             this.port.postMessage({playhead: this.playhead});
 
             return true;
+
         }
     }
 
