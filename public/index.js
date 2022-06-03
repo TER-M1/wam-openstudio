@@ -117,7 +117,15 @@ customElements.define(
                     list.push(track.bpf.getYfromX(x));
                 }
             }
+            let events = [];
+            let inc = 0;
+            const {currentTime} = audioCtx;
+            for (let i =0; i < list.length; i++) {
+                events.push({ type: 'wam-automation', data: { id: track.bpf.paramID, value: list[i] }, time: currentTime + inc })
+                inc += 0.01;
+            }
             track.bpf.style.display = "none";
+            // track.pluginInstance._audioNode.scheduleEvents(...events);
             track.audioWorkletNode.port.postMessage({scheduleList: list, hostGroupId: mainAudio.hostGroupId, groupKey: mainAudio.groupKey, wamParamId: "lowGain"})
         })
     }

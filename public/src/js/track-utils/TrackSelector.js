@@ -13,7 +13,6 @@ function populateDropDown(track, mount, pluginParamSelector) {
     populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
 }
 
-
 export default class TrackSelector {
     /**
      *
@@ -58,7 +57,6 @@ export default class TrackSelector {
         this.handlersCanvas();
         this.defineHandler();
     }
-
 
     handlersCanvas() {
         let elems = [];

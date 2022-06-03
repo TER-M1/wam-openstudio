@@ -89,8 +89,8 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
             class: `item dropItem${values.length}`
         });
 
-        console.log("wam node : ")
-        track.audioWorkletNode.disconnectEvents(wamNode.instanceId)
+        console.log("wam node : ");
+        track.audioWorkletNode.disconnectEvents(wamNode.instanceId);
         track.audioWorkletNode.connectEvents(wamNode.instanceId);
         // track.audioWorkletNode.port.postMessage({pluginInstance: wamNode.module.groupId})
     }
