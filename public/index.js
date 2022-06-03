@@ -118,7 +118,7 @@ customElements.define(
                 }
             }
             track.bpf.style.display = "none";
-            track.audioWorkletNode.port.postMessage({scheduleList: list})
+            track.audioWorkletNode.port.postMessage({scheduleList: list, hostGroupId: mainAudio.hostGroupId, groupKey: mainAudio.groupKey, wamParamId: "lowGain"})
         })
     }
 

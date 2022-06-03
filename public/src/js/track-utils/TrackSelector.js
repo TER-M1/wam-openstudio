@@ -87,7 +87,6 @@ export default class TrackSelector {
                 elems.push(e);
             })
         });
-        // console.log(elems)
     }
 
     getTrack(id) {

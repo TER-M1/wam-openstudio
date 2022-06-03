@@ -25,7 +25,6 @@ export default class MainAudio {
      */
     canvasDiv = document.querySelector(".audio-tracks");
 
-    hostGroupId = undefined;
 
     constructor(audioCtx) {
         this.audioCtx = audioCtx;
@@ -33,12 +32,15 @@ export default class MainAudio {
         this.masterVolumeNode = audioCtx.createGain();
         this.oldMasterVolume = this.masterVolumeNode.gain.value;
         this.masterVolumeNode.connect(this.audioCtx.destination);
+        this.hostGroupId = undefined;
+        this.groupKey = undefined;
     }
 
 
     async loadWam(){
-        const {hostGroupId} = await initWam()
+        const {hostGroupId, groupKey} = await initWam()
         this.hostGroupId = hostGroupId;
+        this.groupKey = groupKey;
 
         WebAssembly.compileStreaming(fetch("./src/js/worklet/ProcessWasm.wasm"))
             .then(module => {

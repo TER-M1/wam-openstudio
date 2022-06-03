@@ -10,7 +10,7 @@ if (audioCtx.state === "suspended") {
 
 export const initWam = async () => {
     const {initializeWamHost} = await import("../../../lib/sdk/index.js");
-    var [hostGroupId] = await initializeWamHost(audioCtx);
-    return { hostGroupId}
+    var [hostGroupId, groupKey] = await initializeWamHost(audioCtx);
+    return { hostGroupId, groupKey}
 }
 

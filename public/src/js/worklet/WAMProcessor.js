@@ -23,6 +23,8 @@ const getProcessor = (moduleId) => {
         constructor(options) {
             super(options);
             this.options = options;
+            this.hostGroupId = undefined;
+            this.groupKey = undefined;
 
             this.audio = null;
             /** @type {number} */
@@ -148,11 +150,24 @@ const getProcessor = (moduleId) => {
                     //
                     // this.disconnectEvents(this.pluginInstanceId)
                     // this.connectEvents(e.data.pluginInstance);
+
                     // console.log(this);
                 } else if (e.data.scheduleList) {
                     console.log("liste de schedule reçue")
-                    this.scheduleList = e.data.scheduleList;
-                    console.log(this.scheduleList)
+                    let scheduleList = e.data.scheduleList;
+                    let hostGroupId = e.data.hostGroupId;
+                    let groupKey = e.data.groupKey;
+                    let wamParamId = e.data.wamParamId;
+
+                    // let group = audioWorkletGlobalScope.webAudioModules.getGroup(this.hostGroupId, this.groupKey);
+                    let events = [];
+                    let inc = 0;
+                    for (let i =0; i < scheduleList.length; i++) {
+                        events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + inc })
+                        inc += 0.01;
+                    }
+                    console.log(events);
+                    this.emitEvents(...events);
                 }
             }
         }
