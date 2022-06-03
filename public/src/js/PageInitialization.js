@@ -55,7 +55,7 @@ function attachControl(values) {
                     let soundList = output.soundList;
                     for (let i = 0; i < soundList.length; i++) {
                         let path = `${output.path}/${soundList[i].name}`;
-                        let WAM = await WamEventDestination.createInstance(mainAudio.hostGroupId,audioCtx);
+                        let WAM = await WamEventDestination.createInstance(mainAudio.hostGroupId, audioCtx);
                         let node = WAM.audioNode;
 
 

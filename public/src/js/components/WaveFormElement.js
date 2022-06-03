@@ -8,7 +8,7 @@ templateCanvas.innerHTML = /*html*/`
 export default class WaveFormElement extends HTMLElement {
     id = undefined;
     canvas = undefined;
-    bpf = undefined;
+    bpfContainer = undefined;
 
     constructor() {
         super();
@@ -32,7 +32,7 @@ export default class WaveFormElement extends HTMLElement {
     defId() {
         this.canvas = this.shadowRoot.querySelector(".can");
         this.canvas.id = this.id;
-        this.bpf = this.shadowRoot.querySelector("#pluginAutomationEditor")
+        this.bpfContainer = this.shadowRoot.querySelector("#pluginAutomationEditor")
     }
 }
 

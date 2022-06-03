@@ -6,6 +6,7 @@ import WaveFormElement from "./src/js/components/WaveFormElement.js";
 
 
 const btnStart = document.getElementById("btn-start");
+const btnApply = document.getElementById("btn-apply")
 const zoomIn = document.getElementById("btn-zoom-in");
 const zoomOut = document.getElementById("btn-zoom-out");
 const btnRestart = document.getElementById("restart");
@@ -103,6 +104,31 @@ customElements.define(
             mainAudio.unMute();
         }
     };
+
+    btnApply.onclick = () => {
+        mainAudio.tracks.forEach(track => {
+            //const paramId = track.bpf.querySelector('.pluginAutomationParamId').textContent;
+            // console.log("paramId" + paramId);
+
+            let list = []
+
+            if (track.bpf !== undefined) {
+                for(let x = 0; x < track.bpf.domain; x += 0.01) {
+                    list.push(track.bpf.getYfromX(x));
+                }
+            }
+            let events = [];
+            let inc = 0;
+            const {currentTime} = audioCtx;
+            for (let i =0; i < list.length; i++) {
+                events.push({ type: 'wam-automation', data: { id: track.bpf.paramID, value: list[i] }, time: currentTime + inc })
+                inc += 0.01;
+            }
+            track.bpf.style.display = "none";
+            track.pluginInstance._audioNode.scheduleEvents(...events);
+            // track.audioWorkletNode.port.postMessage({scheduleList: list, hostGroupId: mainAudio.hostGroupId, groupKey: mainAudio.groupKey, wamParamId: "lowGain"})
+        })
+    }
 
     loopBeginning.addEventListener("change", onLoopBegginingInputChange);
     loopEnding.addEventListener("change", onLoopEndingInputChange);
