@@ -126,7 +126,12 @@ customElements.define(
             // }
             track.bpf.style.display = "none";
             // track.pluginInstance._audioNode.scheduleEvents(...events);
-            track.audioWorkletNode.port.postMessage({scheduleList: list, hostGroupId: mainAudio.hostGroupId, groupKey: mainAudio.groupKey, wamParamId: track.bpf.paramID})
+            track.audioWorkletNode.port.postMessage({
+                scheduleList: list,
+                hostGroupId: mainAudio.hostGroupId,
+                groupKey: mainAudio.groupKey,
+                wamParamId: track.bpf.paramID
+            })
         })
     }
 

@@ -150,8 +150,6 @@ const getProcessor = (moduleId) => {
                 let groupKey = e.data.groupKey;
                 let wamParamId = e.data.wamParamId;
 
-                let group = audioWorkletGlobalScope.webAudioModules.getGroup(hostGroupId, groupKey);
-                console.log(group);
                 let events = [];
                 let inc = 0;
                 for (let i =0; i < scheduleList.length; i++) {
@@ -216,16 +214,28 @@ const getProcessor = (moduleId) => {
         // }
 
 
+        // /**
+        //  * Override this to implement custom DSP.
+        //  * @param {number} startSample beginning of processing slice
+        //  * @param {number} endSample end of processing slice
+        //  * @param {Float32Array[][]} inputs
+        //  * @param {Float32Array[][]} outputs
+        //  * @param {{[x: string]: Float32Array}} parameters
+        //  */
+        // _process(startSample, endSample, inputs, outputs, parameters) {
+
+        // }
+
         /**
-         * Override this to implement custom DSP.
-         * @param {number} startSample beginning of processing slice
-         * @param {number} endSample end of processing slice
          * @param {Float32Array[][]} inputs
          * @param {Float32Array[][]} outputs
-         * @param {{[x: string]: Float32Array}} parameters
+         * @param {Record<string, Float32Array>} parameters
          */
-        _process(startSample, endSample, inputs, outputs, parameters) {
+        process(inputs, outputs, parameters) {
+
+            super.process(inputs, outputs, parameters);
             // If no audio detected skip then process
+            // console.log("aezaeza");
             if (!this.audio) return true;
 
             // Prepare the input array
@@ -301,16 +311,7 @@ const getProcessor = (moduleId) => {
             this.port.postMessage({playhead: this.playhead});
 
             return true;
-        }
 
-        /**
-         * @param {Float32Array[][]} inputs
-         * @param {Float32Array[][]} outputs
-         * @param {Record<string, Float32Array>} parameters
-         */
-        process(inputs, outputs, parameters) {
-            console.log()
-            super.process(inputs, outputs, parameters);
         }
     }
 
