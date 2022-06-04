@@ -23,12 +23,14 @@ export default class WAMAudioWorkletNode extends WamNode {
     constructor(module, options) {
         super(module, options);
 
-        this.port.onmessage = (e) => {
-            if (e.data.playhead) {
-                this._playhead = e.data.playhead;
-            }
-        }
         this._supportedEventTypes = new Set(['wam-automation']);
+    }
+
+    async _onMessage(e) {
+        await super._onMessage(e);
+        if (e.data.playhead) {
+            this._playhead = e.data.playhead;
+        }
     }
 
     /**
@@ -49,6 +51,14 @@ export default class WAMAudioWorkletNode extends WamNode {
      */
     setAudio(audio) {
         this.port.postMessage({audio});
+    }
+
+    resetPlayHead() {
+        this._playhead = 0;
+    }
+
+    setPlayHeadPosition(pos) {
+        this._playhead = pos;
     }
 
     /**

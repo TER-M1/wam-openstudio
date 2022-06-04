@@ -59,8 +59,8 @@ class BPF extends HTMLElement {
             let {
                 left, top, width, height,
             } = svg.getBoundingClientRect();
-            left += 0.025 * width;
-            top += 0.025 * height;
+            // left += 0.025 * width;
+            // top += 0.025 * height;
             width *= 0.95;
             height *= 0.95;
             const normalizedX = (e.clientX - left) / width;
@@ -86,8 +86,8 @@ class BPF extends HTMLElement {
             const {domain} = this.state;
             const svg = line.parentElement.parentElement;
             let {left, width} = svg.getBoundingClientRect();
-            left += 0.025 * width;
-            width *= 0.95;
+            // left += 0.025 * width;
+            // width *= 0.95;
             const normalizedX = (e.clientX - left) / width;
             const {point} = this.getInsertPoint(normalizedX * domain);
             this.setState({ghostPoint: point});
@@ -106,8 +106,8 @@ class BPF extends HTMLElement {
             let {
                 left, top, width, height,
             } = svg.getBoundingClientRect();
-            left += 0.025 * width;
-            top += 0.025 * height;
+            // left += 0.025 * width;
+            // top += 0.025 * height;
             width *= 0.95;
             height *= 0.95;
             if (e.altKey) {
@@ -193,8 +193,10 @@ class BPF extends HTMLElement {
             let {
                 left, top, width, height,
             } = svg.getBoundingClientRect();
-            left += 0.025 * width;
-            top += 0.025 * height;
+            // left += 0.025 * width;
+            // top += 0.025 * height;
+            // left += width;
+            // top += height;
             width *= 0.95;
             height *= 0.95;
             const i = +circle.getAttribute('values');
@@ -244,7 +246,7 @@ class BPF extends HTMLElement {
         this._root = this.attachShadow({mode: 'open'});
         this._svg = this._root.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this._svg.setAttribute('width', '100%');
-        this._svg.setAttribute('height', '100%');
+        this._svg.setAttribute('height', '104px');
         this._svg.style.backgroundColor = 'none';
         // this._svg.style.position = "absolute"
         this._svg.style.zIndex = 10;
@@ -252,7 +254,7 @@ class BPF extends HTMLElement {
         this._svg.addEventListener('dblclick', this.handleDoubleClick);
         this._root.appendChild(this._svg);
         this._g = this._root.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'g');
-        this._g.setAttribute('transform', 'scale(0.95, 0.95)');
+        // this._g.setAttribute('transform', 'scale(0.95, 0.95)');
         this._g.style.transformOrigin = 'center';
         this._svg.appendChild(this._g);
         this.setState(this.state);
