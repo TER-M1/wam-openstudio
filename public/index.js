@@ -6,7 +6,8 @@ import WaveFormElement from "./src/js/components/WaveFormElement.js";
 
 
 const btnStart = document.getElementById("btn-start");
-const btnApply = document.getElementById("btn-apply")
+const btnApply = document.getElementById("btn-apply");
+const btnStop = document.getElementById("btn-stop");
 const zoomIn = document.getElementById("btn-zoom-in");
 const zoomOut = document.getElementById("btn-zoom-out");
 const btnRestart = document.getElementById("restart");
@@ -15,6 +16,8 @@ const volumeinput = document.getElementById("volume");
 const inputMute = document.getElementById("mute");
 const loopBeginning = document.getElementById("loop-beginning-input");
 const loopEnding = document.getElementById("loop-end-input");
+const playPauseIcon = document.getElementById("btn-start-icon");
+const muteIcon = document.getElementById("mute-icon");
 const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
@@ -33,23 +36,18 @@ customElements.define(
 (async () => {
     await mainAudio.loadWam();
     btnStart.hidden = false;
-    /*
-    PROCESSOR INITIALIZATION
-     */
-    let ini
-    // await audioCtx.audioWorklet.addModule("./src/js/worklet/WAMProcessor.js");
+
     /*
     INITIALIZATION PAGES ELEMENTS
      */
     activateMainVolume(mainAudio, startVolume);
     exploreTracks();
+
     /*
     EVENT LISTENERS
      */
     btnStart.playing = false;
     btnStart.onclick = () => {
-        console.log(btnStart.playing);
-
         if (audioCtx.state === "suspended") {
             audioCtx.resume();
             if (intervalCursorTracks === undefined) {
@@ -60,9 +58,11 @@ customElements.define(
         }
 
         if (btnStart.playing === false) {
+            playPauseIcon.className = "large pause icon";
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 1;
                 if (intervalCursorTracks === undefined) {
+                    console.log("redefine");
                     intervalCursorTracks = setInterval(() => {
                         updateCursorTracks();
                     }, 33);
@@ -70,6 +70,7 @@ customElements.define(
             });
             btnStart.playing = true
         } else {
+            playPauseIcon.className = "large play icon";
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 0;
                 if (intervalCursorTracks !== undefined) {
@@ -81,6 +82,20 @@ customElements.define(
             btnStart.playing = false;
         }
     }
+
+    btnStop.onclick = () => {
+        btnStart.playing = false;
+        mainAudio.tracks.forEach((track) => {
+            track.audioWorkletNode.parameters.get("playing").value = 0;
+            track.audioWorkletNode.port.postMessage({reset: true});
+            track.audioWorkletNode.resetPlayHead();
+            updateCursorTracks();
+            clearInterval(intervalCursorTracks);
+            intervalCursorTracks = undefined;
+            playPauseIcon.className = "large play icon";
+        })
+    }
+
     inputLoop.onclick = () => {
         console.log("loop pressed")
         mainAudio.tracks.forEach((track) => {
@@ -99,39 +114,30 @@ customElements.define(
         if (!mainAudio.isMuted) {
             console.log("mute");
             mainAudio.mute();
+            muteIcon.className = "large volume mute icon"
         } else {
             console.log("unmute");
             mainAudio.unMute();
+            muteIcon.className = "large volume up icon"
         }
     };
 
     btnApply.onclick = () => {
         mainAudio.tracks.forEach(track => {
-            //const paramId = track.bpf.querySelector('.pluginAutomationParamId').textContent;
-            // console.log("paramId" + paramId);
-
-            let list = []
-
+            let list = [];
             if (track.bpf !== undefined) {
                 for(let x = 0; x < track.bpf.domain; x += 0.01) {
                     list.push(track.bpf.getYfromX(x));
                 }
             }
-            let events = [];
-            let inc = 0;
-            // const {currentTime} = audioCtx;
-            // for (let i =0; i < list.length; i++) {
-            //     events.push({ type: 'wam-automation', data: { id: track.bpf.paramID, value: list[i] }, time: currentTime + inc })
-            //     inc += 0.01;
-            // }
+
             track.bpf.style.display = "none";
-            // track.pluginInstance._audioNode.scheduleEvents(...events);
             track.audioWorkletNode.port.postMessage({
                 scheduleList: list,
                 hostGroupId: mainAudio.hostGroupId,
                 groupKey: mainAudio.groupKey,
                 wamParamId: track.bpf.paramID
-            })
+            });
         })
     }
 

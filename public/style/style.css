@@ -111,39 +111,6 @@ body, html {
     flex-wrap: nowrap;
 }
 
-.track-element-color {
-    flex-grow: 3;
-    background-color: greenyellow;
-}
-
-.track-element-tools {
-    flex-grow: 20;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-}
-
-.track-name {
-    padding-top: 0.5em;
-    /*padding-left: 3em;*/
-    /*flex-grow: 1;*/
-    color: lightgray;
-    font-family: monospace;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.track-volume, .balance {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
-    padding-right: 0.5em;
-    padding-left: 0.5em;
-    justify-content: space-around;
-    align-items: center;
-}
-
 .right-icon, .left-icon, .mute-icon, .solo-icon {
     font-size: 1.3em;
     font-weight: bold;
@@ -164,10 +131,6 @@ body, html {
     padding-right: 4px;
 }
 
-.mute-icon, .solo-icon {
-    font-size: 1.3em;
-}
-
 .ui.inverted.grey.slider.track {
     padding-top: 0.2em !important;
     padding-bottom: 0.2em !important;
@@ -175,32 +138,8 @@ body, html {
     padding-right: 1em !important;
 }
 
-.track-controls {
-    padding-top: 0.2em;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
-    /*flex-grow: 6;*/
-    align-items: center;
-    justify-content: space-around;
-}
-
-.item.tool {
-    color: grey;
-}
-
-.item.tool:hover {
-    color: white;
-}
-
 .plugin-rack {
     padding-top: 30px;
-    /*display: flex;*/
-    /*flex-direction: row;*/
-    /*flex-wrap: nowrap;*/
-    /*align-items: center;*/
-    /*height: 100%;*/
 }
 
 #mount1 {
@@ -246,28 +185,9 @@ i.icon {
     border: 1px solid black !important;
 }
 
-.add-plugin {
-    margin: 1em;
-    height: 4em;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-around;
-    cursor: pointer;
-    font-family: monospace;
-    font-weight: bold;
-    font-size: 1em;
-    color: lightgray;
-}
-.add-plugin:hover {
-    background-color: #151718;
-}
 .pluginAutomationParamId{
     color: white;
 }
 .mySelected {
-   /*background-color: grey;*/
-   /* border-color: grey;*/
     border: 1px solid lightgrey;
 }

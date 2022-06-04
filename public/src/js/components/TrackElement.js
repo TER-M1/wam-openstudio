@@ -10,6 +10,17 @@ template.innerHTML = /*html*/`
 
 <style>
 
+/* Track Element */
+.track-element {
+    border: 1px solid black;
+    height: 104px;
+    width: 180px;
+    background-color: #31353A;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
 .track-element-color {
     flex-grow: 3;
     background-color: greenyellow !important;
