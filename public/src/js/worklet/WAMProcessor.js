@@ -116,7 +116,7 @@ const getProcessor = (moduleId) => {
                     name: "loop",
                     minValue: 0,
                     maxValue: 1,
-                    defaultValue: 1,
+                    defaultValue: 0,
                 },
             ];
         }
