@@ -154,10 +154,10 @@ const getProcessor = (moduleId) => {
                 let wamParamId = e.data.wamParamId;
 
                 let events = [];
-                let inc = 0;
-                for (let i =0; i < scheduleList.length; i++) {
-                    events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + inc })
-                    inc += 0.01;
+                let t = 0;
+                for (let i = 0; i < scheduleList.length; i++) {
+                    events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
+                    t += 0.1;
                 }
                 console.log(events);
                 this.emitEvents(...events);
