@@ -93,8 +93,8 @@ customElements.define(
             track.audioWorkletNode.port.postMessage({reset: true});
             track.audioWorkletNode.resetPlayHead();
             updateCursorTracks();
-            clearInterval(intervalCursorTracks);
-            intervalCursorTracks = undefined;
+            // clearInterval(intervalCursorTracks);
+            // intervalCursorTracks = undefined;
             // playPauseIcon.className = "large play icon";
         })
     }
