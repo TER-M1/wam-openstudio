@@ -7,7 +7,7 @@ import WaveFormElement from "./src/js/components/WaveFormElement.js";
 
 const btnStart = document.getElementById("btn-start");
 const btnApply = document.getElementById("btn-apply");
-const btnStop = document.getElementById("btn-stop");
+const backToStartBtn = document.getElementById("btn-back-to-start");
 const zoomIn = document.getElementById("btn-zoom-in");
 const zoomOut = document.getElementById("btn-zoom-out");
 const btnRestart = document.getElementById("restart");
@@ -18,6 +18,7 @@ const loopBeginning = document.getElementById("loop-beginning-input");
 const loopEnding = document.getElementById("loop-end-input");
 const playPauseIcon = document.getElementById("btn-start-icon");
 const muteIcon = document.getElementById("mute-icon");
+const loopIcon = document.getElementById("loop-icon")
 const startVolume = 20 / 100;
 var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
@@ -59,6 +60,7 @@ customElements.define(
 
         if (btnStart.playing === false) {
             playPauseIcon.className = "large pause icon";
+            btnStart.setAttribute("data-tooltip", "Stop");
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 1;
                 if (intervalCursorTracks === undefined) {
@@ -71,11 +73,12 @@ customElements.define(
             btnStart.playing = true
         } else {
             playPauseIcon.className = "large play icon";
+            btnStart.setAttribute("data-tooltip", "Play");
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 0;
                 if (intervalCursorTracks !== undefined) {
                     updateCursorTracks();
-                    clearInterval(intervalCursorTracks);
+
                     intervalCursorTracks = undefined;
                 }
             });
@@ -83,24 +86,25 @@ customElements.define(
         }
     }
 
-    btnStop.onclick = () => {
-        btnStart.playing = false;
+    backToStartBtn.onclick = () => {
+        // btnStart.playing = false;
         mainAudio.tracks.forEach((track) => {
-            track.audioWorkletNode.parameters.get("playing").value = 0;
+            // track.audioWorkletNode.parameters.get("playing").value = 0;
             track.audioWorkletNode.port.postMessage({reset: true});
             track.audioWorkletNode.resetPlayHead();
             updateCursorTracks();
             clearInterval(intervalCursorTracks);
             intervalCursorTracks = undefined;
-            playPauseIcon.className = "large play icon";
+            // playPauseIcon.className = "large play icon";
         })
     }
 
     inputLoop.onclick = () => {
-        console.log("loop pressed")
+        let looped = false;
         mainAudio.tracks.forEach((track) => {
             const loop = track.audioWorkletNode.parameters.get("loop").value;
             if (loop === 1) {
+                looped = true;
                 track.audioWorkletNode.parameters.get("loop").value = 0;
                 inputLoop.checked = false;
             } else {
@@ -108,15 +112,21 @@ customElements.define(
                 inputLoop.checked = true;
             }
         })
+        if (looped) {
+            inputLoop.setAttribute("data-tooltip", "Loop");
+            inputLoop.style.background = "#31353A";
+        }
+        else {
+            inputLoop.setAttribute("data-tooltip", "Unloop");
+            inputLoop.style.background = "#1C1E21";
+        }
     };
 
     inputMute.onclick = () => {
         if (!mainAudio.isMuted) {
-            console.log("mute");
             mainAudio.mute();
             muteIcon.className = "large volume mute icon"
         } else {
-            console.log("unmute");
             mainAudio.unMute();
             muteIcon.className = "large volume up icon"
         }
