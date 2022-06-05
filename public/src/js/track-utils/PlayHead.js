@@ -62,12 +62,9 @@ export function canvasClickMoveCursor(event) {
         let estimatedSeconds = x / MainAudio.PIXEL_PER_SECONDS;
         let newPlayHeadPosition = mainAudio.playHeadPositionFromTime(estimatedSeconds, track);
 
-        console.log(x);
-
         if (newPlayHeadPosition >= track.operableDecodedAudioBuffer.length) {
             newPlayHeadPosition = track.operableDecodedAudioBuffer.length - 1;
         }
-        console.log(newPlayHeadPosition);
         track.audioWorkletNode.port.postMessage({position: newPlayHeadPosition});
         track.audioWorkletNode.setPlayHeadPosition(newPlayHeadPosition);
     });

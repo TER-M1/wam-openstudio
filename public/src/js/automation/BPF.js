@@ -310,6 +310,10 @@ class BPF extends HTMLElement {
         }
     }
 
+    setSizeBPF(size) {
+        this._svg.setAttribute("width", size+"px");
+    }
+
     /**
      * @param {WamNode} wamNode
      * @param {string} wamParamId
