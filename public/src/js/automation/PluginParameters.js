@@ -1,7 +1,8 @@
-
 /**
  * @param {import('../api/src').WamNode} wamNode
  */
+import {mainAudio} from "../audio/Utils.js";
+
 export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector, track) => {
 
     pluginParamSelector.innerHTML = '<i class="project diagram icon"></i>';
@@ -50,6 +51,7 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
                 let defaultValue = (maxValue - minValue) / 2;
                 bpf.setAttribute('default', defaultValue);
                 bpf.setAttribute('domain', track.duration);
+                bpf.setSizeBPF(mainAudio.pixelAmountFromBufferLength(track));
                 bpfContainer.appendChild(bpf);
                 track.addBPF(bpf);
                 track.bpf = bpf;
