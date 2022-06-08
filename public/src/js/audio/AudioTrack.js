@@ -111,7 +111,8 @@ export default class AudioTrack {
     async load() {
         // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
         // var {default: WAM} = await import ("https://wam-bank.herokuapp.com/pedalboard/index.js");
-        var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
+        // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
+        var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages//BigMuff/index.js");
 
         var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
 
@@ -120,7 +121,7 @@ export default class AudioTrack {
         this.pluginDOM = await instance.createGui();
 
         console.log(this.pluginInstance)
-
+        console.log(this.fpath)
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
         this.decodedAudioBuffer = await this.audioCtx.decodeAudioData(audioArrayBuffer);
