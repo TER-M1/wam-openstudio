@@ -161,7 +161,6 @@ const getProcessor = (moduleId) => {
                 }
                 console.log(events);
                 this.emitEvents(...events);
-                // this.scheduleEvents(...events);
             }
         }
 
