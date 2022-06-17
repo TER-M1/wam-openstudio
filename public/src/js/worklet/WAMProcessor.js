@@ -147,7 +147,7 @@ const getProcessor = (moduleId) => {
                  * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
                  */
             } else if (e.data.scheduleList) {
-                console.log("liste de schedule reçue")
+                this.clearEvents();
                 let scheduleList = e.data.scheduleList;
                 let hostGroupId = e.data.hostGroupId;
                 let groupKey = e.data.groupKey;
@@ -161,6 +161,7 @@ const getProcessor = (moduleId) => {
                 }
                 console.log(events);
                 this.emitEvents(...events);
+                // this.scheduleEvents(...events);
             }
         }
 
