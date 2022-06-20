@@ -48,9 +48,10 @@ customElements.define(
     EVENT LISTENERS
      */
     btnStart.playing = false;
+    await audioCtx.suspend();
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") {
-            audioCtx.resume();
+            // audioCtx.resume();
             if (intervalCursorTracks === undefined) {
                 intervalCursorTracks = setInterval(() => {
                     updateCursorTracks();
@@ -59,12 +60,12 @@ customElements.define(
         }
 
         if (btnStart.playing === false) {
+            audioCtx.resume();
             playPauseIcon.className = "large pause icon";
             btnStart.setAttribute("data-tooltip", "Stop");
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 1;
                 if (intervalCursorTracks === undefined) {
-                    console.log("redefine");
                     intervalCursorTracks = setInterval(() => {
                         updateCursorTracks();
                     }, 33);
@@ -72,6 +73,7 @@ customElements.define(
             });
             btnStart.playing = true
         } else {
+            audioCtx.suspend();
             playPauseIcon.className = "large play icon";
             btnStart.setAttribute("data-tooltip", "Play");
             mainAudio.tracks.forEach((track) => {
@@ -134,21 +136,22 @@ customElements.define(
 
     btnApply.onclick = () => {
         mainAudio.tracks.forEach(track => {
+            track.audioWorkletNode.clearEvents();
             let list = [];
-            if (track.bpf !== undefined) {
-                for(let x = 0; x < track.bpf.domain; x += 0.1) {
-                    list.push(track.bpf.getYfromX(x));
+            track.bpfList.forEach(bpf => {
+                if (bpf !== undefined) {
+                    for(let x = 0; x < bpf.domain; x += 0.1) {
+                        list.push(bpf.getYfromX(x));
+                    }
+                    track.audioWorkletNode.port.postMessage({
+                        scheduleList: list,
+                        hostGroupId: mainAudio.hostGroupId,
+                        groupKey: mainAudio.groupKey,
+                        wamParamId: bpf.paramID
+                    });
+                    // bpf.style.display = "none";
                 }
-                track.audioWorkletNode.port.postMessage({
-                    scheduleList: list,
-                    hostGroupId: mainAudio.hostGroupId,
-                    groupKey: mainAudio.groupKey,
-                    wamParamId: track.bpf.paramID
-                });
-                track.bpf.style.display = "none";
-            }
-
-
+            })
         })
     }
 

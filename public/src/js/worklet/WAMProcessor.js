@@ -84,7 +84,7 @@ const getProcessor = (moduleId) => {
                 .then(instance => {
                     this.instance = instance.exports;
                     this._processPerf = this.instance.processPerf;
-                    this.loadBuffers().then(() => console.log("Processeur chargé."));
+                    this.loadBuffers();
                 })
         }
 
@@ -147,7 +147,8 @@ const getProcessor = (moduleId) => {
                  * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
                  */
             } else if (e.data.scheduleList) {
-                console.log("liste de schedule reçue")
+                this.clearEvents();
+
                 let scheduleList = e.data.scheduleList;
                 let hostGroupId = e.data.hostGroupId;
                 let groupKey = e.data.groupKey;
@@ -159,7 +160,7 @@ const getProcessor = (moduleId) => {
                     events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
                     t += 0.1;
                 }
-                console.log(events);
+                // console.log(events);
                 this.emitEvents(...events);
             }
         }
