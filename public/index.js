@@ -66,7 +66,6 @@ customElements.define(
             mainAudio.tracks.forEach((track) => {
                 track.audioWorkletNode.parameters.get("playing").value = 1;
                 if (intervalCursorTracks === undefined) {
-                    console.log("redefine");
                     intervalCursorTracks = setInterval(() => {
                         updateCursorTracks();
                     }, 33);

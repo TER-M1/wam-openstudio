@@ -681,11 +681,3 @@ export default class BPF extends HTMLElement {
         return [x * domain, y * rangeInterval + rangeMin];
     }
 }
-
-// try {
-//     customElements.define('webaudiomodules-host-bpf', BPF);
-//     console.log('Element defined');
-// } catch (error) {
-//     console.log(error);
-//     console.log('Element already defined');
-// }

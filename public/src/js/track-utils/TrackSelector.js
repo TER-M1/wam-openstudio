@@ -100,7 +100,6 @@ export default class TrackSelector {
 
     pop() {
         let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
-        console.log(can)
         populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
     }
 

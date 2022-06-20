@@ -84,7 +84,7 @@ const getProcessor = (moduleId) => {
                 .then(instance => {
                     this.instance = instance.exports;
                     this._processPerf = this.instance.processPerf;
-                    this.loadBuffers().then(() => console.log("Processeur chargé."));
+                    this.loadBuffers();
                 })
         }
 

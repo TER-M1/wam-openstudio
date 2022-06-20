@@ -120,8 +120,6 @@ export default class AudioTrack {
         this.pluginInstance = instance;
         this.pluginDOM = await instance.createGui();
 
-        console.log(this.pluginInstance)
-        console.log(this.fpath)
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
         this.decodedAudioBuffer = await this.audioCtx.decodeAudioData(audioArrayBuffer);
