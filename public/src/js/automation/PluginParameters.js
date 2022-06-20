@@ -16,6 +16,13 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
 
     let values = []
     let params = []
+
+    values.push({
+        name: "Hide current automation",
+        value: 0,
+        class: `item dropItemHide`
+    })
+
     for (const paramId in info) {
         const {minValue, maxValue, label} = info[paramId];
         params.push(paramId)
@@ -36,14 +43,18 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         values: values
     });
 
-    for (let i = 0; i < values.length; i++) {
+    for (let i = 1; i < values.length; i++) {
         let item = pluginParamSelector.querySelector(`.dropItem${i}`);
-        let param = params[i]
+        let param = params[i-1]
         const {minValue, maxValue, label} = info[param];
         item.onclick = () => {
+            if (track.currentBpf !== undefined) {
+                track.currentBpf.style.display = "none";
+            }
             if (track.hasBPF(param)) {
                 let bpf = track.getBPF(param);
                 bpf.style.display = "block";
+                track.currentBpf = bpf;
             }
             else {
                 const bpf = document.createElement('webaudiomodules-host-bpf');
@@ -58,8 +69,14 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
                 bpf.setSizeBPF(mainAudio.pixelAmountFromBufferLength(track));
                 bpfContainer.appendChild(bpf);
                 track.addBPF(bpf);
-                track.bpf = bpf;
+                track.currentBpf = bpf;
             }
+        }
+    }
+    let itemHide = pluginParamSelector.querySelector(".dropItemHide");
+    itemHide.onclick = () => {
+        if (track.currentBpf !== undefined) {
+            track.currentBpf.style.display = "none";
         }
     }
 };

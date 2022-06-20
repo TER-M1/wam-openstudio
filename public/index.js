@@ -138,18 +138,20 @@ customElements.define(
         mainAudio.tracks.forEach(track => {
             track.audioWorkletNode.clearEvents();
             let list = [];
-            if (track.bpf !== undefined) {
-                for(let x = 0; x < track.bpf.domain; x += 0.1) {
-                    list.push(track.bpf.getYfromX(x));
+            track.bpfList.forEach(bpf => {
+                if (bpf !== undefined) {
+                    for(let x = 0; x < bpf.domain; x += 0.1) {
+                        list.push(bpf.getYfromX(x));
+                    }
+                    track.audioWorkletNode.port.postMessage({
+                        scheduleList: list,
+                        hostGroupId: mainAudio.hostGroupId,
+                        groupKey: mainAudio.groupKey,
+                        wamParamId: bpf.paramID
+                    });
+                    // bpf.style.display = "none";
                 }
-                track.audioWorkletNode.port.postMessage({
-                    scheduleList: list,
-                    hostGroupId: mainAudio.hostGroupId,
-                    groupKey: mainAudio.groupKey,
-                    wamParamId: track.bpf.paramID
-                });
-                track.bpf.style.display = "none";
-            }
+            })
         })
     }
 

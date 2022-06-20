@@ -26,7 +26,7 @@ export default class AudioTrack {
      *
      * @type {Element}
      */
-    bpf = undefined;
+    currentBpf = undefined;
     id = undefined;
     pluginInstance = undefined;
     pluginDOM = undefined;
