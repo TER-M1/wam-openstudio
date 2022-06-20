@@ -84,7 +84,7 @@ const getProcessor = (moduleId) => {
                 .then(instance => {
                     this.instance = instance.exports;
                     this._processPerf = this.instance.processPerf;
-                    this.loadBuffers().then(() => console.log("Processeur chargé."));
+                    this.loadBuffers();
                 })
         }
 
@@ -159,7 +159,6 @@ const getProcessor = (moduleId) => {
                     events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
                     t += 0.1;
                 }
-                console.log(events);
                 this.emitEvents(...events);
             }
         }

@@ -696,7 +696,6 @@ class BPF extends HTMLElement {
 
 try {
     customElements.define('webaudiomodules-host-bpf', BPF);
-    console.log('Element defined');
 } catch (error) {
     console.log(error);
     console.log('Element already defined');

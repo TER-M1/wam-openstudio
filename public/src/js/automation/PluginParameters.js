@@ -21,7 +21,6 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
             class: `item dropItem${values.length}`
         });
 
-        console.log("wam node : ");
         track.audioWorkletNode.disconnectEvents(wamNode.instanceId);
         track.audioWorkletNode.connectEvents(wamNode.instanceId);
     }
@@ -36,9 +35,7 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         let param = params[i]
         const {minValue, maxValue, label} = info[param];
         item.onclick = () => {
-            console.log("item: ", item);
             if (track.hasBPF(param)) {
-                console.log("in?")
                 let bpf = track.getBPF(param);
                 bpf.style.display = "block";
             }

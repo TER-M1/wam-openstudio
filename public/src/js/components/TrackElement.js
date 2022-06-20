@@ -267,7 +267,6 @@ export default class TrackElement extends HTMLElement {
     soloTrackListeners() {
         let soloTrack = this.shadowRoot.querySelector(".item.tool.solo");
         soloTrack.onclick = () => {
-            console.log(this.track.name + "selected")
             if (this.track.isSoloTrack) {
                 soloTrack.style.color = null;
                 mainAudio.unSoloTrack(this.track);
