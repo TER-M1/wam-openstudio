@@ -1,7 +1,20 @@
 const templateCanvas = document.createElement("template");
 templateCanvas.innerHTML = /*html*/`
-<div id = "pluginAutomationEditor"></div>
+<style>
+.can {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.bpf-div {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+</style>
+<div id = "pluginAutomationEditor" class="bpf-div"></div>
 <canvas height="104" width="2000" class="can"></canvas>
+
 `;
 
 

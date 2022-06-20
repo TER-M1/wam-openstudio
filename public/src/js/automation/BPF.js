@@ -1,14 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-constant-condition */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-plusplus */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-globals */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-shadow */
-/* eslint-disable no-mixed-operators */
-/* eslint-disable max-len */
 /**
  * @typedef {{ points: TBPFPoint[]; ghostPoint: TBPFPoint; domain: number; range: [number, number]; defaultValue: number }} State
  * @typedef {[number, number, number]} TBPFPoint
@@ -248,7 +237,6 @@ export default class BPF extends HTMLElement {
         this._svg.setAttribute('width', '100%');
         this._svg.setAttribute('height', '104px');
         this._svg.style.backgroundColor = 'none';
-        // this._svg.style.position = "absolute"
         this._svg.style.zIndex = 10;
         this._svg.addEventListener('mousemove', this.handleMouseMove);
         this._svg.addEventListener('dblclick', this.handleDoubleClick);

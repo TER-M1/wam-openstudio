@@ -92,7 +92,7 @@ body, html {
 }
 
 .wave-form {
-    /*position: relative;*/
+    display: grid;
     margin-left: 3px;
     min-height: 104px;
     border: 1px solid black;
