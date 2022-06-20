@@ -9,7 +9,6 @@ export default class WamEventDestination extends WebAudioModule {
         await WAMAudioWorkletNode.addModules(this.moduleId)
         // await addFunctionModule(audioCtx.audioWorklet, getProcessor, this.moduleId);
 
-
         const node = new WAMAudioWorkletNode(
             this,
             {

@@ -24,7 +24,7 @@ const scale = (x, l1, h1, l2, h2) => {
 };
 const scaleClip = (x, l1, h1, l2, h2) => Math.max(l2, Math.min(h2, scale(x, l1, h1, l2, h2)));
 
-class BPF extends HTMLElement {
+export default class BPF extends HTMLElement {
     constructor() {
         super();
         /**
@@ -694,10 +694,10 @@ class BPF extends HTMLElement {
     }
 }
 
-try {
-    customElements.define('webaudiomodules-host-bpf', BPF);
-    console.log('Element defined');
-} catch (error) {
-    console.log(error);
-    console.log('Element already defined');
-}
+// try {
+//     customElements.define('webaudiomodules-host-bpf', BPF);
+//     console.log('Element defined');
+// } catch (error) {
+//     console.log(error);
+//     console.log('Element already defined');
+// }

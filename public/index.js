@@ -48,9 +48,10 @@ customElements.define(
     EVENT LISTENERS
      */
     btnStart.playing = false;
+    await audioCtx.suspend();
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") {
-            audioCtx.resume();
+            // audioCtx.resume();
             if (intervalCursorTracks === undefined) {
                 intervalCursorTracks = setInterval(() => {
                     updateCursorTracks();
@@ -59,6 +60,7 @@ customElements.define(
         }
 
         if (btnStart.playing === false) {
+            audioCtx.resume();
             playPauseIcon.className = "large pause icon";
             btnStart.setAttribute("data-tooltip", "Stop");
             mainAudio.tracks.forEach((track) => {
@@ -72,6 +74,7 @@ customElements.define(
             });
             btnStart.playing = true
         } else {
+            audioCtx.suspend();
             playPauseIcon.className = "large play icon";
             btnStart.setAttribute("data-tooltip", "Play");
             mainAudio.tracks.forEach((track) => {
@@ -134,6 +137,7 @@ customElements.define(
 
     btnApply.onclick = () => {
         mainAudio.tracks.forEach(track => {
+            track.audioWorkletNode.clearEvents();
             let list = [];
             if (track.bpf !== undefined) {
                 for(let x = 0; x < track.bpf.domain; x += 0.1) {
@@ -147,8 +151,6 @@ customElements.define(
                 });
                 track.bpf.style.display = "none";
             }
-
-
         })
     }
 

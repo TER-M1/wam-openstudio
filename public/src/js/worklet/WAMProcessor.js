@@ -148,6 +148,7 @@ const getProcessor = (moduleId) => {
                  */
             } else if (e.data.scheduleList) {
                 this.clearEvents();
+
                 let scheduleList = e.data.scheduleList;
                 let hostGroupId = e.data.hostGroupId;
                 let groupKey = e.data.groupKey;
@@ -159,7 +160,7 @@ const getProcessor = (moduleId) => {
                     events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
                     t += 0.1;
                 }
-                console.log(events);
+                // console.log(events);
                 this.emitEvents(...events);
             }
         }

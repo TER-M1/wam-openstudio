@@ -2,6 +2,12 @@
  * @param {import('../api/src').WamNode} wamNode
  */
 import {mainAudio} from "../audio/Utils.js";
+import BPF from "./BPF.js";
+
+customElements.define(
+    'webaudiomodules-host-bpf',
+    BPF
+)
 
 export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSelector, track) => {
 
@@ -38,7 +44,6 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
         item.onclick = () => {
             console.log("item: ", item);
             if (track.hasBPF(param)) {
-                console.log("in?")
                 let bpf = track.getBPF(param);
                 bpf.style.display = "block";
             }
@@ -46,6 +51,7 @@ export const populateParamSelector = async (wamNode, bpfContainer, pluginParamSe
                 const bpf = document.createElement('webaudiomodules-host-bpf');
                 bpf.className = param;
                 bpf.paramID = param;
+                // bpf.style.position = "absolute";
                 bpf.setAttribute('min', minValue);
                 bpf.setAttribute('max', maxValue);
                 let defaultValue = (maxValue - minValue) / 2;
