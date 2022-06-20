@@ -112,7 +112,7 @@ export default class AudioTrack {
         // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
         // var {default: WAM} = await import ("https://wam-bank.herokuapp.com/pedalboard/index.js");
         // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
-        var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages//BigMuff/index.js");
+        var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages//quadrafuzz/dist/index.js");
 
         var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
 
