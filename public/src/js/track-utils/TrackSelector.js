@@ -54,7 +54,7 @@ export default class TrackSelector {
                 populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
             }
         })
-        this.handlersCanvas();
+        // this.handlersCanvas();
         this.defineHandler();
     }
 
@@ -102,7 +102,6 @@ export default class TrackSelector {
         let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
         populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
     }
-
 
     defineHandler() {
         this.automation.addEventListener("click", () => {

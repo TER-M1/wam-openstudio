@@ -80,7 +80,7 @@ body, html {
     font-size: 1em;
     color: lightgray;
     overflow: auto;
-    min-width: 192px;
+    min-width: 200px;
 }
 
 .audio-tracks {
@@ -104,11 +104,15 @@ body, html {
 .track-element {
     border: 1px solid black;
     height: 104px;
-    width: 180px;
+    width: 190px;
     background-color: #31353A;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
+}
+
+.track-element:hover {
+    background-color: #373c41;
 }
 
 .right-icon, .left-icon, .mute-icon, .solo-icon {

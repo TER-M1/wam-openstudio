@@ -18,9 +18,7 @@ const loopBeginning = document.getElementById("loop-beginning-input");
 const loopEnding = document.getElementById("loop-end-input");
 const playPauseIcon = document.getElementById("btn-start-icon");
 const muteIcon = document.getElementById("mute-icon");
-const loopIcon = document.getElementById("loop-icon")
 const startVolume = 20 / 100;
-var currentPluginAudioNode;
 var intervalCursorTracks = undefined;
 
 customElements.define(
@@ -51,7 +49,6 @@ customElements.define(
     await audioCtx.suspend();
     btnStart.onclick = () => {
         if (audioCtx.state === "suspended") {
-            // audioCtx.resume();
             if (intervalCursorTracks === undefined) {
                 intervalCursorTracks = setInterval(() => {
                     updateCursorTracks();
@@ -71,7 +68,7 @@ customElements.define(
                     }, 33);
                 }
             });
-            btnStart.playing = true
+            btnStart.playing = true;
         } else {
             audioCtx.suspend();
             playPauseIcon.className = "large play icon";
@@ -89,16 +86,11 @@ customElements.define(
     }
 
     backToStartBtn.onclick = () => {
-        // btnStart.playing = false;
         mainAudio.tracks.forEach((track) => {
-            // track.audioWorkletNode.parameters.get("playing").value = 0;
             track.audioWorkletNode.port.postMessage({reset: true});
             track.audioWorkletNode.resetPlayHead();
             updateCursorTracks();
-            // clearInterval(intervalCursorTracks);
-            // intervalCursorTracks = undefined;
-            // playPauseIcon.className = "large play icon";
-        })
+        });
     }
 
     inputLoop.onclick = () => {
@@ -113,7 +105,7 @@ customElements.define(
                 track.audioWorkletNode.parameters.get("loop").value = 1;
                 inputLoop.checked = true;
             }
-        })
+        });
         if (looped) {
             inputLoop.setAttribute("data-tooltip", "Loop");
             inputLoop.style.background = "#31353A";
@@ -127,10 +119,10 @@ customElements.define(
     inputMute.onclick = () => {
         if (!mainAudio.isMuted) {
             mainAudio.mute();
-            muteIcon.className = "large volume mute icon"
+            muteIcon.className = "large volume mute icon";
         } else {
             mainAudio.unMute();
-            muteIcon.className = "large volume up icon"
+            muteIcon.className = "large volume up icon";
         }
     };
 
@@ -151,8 +143,8 @@ customElements.define(
                     });
                     // bpf.style.display = "none";
                 }
-            })
-        })
+            });
+        });
     }
 
     loopBeginning.addEventListener("change", onLoopBegginingInputChange);
