@@ -123,15 +123,17 @@ export default class MainAudio {
                 track.canvas.width = this.pixelAmountFromBufferLength(track);
                 track.canvas.height = MainAudio.CANVAS_HEIGHT;
                 track.canvas.addEventListener("click", canvasClickMoveCursor);
-                drawBuffer(track.canvas, track.decodedAudioBuffer, "#" + Math.floor(Math.random() * 16777215).toString(16));
+                console.log(`${track.name} loaded...`);
+                resolve(track);
 
+                let color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+                drawBuffer(track.canvas, track.decodedAudioBuffer, color);
                 let trackEl = document.createElement("track-element");
                 trackEl.track = track;
                 trackEl.id = "track" + track.id;
                 trackEl.className = `track-element`;
                 this.tracksDiv.appendChild(trackEl);
-                console.log(`${track.name} loaded...`);
-                resolve(track);
+                trackEl.shadowRoot.getElementById("color").style.backgroundColor = color;
             } catch (e) {
                 reject(e);
             }

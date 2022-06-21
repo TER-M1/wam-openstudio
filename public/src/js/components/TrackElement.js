@@ -11,19 +11,10 @@ template.innerHTML = /*html*/`
 <style>
 
 /* Track Element */
-.track-element {
-    border: 1px solid black;
-    height: 104px;
-    width: 180px;
-    background-color: #31353A;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
 
 .track-element-color {
-    flex-grow: 3;
-    background-color: greenyellow !important;
+    width: 10px;
+    background-color: lime;
 }
 
 .track-element-tools {
@@ -47,7 +38,7 @@ template.innerHTML = /*html*/`
 }
 
 .ui.black.label {
-    width: 150px;
+    width: 140px;
     overflow     : hidden;
     text-overflow: ellipsis;
     white-space  : nowrap;
@@ -185,7 +176,7 @@ i.icon {
 <!--        </a>-->
     </div>
 </div>
-<div class="track-element-color"></div>
+<div id="color" class="track-element-color"></div>
  `;
 
 export default class TrackElement extends HTMLElement {
