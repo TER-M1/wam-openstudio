@@ -3,9 +3,6 @@ import {mainAudio} from "../audio/Utils.js";
 const template = document.createElement("template");
 
 template.innerHTML = /*html*/`
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
-<script src="../../lib/semantic.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/components/icon.min.css">
 <link rel="stylesheet" href="../../lib/semantic.min.css" type="text/css">
 
 <style>
