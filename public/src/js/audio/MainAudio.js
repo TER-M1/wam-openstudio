@@ -141,6 +141,7 @@ export default class MainAudio {
     }
 
     removeTrack(track) {
+        track.audioWorkletNode.port.postMessage({delete: true});
         track.audioWorkletNode.disconnect();
         delete track.decodedAudioBuffer;
         delete track.operableDecodedAudioBuffer;

@@ -163,6 +163,11 @@ const getProcessor = (moduleId) => {
                 // console.log(events);
                 this.emitEvents(...events);
             }
+            else if (e.data.delete) {
+                // DOESN'T WORK : stackFree of _module doesn't exist... See on wasm compilation.
+                // this._heapInputBuffer.free();
+                // this._heapOutputBuffer.free();
+            }
         }
 
         /**
