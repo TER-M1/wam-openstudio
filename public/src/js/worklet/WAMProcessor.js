@@ -165,6 +165,7 @@ const getProcessor = (moduleId) => {
                 this._processPerf = null;
                 this._heapOutputBuffer = null;
                 this._heapInputBuffer = null;
+                this.audio = null;
                 // this._heapInputBuffer.free();
                 // this._heapOutputBuffer.free();
             }
