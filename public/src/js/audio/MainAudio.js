@@ -144,8 +144,11 @@ export default class MainAudio {
         track.pannerNode.disconnect();
         track.gainOutNode.disconnect();
         track.pluginInstance._audioNode.disconnect();
-        track.pannerNode.disconnect();
         track.audioWorkletNode.disconnect();
+
+        track.pannerNode = null;
+        track.gainOutNode = null;
+        track.pluginInstance._audioNode = null;
 
         track.audioWorkletNode.port.postMessage({delete: true});
         track.decodedAudioBuffer = null;
