@@ -141,13 +141,9 @@ const getProcessor = (moduleId) => {
             } else if (e.data.reset) {
                 this.playhead = 0;
             }
-            else if (e.data.mod) {
-                /**
-                 * IL FAUT RECEVOIR LE MODULE, ET FAIRE LE WEBASSEMBLY.INSTIANTIATE ICI
-                 * MAIS JE RECOIS JAMAIS LE MESSAGE AVEC MODULE IL DISPARAIT PTN
-                 */
-            } else if (e.data.scheduleList) {
+            else if (e.data.scheduleList) {
                 this.clearEvents();
+
 
                 let scheduleList = e.data.scheduleList;
                 let hostGroupId = e.data.hostGroupId;
@@ -160,15 +156,24 @@ const getProcessor = (moduleId) => {
                     events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
                     t += 0.1;
                 }
-                // console.log(events);
-                this.emitEvents(...events);
+                this.scheduleEvents(...events);
+                // this.emitEvents(...events);
             }
             else if (e.data.delete) {
                 // DOESN'T WORK : stackFree of _module doesn't exist... See on wasm compilation.
+                this.instance = null;
+                this._processPerf = null;
+                this._heapOutputBuffer = null;
+                this._heapInputBuffer = null;
                 // this._heapInputBuffer.free();
                 // this._heapOutputBuffer.free();
             }
         }
+
+        _processEvent(event) {
+            this.emitEvents(event);
+        }
+        _process() {}
 
         /**
          * @param {Float32Array[][]} inputs

@@ -19,6 +19,7 @@ export default class WamEventDestination extends WebAudioModule {
                 }
             });
 
+        await node._initialize();
         return node;
     }
 

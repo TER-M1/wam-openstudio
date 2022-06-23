@@ -141,13 +141,20 @@ export default class MainAudio {
     }
 
     removeTrack(track) {
-        track.audioWorkletNode.port.postMessage({delete: true});
+        track.pannerNode.disconnect();
+        track.gainOutNode.disconnect();
+        track.pluginInstance._audioNode.disconnect();
+        track.pannerNode.disconnect();
         track.audioWorkletNode.disconnect();
-        delete track.decodedAudioBuffer;
-        delete track.operableDecodedAudioBuffer;
+
+        track.audioWorkletNode.port.postMessage({delete: true});
+        track.decodedAudioBuffer = null;
+        track.operableDecodedAudioBuffer = null;
         this.tracks = this.tracks.filter((ele) => {
             return ele !== track;
         });
+        track.audioWorkletNode = null;
+        track = null;
     }
 
     /**
