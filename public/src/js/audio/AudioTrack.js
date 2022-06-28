@@ -53,6 +53,7 @@ export default class AudioTrack {
         this.loopEnding = 0;
         this.bpfList = [];
         this.bpfContainer = undefined;
+        this.hasPlugin = false;
     }
 
     /**
@@ -109,16 +110,16 @@ export default class AudioTrack {
     }
 
     async load() {
-        var {default: WAM} = await import ("../../../plugins/TER/pedalboard/index.js");
+        // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
         // var {default: WAM} = await import ("https://wam-bank.herokuapp.com/pedalboard/index.js");
         // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
         // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages//quadrafuzz/dist/index.js");
 
-        var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
+        // var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
 
         // instance._descriptor.name = instance.name + ` ${this.id}`
-        this.pluginInstance = instance;
-        this.pluginDOM = await instance.createGui();
+        // this.pluginInstance = instance;
+        // this.pluginDOM = await instance.createGui();
 
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
@@ -130,8 +131,35 @@ export default class AudioTrack {
         );
         this.setLoopEnding(this.decodedAudioBuffer.length);
         this.audioWorkletNode.setAudio(this.operableDecodedAudioBuffer.toArray());
-        this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode).connect(this.gainOutNode);
-        this.audioWorkletNode.port.postMessage({plugin: this.pluginInstance._groupId})
+        this.audioWorkletNode.connect(this.pannerNode).connect(this.gainOutNode);
+    }
+
+    async addPedalBoard() {
+        this.hasPlugin = true;
+        var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
+        var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
+
+        this.pluginInstance = instance;
+        this.pluginDOM = await instance.createGui();
+        this.audioWorkletNode.disconnect(this.pannerNode);
+        this.audioWorkletNode.connect(this.pluginInstance._audioNode).connect(this.pannerNode);
+        this.audioWorkletNode.port.postMessage({plugin: this.pluginInstance._groupId});
+
+        let mount = document.querySelector("#mount1");
+        mount.innerHTML = '';
+        mount.appendChild(this.pluginDOM);
+    }
+
+    async removePedalBoard() {
+        this.hasPlugin = false;
+        this.audioWorkletNode.disconnect(this.pluginInstance._audioNode);
+        this.audioWorkletNode.connect(this.pannerNode);
+
+        this.pluginInstance._audioNode = null;
+        this.pluginDOM = null;
+
+        let mount = document.querySelector("#mount1");
+        mount.innerHTML = '';
     }
 
     mute() {

@@ -402,7 +402,7 @@ const getProcessor = (moduleId) => {
     try {
         registerProcessor(moduleId, MyWAMProcessor);
     } catch (e) {
-        console.log(e);
+        // console.log(e);
     }
     return MyWAMProcessor;
 }

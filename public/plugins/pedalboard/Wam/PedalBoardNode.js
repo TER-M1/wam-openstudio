@@ -1,5 +1,4 @@
-import WamNode from "../../../plugins/utils/sdk/src/WamNode.js";
-import addFunctionModule from "../../plugins/utils/sdk/src/addFunctionModule.js";
+import {WamNode, addFunctionModule} from "../../../lib/sdk/index.js";
 import getCustomProcessor from "./CustomProcessor.js";
 
 export default class PedalBoardNode extends WamNode {
@@ -30,7 +29,7 @@ export default class PedalBoardNode extends WamNode {
 
   async _initialize() {
     await super._initialize();
-    const { default: initializeWamHost } = await import("../../plugins/utils/sdk/src/initializeWamHost.js");
+    const {initializeWamHost} = await import("../../../lib/sdk/index.js");
     let [subGroupId, subGroupKey] = await initializeWamHost(this.module.audioContext);
     this.subGroupId = subGroupId;
 

@@ -134,7 +134,7 @@ const getCustomProcessor = (moduleId) => {
   try {
     registerProcessor(moduleId, CustomProcessor);
   } catch (error) {
-    console.warn(error);
+    // console.warn(error);
   }
 
   return CustomProcessor;

@@ -34,6 +34,7 @@ export default class MainAudio {
         this.masterVolumeNode.connect(this.audioCtx.destination);
         this.hostGroupId = undefined;
         this.groupKey = undefined;
+        this.selectedTrack = undefined;
     }
 
 
@@ -141,14 +142,26 @@ export default class MainAudio {
     }
 
     removeTrack(track) {
+        if (track === this.selectedTrack) {
+            this.selectedTrack = null;
+            let addRemoveButton = document.querySelector("#add-remove-plugins")
+
+            let icon = addRemoveButton.firstElementChild;
+            icon.className = "disabled plus icon";
+            addRemoveButton.className = "disabled item";
+            console.log(addRemoveButton.className);
+        }
+        if (track.hasPlugin) {
+            track.removePedalBoard().then(() => {});
+        }
         track.pannerNode.disconnect();
         track.gainOutNode.disconnect();
-        track.pluginInstance._audioNode.disconnect();
         track.audioWorkletNode.disconnect();
 
         track.pannerNode = null;
         track.gainOutNode = null;
-        track.pluginInstance._audioNode = null;
+
+
 
         track.audioWorkletNode.port.postMessage({delete: true});
         track.decodedAudioBuffer = null;

@@ -25,11 +25,11 @@
                 </div>
             </div>
         </div>
-            <a class="auto ui dropdown search item inverted">
-                <i class="project diagram icon"></i>
-                <div class="menu pluginParamSelector">
-                </div>
-            </a>
+        <a class="auto ui dropdown search item inverted">
+            <i class="project diagram icon"></i>
+            <div class="menu pluginParamSelector">
+            </div>
+        </a>
 
         <a id="btn-apply" class="item" data-tooltip="Apply" data-position="bottom right" data-variation="mini basic"
            data-inverted="">
@@ -39,7 +39,8 @@
            data-inverted="">
             <i id="btn-start-icon" class="large play icon"></i>
         </a>
-        <a id="btn-back-to-start" class="item" data-tooltip="Back to start" data-position="bottom right" data-variation="mini basic"
+        <a id="btn-back-to-start" class="item" data-tooltip="Back to start" data-position="bottom right"
+           data-variation="mini basic"
            data-inverted="">
             <i class="large step backward icon"></i>
         </a>
@@ -54,7 +55,7 @@
         <div class="item">
             <div class="timer">00:00:00.00</div>
         </div>
-        <a id="mute"class="item" data-tooltip="Mute" data-position="bottom right" data-variation="mini basic"
+        <a id="mute" class="item" data-tooltip="Mute" data-position="bottom right" data-variation="mini basic"
            data-inverted="">
             <i id="mute-icon" class="large volume up icon"></i>
         </a>
@@ -78,15 +79,15 @@
     </div>
 
     <div class="right menu">
-<!--        NOT IMPLEMENTED YET -->
-<!--        <a class="item" data-tooltip="Zoom out" data-position="bottom right"-->
-<!--           data-variation="mini basic" data-inverted="" id="btn-zoom-out">-->
-<!--            <i class="large search minus icon"></i>-->
-<!--        </a>-->
-<!--        <a class="item" data-tooltip="Zoom in" data-position="bottom right"-->
-<!--           data-variation="mini basic" data-inverted="" id="btn-zoom-in">-->
-<!--            <i class="large search plus icon"></i>-->
-<!--        </a>-->
+        <!--        NOT IMPLEMENTED YET -->
+        <!--        <a class="item" data-tooltip="Zoom out" data-position="bottom right"-->
+        <!--           data-variation="mini basic" data-inverted="" id="btn-zoom-out">-->
+        <!--            <i class="large search minus icon"></i>-->
+        <!--        </a>-->
+        <!--        <a class="item" data-tooltip="Zoom in" data-position="bottom right"-->
+        <!--           data-variation="mini basic" data-inverted="" id="btn-zoom-in">-->
+        <!--            <i class="large search plus icon"></i>-->
+        <!--        </a>-->
     </div>
 
 </div>
@@ -111,6 +112,13 @@
         <div class="head-plugin-editor">
             <i class="inverted sliders horizontal icon"></i>
             PLUGINS
+
+            <a id="hide-show-plugins" class="item" data-tooltip="Show" data-position="bottom right" data-variation="mini basic" data-inverted="">
+                <i class="chevron up icon"></i>
+            </a>
+            <a id="add-remove-plugins" class="disabled item" data-tooltip="Add pedalboard" data-position="bottom right" data-variation="mini basic" data-inverted="">
+                <i class="disabled plus icon"></i>
+            </a>
         </div>
 
         <div class="plugin-rack">
@@ -119,7 +127,7 @@
     </div>
 </div>
 
-<script src="src/js/track-utils/Control.js"></script>
+<script src="src/js/track-utils/Control.js" type="module"></script>
 <script src="index.js" type="module"></script>
 
 </body>

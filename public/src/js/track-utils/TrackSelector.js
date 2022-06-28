@@ -1,4 +1,5 @@
 import {populateParamSelector} from "../automation/PluginParameters.js";
+import {mainAudio} from "../audio/Utils.js";
 
 const mountPlugin = (mount, domModel) => {
     mount.innerHTML = '';
@@ -10,7 +11,9 @@ const uMountPlugin = (mount) => {
 }
 
 function populateDropDown(track, mount, pluginParamSelector) {
-    populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
+    if (track.hasPlugin) {
+        populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
+    }
 }
 
 export default class TrackSelector {
@@ -30,16 +33,18 @@ export default class TrackSelector {
     constructor(tracks = []) {
 
         this.tracks = tracks;
-        let trackDivs = document.querySelectorAll(".track-element")
+        let trackDivs = document.querySelectorAll(".track-element");
+        let addPlugin = document.querySelector("#add-remove-plugins");
 
         trackDivs.forEach((elem) => {
             this.tracksId.push(elem.id);
             let idTrack = elem.id.split('')[elem.id.length - 1];
             elem.onclick = () => {
                 if (this.getTrack(idTrack) !== this.selectedTrack) {
+                    addPlugin.className = "item";
                     uMountPlugin(document.querySelector("#mount1"));
                     let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
-                    let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
+                    let toRemoveSElectionTrackElem = document.querySelector('.mySelected');
                     if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
                         toRemoveSElectionTrackElem.className = this.trackElementClass;
                         toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id;
@@ -47,44 +52,19 @@ export default class TrackSelector {
                     elem.className += this.selectClass;
                     document.querySelector('.' + elem.id).className += this.selectClass;
                     this.selectedTrack = this.getTrack(idTrack);
-                    let can = document.querySelector(`.wave-form.${elem.id}`);
-                    mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
-                    // console.log(this.selectedTrack.bpf)
+                    mainAudio.selectedTrack = this.selectedTrack;
+                    if (this.selectedTrack.hasPlugin) {
+                        mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
+                        addPlugin.firstElementChild.className = "minus icon";
+                    }
+                    else {
+                        addPlugin.firstElementChild.className = "plus icon";
+                    }
                 }
                 populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
             }
         })
-        // this.handlersCanvas();
         this.defineHandler();
-    }
-
-    handlersCanvas() {
-        let elems = [];
-        this.tracksId.forEach((id) => {
-            let el = document.querySelectorAll(' .' + id);
-            el.forEach((e) => {
-
-                let idTrack = e.id.split('')[e.id.length - 1];
-                e.onclick = () => {
-                    if (this.getTrack(idTrack) !== this.selectedTrack) {
-                        uMountPlugin(document.querySelector("#mount1"));
-                        let toRemoveSelectionCanvas = document.querySelector('.wave-form.mySelected');
-                        let toRemoveSElectionTrackElem = document.querySelector('.mySelected')
-                        if (toRemoveSelectionCanvas !== null && toRemoveSElectionTrackElem !== null) {
-                            toRemoveSElectionTrackElem.className = this.trackElementClass
-                            toRemoveSelectionCanvas.className = this.waveformClass + ' ' + toRemoveSelectionCanvas.id
-                        }
-                        e.className += this.selectClass;
-                        document.querySelector('#' + e.id).className += this.selectClass;
-                        this.selectedTrack = this.getTrack(idTrack);
-                        mountPlugin(document.querySelector("#mount1"), this.selectedTrack.pluginDOM);
-                        let can = document.querySelector(`.wave-form.${e.id}`);
-                    }
-                    populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
-                }
-                elems.push(e);
-            })
-        });
     }
 
     getTrack(id) {
@@ -107,7 +87,6 @@ export default class TrackSelector {
         this.automation.addEventListener("click", () => {
             console.log("need to update teh dropdown here too without deelting it ")
         })
-
     }
 
 }

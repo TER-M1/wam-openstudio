@@ -1,4 +1,4 @@
-import WebAudioModule from "../../plugins/utils/sdk/src/WebAudioModule.js";
+import {WebAudioModule} from "../../lib/sdk/index.js";
 import PedalBoardNode from "./Wam/PedalBoardNode.js";
 import { createElement } from "./Gui/index.js";
 
