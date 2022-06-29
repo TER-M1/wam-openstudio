@@ -1,6 +1,5 @@
-import WebAudioModule from "https://mainline.i3s.unice.fr/PedalEditor/Back-End/functional-pedals/published/freeverbForBrowser/utils/sdk/src/WebAudioModule.js";
-import ParamMgrFactory from "https://mainline.i3s.unice.fr/PedalEditor/Back-End/functional-pedals/published/freeverbForBrowser/utils/sdk-parammgr/src/ParamMgrFactory.js";
-import PedalBoardNode from "./Wam/node.js";
+import {WebAudioModule} from "../../lib/sdk/index.js";
+import PedalBoardNode from "./Wam/PedalBoardNode.js";
 import { createElement } from "./Gui/index.js";
 
 /**
@@ -11,7 +10,6 @@ const getBasetUrl = (relativeURL) => {
   const baseURL = relativeURL.href.substring(0, relativeURL.href.lastIndexOf("/"));
   return baseURL;
 };
-
 export default class PedalBoardPlugin extends WebAudioModule {
   _baseURL = getBasetUrl(new URL(".", import.meta.url));
 
@@ -48,10 +46,10 @@ export default class PedalBoardPlugin extends WebAudioModule {
    * @author Quentin Beauchet
    */
   async createAudioNode(initialState) {
-    this.pedalboardNode = new PedalBoardNode(this.audioContext);
+    await PedalBoardNode.addModules(this.audioContext, this.moduleId);
+    this.pedalboardNode = new PedalBoardNode(this, {});
+    await this.pedalboardNode._initialize();
 
-    const paramMgrNode = await ParamMgrFactory.create(this, {});
-    this.pedalboardNode.setup(paramMgrNode);
     if (initialState) {
       this.pedalboardNode.initialState = initialState;
     } else {
@@ -74,17 +72,18 @@ export default class PedalBoardPlugin extends WebAudioModule {
     let json2 = await repos.json();
     let files = await Promise.allSettled(json2.map((el) => fetch(this.removeRelativeUrl(el))));
     let urls = await Promise.all(files.filter(filterFetch).map((el) => el.value.json()));
+
     urls = urls.reduce((arr, next) => arr.concat(next), []);
 
     let responses = await Promise.allSettled(urls.map((el) => fetch(`${el}descriptor.json`)));
 
-    let descriptors = await Promise.all(responses.filter(filterFetch).map((el) => el.value.json()));
+    let descriptors = await Promise.all(responses.map((el) => (filterFetch(el) ? el.value.json() : undefined)));
 
     let modules = await Promise.allSettled(urls.map((el) => import(`${el}index.js`)));
 
     this.WAMS = {};
     descriptors.forEach((el, index) => {
-      if (modules[index].status == "fulfilled") {
+      if (el && modules[index].status == "fulfilled" && !this.WAMS[el.name]) {
         this.WAMS[el.name] = {
           url: urls[index],
           descriptor: el,
@@ -111,12 +110,12 @@ export default class PedalBoardPlugin extends WebAudioModule {
    */
   async addWAM(WamName, state) {
     const { default: WAM } = this.WAMS[WamName].module;
-    let instance = await WAM.createInstance(this.pedalboardNode.module._groupId, this.pedalboardNode.context);
+    let instance = await WAM.createInstance(this.pedalboardNode.subGroupId, this.pedalboardNode.context);
     if (state) {
       instance.audioNode.setState(state);
     }
     this.pedalboardNode.addPlugin(instance.audioNode, WamName, this.id);
-    this.gui.addPlugin(instance, this.WAMS[WamName].img, this.id);
+    await this.gui.addPlugin(instance, this.WAMS[WamName].img, this.id);
     this.id++;
   }
 

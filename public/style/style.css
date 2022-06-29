@@ -16,14 +16,14 @@ body, html {
     padding-top: 39px;
     padding-bottom: 28px;
     /*overflow-y: auto;*/
-    height: 67%;
+    height: 95%;
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
 }
 
 .plugin-editor {
-    height: 33%;
+    height: 5%;
     background: #1C1E21;
     border: 1px solid black;
     border-top: none;
@@ -198,4 +198,17 @@ i.icon {
 
 .ui.input {
     width: 80px !important;
+}
+
+
+.item:hover {
+    cursor: pointer;
+}
+
+.item.disabled:hover {
+    cursor: not-allowed;
+}
+
+.waiting:hover {
+    cursor: wait;
 }

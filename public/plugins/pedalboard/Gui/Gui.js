@@ -1,12 +1,12 @@
+import Visualizer from "./Visualizer.js";
+import "https://wam-bank.herokuapp.com/plugins/utils/webaudio-controls.js";
+
 /**
  * @param {URL} relativeURL
  * @returns {string}
  */
 const getBasetUrl = (relativeURL) => {
-  const baseURL = relativeURL.href.substring(
-    0,
-    relativeURL.href.lastIndexOf("/")
-  );
+  const baseURL = relativeURL.href.substring(0, relativeURL.href.lastIndexOf("/"));
   return baseURL;
 };
 
@@ -43,10 +43,15 @@ export default class pedalboardGui extends HTMLElement {
     this.createBoard();
     await this._plug.pedalboardNode.initState();
 
-    var body = document.createElement("body");
-    body.appendChild(this.main);
+    let canvas = document.createElement("canvas");
+    canvas.on = true;
+    this.main.appendChild(canvas);
+    new Visualizer(canvas, this._plug.pedalboardNode._output);
 
-    this._root.appendChild(body);
+    this.body = document.createElement("body");
+    this.body.appendChild(this.main);
+
+    this._root.appendChild(this.body);
   }
 
   /**
@@ -119,10 +124,33 @@ export default class pedalboardGui extends HTMLElement {
   async reloadPresets(presets) {
     this.PresetsBank = presets;
 
-    if (this.presetsMenu) this.presetsMenu.remove();
+    if (this.presetsMenu) {
+      this._root.getElementById("presetsCollapsable").remove();
+    }
+
     this.presetsMenu = await this.loadMenu();
 
-    this.main.appendChild(this.presetsMenu);
+    let presetsCollapsable = document.createElement("div");
+    presetsCollapsable.id = "presetsCollapsable";
+
+    let onoff = document.createElement("button");
+    onoff.id = "presetsONOFF";
+    onoff.innerHTML = "❱";
+
+    onoff.onclick = () => {
+      if (presetsCollapsable.getAttribute("collapsed") == "on") {
+        presetsCollapsable.setAttribute("collapsed", "off");
+        onoff.innerHTML = "❱";
+      } else {
+        presetsCollapsable.setAttribute("collapsed", "on");
+        onoff.innerHTML = "❰";
+      }
+    };
+
+    presetsCollapsable.appendChild(onoff);
+    presetsCollapsable.appendChild(this.presetsMenu);
+
+    this.main.appendChild(presetsCollapsable);
   }
 
   /**
@@ -137,13 +165,14 @@ export default class pedalboardGui extends HTMLElement {
     this.dropZone = document.createElement("div");
     this.dropZone.id = "dropZone";
     this.dropZone.ondragover = (e) => e.preventDefault();
-    this.dropZone.ondrop = () => {
+    this.dropZone.ondrop = (e) => {
+      e.preventDefault();
       let target = this.dropZone.nextSibling;
       this.board.removeChild(this.dropZone);
 
-      this._plug.pedalboardNode.disconnectNodes(this.board.childNodes);
-      this.board.insertBefore(this.dragOrigin, target);
-      this._plug.pedalboardNode.connectNodes(this.board.childNodes);
+      this._plug.pedalboardNode.disconnectNodes(this.board.childNodes, false, () =>
+        this.board.insertBefore(this.dragOrigin, target)
+      );
 
       this.dragOrigin = undefined;
     };
@@ -154,65 +183,78 @@ export default class pedalboardGui extends HTMLElement {
   /**
    * Create the gui for the plugin and then the wrapper around it.
    * We need to resize it with resizeWrapper at the end.
+   * If the customElement of the gui was already used we need to define it
+   * with a new id until it's free to be defined.
    * @param {WebAudioModule} instance
    * @param {HTMLElement} img
    * @param {int} id
    * @author Quentin Beauchet
    */
-  addPlugin(instance, img, id) {
-    instance.createGui().then((gui) => {
-      let wrapper = document.createElement("article");
-      wrapper.draggable = true;
-      wrapper.ondragstart = (event) => {
-        event.dataTransfer.setDragImage(img, img.width / 2, img.height / 2);
-        this.dragOrigin = wrapper;
-      };
-      wrapper.ondragover = (event) => {
-        let target = this.getWrapper(event.path);
-        let mid =
-          target.getBoundingClientRect().x +
-          target.getBoundingClientRect().width / 2;
-        if (target && this.dragOrigin) {
-          this.board.insertBefore(
-            this.dropZone,
-            mid > event.x ? target : target.nextSibling
-          );
+  async addPlugin(instance, img, id) {
+    var gui;
+    try {
+      gui = await instance.createGui();
+    } catch (e) {
+      if (e instanceof TypeError) {
+        let path = e.stack.split("\n")[1].split("(")[1].split(":").slice(0, -2).join(":");
+        let module = await import(path);
+        let name = module.default.name.toLowerCase();
+        let id = 0;
+        while (customElements.get(`${name}-${id}`)) {
+          id++;
+          if (id > 1000) throw new Error("Element already defined");
         }
-      };
-      wrapper.ondragend = () => {
-        if (this.dropZone.parentElement == this.board) {
-          this.board.removeChild(this.dropZone);
-        }
-      };
+        customElements.define(`${name}-${id}`, module.default);
+        gui = await instance.createGui();
+      } else {
+        throw e;
+      }
+    }
+    let wrapper = document.createElement("article");
+    wrapper.draggable = true;
+    wrapper.ondragstart = (event) => {
+      event.dataTransfer.setDragImage(img, img.width / 2, img.height / 2);
+      this.dragOrigin = wrapper;
+    };
+    wrapper.ondragover = (event) => {
+      let target = this.getWrapper(event);
+      let mid = target.getBoundingClientRect().x + target.getBoundingClientRect().width / 2;
+      if (target && this.dragOrigin) {
+        this.board.insertBefore(this.dropZone, mid > event.x ? target : target.nextSibling);
+      }
+    };
+    wrapper.ondragend = (event) => {
+      event.preventDefault();
+      if (this.dropZone.parentElement == this.board) {
+        this.board.removeChild(this.dropZone);
+      }
+    };
 
-      let header = document.createElement("header");
-      let title = document.createElement("h2");
-      title.innerHTML = instance.name;
-      header.appendChild(title);
+    let header = document.createElement("header");
+    let title = document.createElement("h2");
+    title.innerHTML = instance.name;
+    header.appendChild(title);
 
-      let cross = document.createElement("img");
-      cross.src = this._crossIMGUrl;
-      cross.setAttribute("crossorigin", "anonymous");
-      cross.addEventListener("click", () => {
-        this._plug.pedalboardNode.disconnectNodes(this.board.childNodes);
-        this.board.removeChild(wrapper);
-        this._plug.pedalboardNode.connectNodes(this.board.childNodes);
-      });
-      header.append(cross);
-      wrapper.appendChild(gui);
-      wrapper.id = id;
-      wrapper.classList.add("nodeArticle");
-
-      this.board.appendChild(wrapper);
-
-      // We need to do this because the HTMLElement is not fully loaded and the BoundingClientRect returns falsy values.
-      wrapper.hidden = true;
-      setTimeout(() => {
-        wrapper.hidden = false;
-        this.resizeWrapper(wrapper, header, title, cross, gui);
-        wrapper.insertBefore(header, gui);
-      }, 10);
+    let cross = document.createElement("img");
+    cross.src = this._crossIMGUrl;
+    cross.setAttribute("crossorigin", "anonymous");
+    cross.addEventListener("click", () => {
+      this._plug.pedalboardNode.disconnectNodes(this.board.childNodes, false, () => this.board.removeChild(wrapper));
     });
+    header.append(cross);
+    wrapper.appendChild(gui);
+    wrapper.id = id;
+    wrapper.classList.add("nodeArticle");
+
+    this.board.appendChild(wrapper);
+
+    // We need to do this because the HTMLElement is not fully loaded and the BoundingClientRect returns falsy values.
+    wrapper.hidden = true;
+    setTimeout(() => {
+      wrapper.hidden = false;
+      this.resizeWrapper(wrapper, header, title, cross, gui);
+      wrapper.insertBefore(header, gui);
+    }, 10);
   }
 
   /**
@@ -233,12 +275,8 @@ export default class pedalboardGui extends HTMLElement {
 
     const width = Math.round(wrapper.getBoundingClientRect().width / scale);
 
-    wrapper.style.width = `${
-      wrapper.getBoundingClientRect().width / parentScale
-    }px`;
-    wrapper.style.height = `${
-      wrapper.getBoundingClientRect().height / parentScale
-    }px`;
+    wrapper.style.width = `${wrapper.getBoundingClientRect().width / parentScale}px`;
+    wrapper.style.height = `${wrapper.getBoundingClientRect().height / parentScale}px`;
 
     header.style.height = `${Math.round(30 / scale)}px`;
     header.style.width = `${Math.round(width / parentScale)}px`;
@@ -251,16 +289,13 @@ export default class pedalboardGui extends HTMLElement {
 
   /**
    * Return the nodeArticle when selecting child node instead of itself with drag and drop.
-   * @param {HTMLElement[]} path
+   * @param {HTMLElement[]} event
    * @returns The wrapper selected.
    */
-  getWrapper(path) {
-    let pre;
-    for (let e of path) {
-      if (e == this.board) {
-        return pre;
-      }
-      pre = e;
+  getWrapper(event) {
+    let pre = this._root.elementFromPoint(event.clientX, event.clientY);
+    while (pre && pre.parentNode != this.board) {
+      pre = pre.parentNode;
     }
     return pre;
   }
@@ -351,9 +386,7 @@ export default class pedalboardGui extends HTMLElement {
     this.presets.appendChild(button);
 
     Object.keys(this.PresetsBank[bank]).forEach((preset) => {
-      this.presets.appendChild(
-        this.createPresetElement(bankNameCallBack, preset)
-      );
+      this.presets.appendChild(this.createPresetElement(bankNameCallBack, preset));
     });
   }
 
@@ -472,8 +505,7 @@ export default class pedalboardGui extends HTMLElement {
 
     let text = document.createElement("span");
     text.innerHTML = presetName;
-    const clickEventCallBack = () =>
-      this.displayPreset(bankNameCallBack, text.innerHTML);
+    const clickEventCallBack = () => this.displayPreset(bankNameCallBack, text.innerHTML);
     text.addEventListener("click", clickEventCallBack);
     el.append(text);
 
@@ -494,9 +526,7 @@ export default class pedalboardGui extends HTMLElement {
       this.createLiButton(this._saveSVGUrl, "SAVE", () => {
         this._plug.pedalboardNode
           .getState(this.board.childNodes)
-          .then(
-            (state) => (this.PresetsBank[bank][text.innerHTML] = state.current)
-          );
+          .then((state) => (this.PresetsBank[bank][text.innerHTML] = state.current));
       })
     );
 
@@ -561,11 +591,7 @@ export default class pedalboardGui extends HTMLElement {
       })
     );
 
-    el.append(
-      this.createLiButton(this._deleteSVGUrl, "DELETE", () =>
-        this.deleteBank(() => text.innerHTML, el)
-      )
-    );
+    el.append(this.createLiButton(this._deleteSVGUrl, "DELETE", () => this.deleteBank(() => text.innerHTML, el)));
 
     return el;
   }
@@ -592,10 +618,10 @@ export default class pedalboardGui extends HTMLElement {
    * Return DataWidth and DataHeight values.
    */
   get properties() {
-    const bbox = this.body.getBoundingClientRect();
+    const bbox = this.body?.getBoundingClientRect();
     return {
-      dataWidth: { value: bbox.width },
-      dataHeight: { value: bbox.height },
+      dataWidth: { value: bbox?.width || 1002 },
+      dataHeight: { value: bbox?.height || 609 },
     };
   }
 
