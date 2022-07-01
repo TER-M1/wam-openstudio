@@ -132,23 +132,6 @@ customElements.define(
 
         mainAudio.tracks.forEach(track => {
             track.applyAutomation(playhead, time);
-            // let maxDuration = track.duration*1000; // convert seconds in milliseconds
-            // // track.audioWorkletNode.clearEvents();
-            // let list = [];
-            // track.bpfList.forEach(bpf => {
-            //     if (bpf !== undefined) {
-            //         for(let x = 0; x < bpf.domain; x += 0.1) {
-            //             list.push(bpf.getYfromX(x));
-            //         }
-            //         let firstPoint = getStartingPoint(maxDuration, time, list.length);
-            //         // list.slice(firstPoint, list.length);
-            //         track.audioWorkletNode.port.postMessage({
-            //             scheduleList: list,
-            //             wamParamId: bpf.paramID,
-            //             start: firstPoint
-            //         });
-            //     }
-            // });
         });
     }
 
