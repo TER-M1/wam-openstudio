@@ -1,5 +1,6 @@
 import OperableAudioBuffer from "./OperableAudioBuffer.js";
-import {audioCtx, mainAudio} from "./Utils.js";
+import {audioCtx, getStartingPoint, mainAudio} from "./Utils.js";
+import {populateDropDown} from "../track-utils/TrackSelector.js";
 
 export default class AudioTrack {
     /**
@@ -110,17 +111,6 @@ export default class AudioTrack {
     }
 
     async load() {
-        // var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
-        // var {default: WAM} = await import ("https://wam-bank.herokuapp.com/pedalboard/index.js");
-        // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages/disto_machine/src/index.js");
-        // var {default: WAM} = await import ("https://mainline.i3s.unice.fr/wam2/packages//quadrafuzz/dist/index.js");
-
-        // var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
-
-        // instance._descriptor.name = instance.name + ` ${this.id}`
-        // this.pluginInstance = instance;
-        // this.pluginDOM = await instance.createGui();
-
         let response = await fetch(this.fpath);
         let audioArrayBuffer = await response.arrayBuffer();
         this.decodedAudioBuffer = await this.audioCtx.decodeAudioData(audioArrayBuffer);
@@ -148,6 +138,7 @@ export default class AudioTrack {
         let mount = document.querySelector("#mount1");
         mount.innerHTML = '';
         mount.appendChild(this.pluginDOM);
+        populateDropDown(this, this.bpfContainer, document.querySelector('.ui.dropdown.auto'));
     }
 
     async removePedalBoard() {
@@ -160,6 +151,26 @@ export default class AudioTrack {
 
         let mount = document.querySelector("#mount1");
         mount.innerHTML = '';
+    }
+
+    applyAutomation(playhead, time) {
+        let maxDuration = this.duration*1000; // convert seconds in milliseconds
+        // track.audioWorkletNode.clearEvents();
+        let list = [];
+        this.bpfList.forEach(bpf => {
+            if (bpf !== undefined) {
+                for(let x = 0; x < bpf.domain; x += 0.1) {
+                    list.push(bpf.getYfromX(x));
+                }
+                let firstPoint = getStartingPoint(maxDuration, time, list.length);
+                // list.slice(firstPoint, list.length);
+                this.audioWorkletNode.port.postMessage({
+                    scheduleList: list,
+                    wamParamId: bpf.paramID,
+                    start: firstPoint
+                });
+            }
+        });
     }
 
     mute() {

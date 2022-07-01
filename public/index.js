@@ -1,6 +1,6 @@
 import {activateMainVolume, exploreTracks} from "./src/js/PageInitialization.js";
 import {onLoopBegginingInputChange, onLoopEndingInputChange, updateCursorTracks} from "./src/js/track-utils/PlayHead.js";
-import {audioCtx, mainAudio} from "./src/js/audio/Utils.js";
+import {audioCtx, mainAudio, getStartingPoint} from "./src/js/audio/Utils.js";
 import TrackElement from "./src/js/components/TrackElement.js";
 import WaveFormElement from "./src/js/components/WaveFormElement.js";
 
@@ -127,23 +127,28 @@ customElements.define(
     };
 
     btnApply.onclick = () => {
+        let playhead = mainAudio.tracks[0].audioWorkletNode.playHeadPosition;
+        let time = (playhead / 48000) * 1000; // In milliseconds
+
         mainAudio.tracks.forEach(track => {
-            track.audioWorkletNode.clearEvents();
-            let list = [];
-            track.bpfList.forEach(bpf => {
-                if (bpf !== undefined) {
-                    for(let x = 0; x < bpf.domain; x += 0.1) {
-                        list.push(bpf.getYfromX(x));
-                    }
-                    track.audioWorkletNode.port.postMessage({
-                        scheduleList: list,
-                        hostGroupId: mainAudio.hostGroupId,
-                        groupKey: mainAudio.groupKey,
-                        wamParamId: bpf.paramID
-                    });
-                    // bpf.style.display = "none";
-                }
-            });
+            track.applyAutomation(playhead, time);
+            // let maxDuration = track.duration*1000; // convert seconds in milliseconds
+            // // track.audioWorkletNode.clearEvents();
+            // let list = [];
+            // track.bpfList.forEach(bpf => {
+            //     if (bpf !== undefined) {
+            //         for(let x = 0; x < bpf.domain; x += 0.1) {
+            //             list.push(bpf.getYfromX(x));
+            //         }
+            //         let firstPoint = getStartingPoint(maxDuration, time, list.length);
+            //         // list.slice(firstPoint, list.length);
+            //         track.audioWorkletNode.port.postMessage({
+            //             scheduleList: list,
+            //             wamParamId: bpf.paramID,
+            //             start: firstPoint
+            //         });
+            //     }
+            // });
         });
     }
 

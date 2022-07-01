@@ -86,6 +86,7 @@ const getProcessor = (moduleId) => {
                     this._processPerf = this.instance.processPerf;
                     this.loadBuffers();
                 })
+                .catch(err => console.log(err));
         }
 
         async loadBuffers() {
@@ -146,28 +147,23 @@ const getProcessor = (moduleId) => {
 
 
                 let scheduleList = e.data.scheduleList;
-                let hostGroupId = e.data.hostGroupId;
-                let groupKey = e.data.groupKey;
                 let wamParamId = e.data.wamParamId;
+                let start = e.data.start;
 
                 let events = [];
                 let t = 0;
-                for (let i = 0; i < scheduleList.length; i++) {
+                for (let i = start; i < scheduleList.length; i++) {
                     events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
                     t += 0.1;
                 }
                 this.scheduleEvents(...events);
-                // this.emitEvents(...events);
             }
             else if (e.data.delete) {
-                // DOESN'T WORK : stackFree of _module doesn't exist... See on wasm compilation.
                 this.instance = null;
                 this._processPerf = null;
                 this._heapOutputBuffer = null;
                 this._heapInputBuffer = null;
                 this.audio = null;
-                // this._heapInputBuffer.free();
-                // this._heapOutputBuffer.free();
             }
         }
 
@@ -185,7 +181,6 @@ const getProcessor = (moduleId) => {
 
             super.process(inputs, outputs, parameters);
             // If no audio detected skip then process
-            // console.log("aezaeza");
             if (!this.audio) return true;
 
             // Prepare the input array
@@ -233,7 +228,6 @@ const getProcessor = (moduleId) => {
                 if (this.playhead >= this.loopEnding || this.playhead < this.loopBeggining) {
                     // Play was finished
                     if (loop) {
-                        // console.log("actual beggining : " + this.loopBeggining)
                         this.playhead = this.loopBeggining; // Loop just enabled, reset playhead
                     } else continue; // EOF without loop
                 }

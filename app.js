@@ -26,6 +26,7 @@ app.listen(PORT, () => console.log(`Server is started and listening on port ${PO
 ROUTING
  */
 app.get('/track', async (req, res) => {
+    console.log('get track');
     res.writeHead(200, {"Content-Type": "application/json"});
     exploreMultiTracks();
     res.write(JSON.stringify(tracks));
@@ -33,6 +34,7 @@ app.get('/track', async (req, res) => {
 });
 
 app.get('/track/:id', async (req, res) => {
+    console.log('get track by id');
     const id = req.params.id;
     res.writeHead(200, {"Content-Type": "application/json"});
     res.write(JSON.stringify(getMutliTrackById(id)));
