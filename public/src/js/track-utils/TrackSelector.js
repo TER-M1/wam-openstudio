@@ -10,9 +10,12 @@ const uMountPlugin = (mount) => {
     mount.innerHTML = '';
 }
 
-function populateDropDown(track, mount, pluginParamSelector) {
+
+export function populateDropDown(track, mount, pluginParamSelector) {
     if (track.hasPlugin) {
-        populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track);
+        track.pluginInstance._audioNode.addEventListener("wam-info", () =>
+            populateParamSelector(track.pluginInstance._audioNode, mount, pluginParamSelector, track)
+        );
     }
 }
 
@@ -61,10 +64,8 @@ export default class TrackSelector {
                         addPlugin.firstElementChild.className = "plus icon";
                     }
                 }
-                populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
             }
         })
-        this.defineHandler();
     }
 
     getTrack(id) {
@@ -77,16 +78,4 @@ export default class TrackSelector {
         })
         return track;
     }
-
-    pop() {
-        let can = document.querySelector(`.wave-form.track${this.selectedTrack.id}`);
-        populateDropDown(this.selectedTrack, this.selectedTrack.bpfContainer, document.querySelector('.ui.dropdown.auto'));
-    }
-
-    defineHandler() {
-        this.automation.addEventListener("click", () => {
-            console.log("need to update teh dropdown here too without deelting it ")
-        })
-    }
-
 }

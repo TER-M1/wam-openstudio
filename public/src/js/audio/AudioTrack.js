@@ -1,5 +1,6 @@
 import OperableAudioBuffer from "./OperableAudioBuffer.js";
 import {audioCtx, mainAudio} from "./Utils.js";
+import {populateDropDown} from "../track-utils/TrackSelector.js";
 
 export default class AudioTrack {
     /**
@@ -148,6 +149,7 @@ export default class AudioTrack {
         let mount = document.querySelector("#mount1");
         mount.innerHTML = '';
         mount.appendChild(this.pluginDOM);
+        populateDropDown(this, this.bpfContainer, document.querySelector('.ui.dropdown.auto'));
     }
 
     async removePedalBoard() {
