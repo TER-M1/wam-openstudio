@@ -1,5 +1,9 @@
 import {mainAudio} from "../audio/Utils.js";
 
+var viewportHeight = document.documentElement.getBoundingClientRect().height;
+const pluginDivHeight = 325;
+const pluginDivHeightMin = 27;
+
 function scrollSync(selector) {
     let active = null;
     document.querySelectorAll(selector).forEach(function (element) {
@@ -20,21 +24,37 @@ function scrollSync(selector) {
     });
 }
 
+function adaptSizePlugins() {
+    let hideShowButton = document.querySelector("#hide-show-plugins");
+    let pluginDiv = document.querySelector(".plugin-editor");
+    let trackDiv = document.querySelector(".track-editor");
+    let icon = hideShowButton.firstElementChild;
+    if (icon.className.includes("up")) {
+        pluginDiv.style.height = pluginDivHeightMin+"px";
+        trackDiv.style.height = `${viewportHeight-pluginDivHeightMin}px`;
+    }
+    else {
+        pluginDiv.style.height = pluginDivHeight + "px";
+        trackDiv.style.height = `${viewportHeight-pluginDivHeight}px`;;
+    }
+}
+
 function hideShowPluginsRack(buttonSelector) {
     let hideShowButton = document.querySelector(buttonSelector);
     let pluginDiv = document.querySelector(".plugin-editor");
     let trackDiv = document.querySelector(".track-editor");
+
     hideShowButton.addEventListener("click", (e) => {
         let icon = hideShowButton.firstElementChild;
         if (icon.className.includes("down")) {
-            pluginDiv.style.height = "5%";
-            trackDiv.style.height = "95%";
+            pluginDiv.style.height = pluginDivHeightMin+"px";
+            trackDiv.style.height = `${viewportHeight-pluginDivHeightMin}px`;
             icon.className = "chevron up icon";
             hideShowButton.setAttribute("data-tooltip", "Show");
         }
         else {
-            pluginDiv.style.height = "45%";
-            trackDiv.style.height = "55%";
+            pluginDiv.style.height = pluginDivHeight + "px";
+            trackDiv.style.height = `${viewportHeight-pluginDivHeight}px`;;
             icon.className = "chevron down icon";
             hideShowButton.setAttribute("data-tooltip", "Hide");
         }
@@ -77,6 +97,19 @@ function addRemovePlugin() {
     let addRemoveButton = document.querySelector("#add-remove-plugins");
     addRemoveButton.addEventListener("click", addRemoveEvent);
 }
+
+
+
+window.onresize = (ev) => {
+    viewportHeight = document.documentElement.getBoundingClientRect().height;
+    adaptSizePlugins();
+}
+
+window.onload = () => {
+    viewportHeight = document.documentElement.getBoundingClientRect().height;
+    adaptSizePlugins();
+}
+
 
 scrollSync(".scroll-sync");
 hideShowPluginsRack("#hide-show-plugins");

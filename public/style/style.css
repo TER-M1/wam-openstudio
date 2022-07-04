@@ -16,14 +16,14 @@ body, html {
     padding-top: 39px;
     padding-bottom: 28px;
     /*overflow-y: auto;*/
-    height: 95%;
+    height: 97%;
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
 }
 
 .plugin-editor {
-    height: 5%;
+    height: 0px;
     background: #1C1E21;
     border: 1px solid black;
     border-top: none;
