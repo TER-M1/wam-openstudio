@@ -14,8 +14,6 @@ body, html {
 
 .track-editor {
     padding-top: 39px;
-    padding-bottom: 28px;
-    /*overflow-y: auto;*/
     height: 97%;
     display: flex;
     flex-direction: column;
@@ -31,7 +29,7 @@ body, html {
     z-index: 2;
 }
 
-.head-track-editor, .head-plugin-editor {
+.head-track-editor, .head-plugin-editor, .head-track-waveform {
     z-index: 8;
     background-color: #3b4046;
     border: 1px solid black;
@@ -46,25 +44,38 @@ body, html {
 
 .head-track-editor {
     border-top: none;
-    position: fixed;
-    width: 100%;
+    width: 200px;
     user-select: none;
+}
+
+.head-track-waveform {
+    display: grid;
+    grid-column: 1;
+    grid-row: 1;
+    width: 6000px;
+    padding-top: 24px;
+    background-color: #3b4046;
+    border: 1px solid black;
+    border-top: none;
 }
 
 .head-plugin-editor {
-    position: fixed;
+    /*position: fixed;*/
     width: 99.9%;
     border-right: 1px solid black;
     user-select: none;
+    position: absolute;
+    bottom: 0;
+    z-index: 20;
 }
 
 .tracks {
-    margin-top: 1.9em;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     height: 100%;
     background-color: #1C1E21;
+    padding-bottom: 22px
 }
 
 .tools-tracks {
@@ -72,15 +83,13 @@ body, html {
     flex-direction: column;
     flex-wrap: nowrap;
     background-color: #111113;
-    /*border: 1px solid black;*/
-    /*border-top: none;*/
-    /*border-bottom: none;*/
     font-family: monospace;
     font-weight: bold;
     font-size: 1em;
     color: lightgray;
-    overflow: auto;
-    min-width: 200px;
+    overflow-y: scroll;
+    overflow-x: scroll;
+    min-width: 210px;
 }
 
 .audio-tracks {
@@ -89,6 +98,7 @@ body, html {
     flex-wrap: nowrap;
     background-color: #1C1E21;
     overflow-y: auto;
+    width: 6000px;
 }
 
 .wave-form {
@@ -96,7 +106,7 @@ body, html {
     margin-left: 3px;
     min-height: 104px;
     border: 1px solid black;
-    width: 2000px;
+    width: 6000px;
     max-height: 100px;
 }
 
@@ -104,7 +114,7 @@ body, html {
 .track-element {
     border: 1px solid black;
     height: 104px;
-    width: 190px;
+    width: 200px;
     background-color: #31353A;
     display: flex;
     flex-direction: row;

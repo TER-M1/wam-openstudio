@@ -141,6 +141,10 @@ a.item.volume-slider {
 i.icon {
     margin: 0 !important;
 }
+.input.track.sound {
+    width: 136px !important;
+}
+
 
 </style>
 

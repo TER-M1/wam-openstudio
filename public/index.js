@@ -3,6 +3,7 @@ import {onLoopBegginingInputChange, onLoopEndingInputChange, updateCursorTracks}
 import {audioCtx, mainAudio, getStartingPoint} from "./src/js/audio/Utils.js";
 import TrackElement from "./src/js/components/TrackElement.js";
 import WaveFormElement from "./src/js/components/WaveFormElement.js";
+import PlayHeadSlider from "./src/js/components/PlayHeadSlider.js";
 
 
 const btnStart = document.getElementById("btn-start");
