@@ -157,6 +157,7 @@ const getProcessor = (moduleId) => {
                     t += 0.1;
                 }
                 this.scheduleEvents(...events);
+                // this.emitEvents(...events);
             }
             else if (e.data.delete) {
                 this.instance = null;
