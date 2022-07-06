@@ -34,11 +34,11 @@ export default class AudioTrack {
 
     /**
      *
-     * @param{AudioContext} audioCtx
-     * @param{AudioWorkletNode} audioWorkletNode
-     * @param{String} fpath
-     * @param initWamHostPath
-     * @param wamIndexPath
+     * @param {AudioContext} audioCtx
+     * @param {import("../../../lib/sdk").WamNode} audioWorkletNode
+     * @param {string} fpath
+     * @param {string} initWamHostPath
+     * @param {string} wamIndexPath
      */
     constructor(audioCtx, audioWorkletNode, fpath, initWamHostPath = "", wamIndexPath = "") {
         this.audioCtx = audioCtx;
@@ -153,9 +153,11 @@ export default class AudioTrack {
         mount.innerHTML = '';
     }
 
-    applyAutomation(playhead, time) {
+    async applyAutomation(playhead, time) {
         let maxDuration = this.duration*1000; // convert seconds in milliseconds
+        await this.audioWorkletNode.clearEvents();
         // track.audioWorkletNode.clearEvents();
+        let events = [];
         this.bpfList.forEach(bpf => {
             let list = [];
 
@@ -163,14 +165,18 @@ export default class AudioTrack {
                 for(let x = 0; x < bpf.domain; x += 0.1) {
                     list.push(bpf.getYfromX(x));
                 }
-                let firstPoint = getStartingPoint(maxDuration, time, list.length);
-                this.audioWorkletNode.port.postMessage({
-                    scheduleList: list,
-                    wamParamId: bpf.paramID,
-                    start: firstPoint
-                });
+                let start = getStartingPoint(maxDuration, time, list.length);
+                let wamParamId = bpf.paramID;
+
+                let t = 0;
+                for (let i = start; i < list.length; i++) {
+                    events.push({ type: 'wam-automation', data: { id: wamParamId, value: list[i] }, time: this.audioCtx.currentTime + t })
+                    t += 0.1;
+                }
             }
         });
+        events.sort((a, b) => a.time - b.time);
+        this.audioWorkletNode.scheduleEvents(...events);
     }
 
     mute() {
