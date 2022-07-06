@@ -60,8 +60,7 @@ body, html {
 }
 
 .head-plugin-editor {
-    /*position: fixed;*/
-    width: 99.9%;
+    width: 100%;
     border-right: 1px solid black;
     user-select: none;
     position: absolute;
@@ -150,10 +149,6 @@ body, html {
     padding-bottom: 0.2em !important;
     padding-left: 1em !important;
     padding-right: 1em !important;
-}
-
-.plugin-rack {
-    padding-top: 30px;
 }
 
 #mount1 {

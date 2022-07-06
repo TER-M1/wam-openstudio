@@ -1612,6 +1612,8 @@ var WamNode = class extends AudioWorkletNode {
       if (ids.length) {
         this._pendingResponses[id] = resolve;
         this.port.postMessage({ id, request });
+      } else {
+        resolve([]);
       }
     }).then((clearedIds) => {
       clearedIds.forEach((clearedId) => {

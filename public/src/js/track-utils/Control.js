@@ -1,7 +1,7 @@
 import {mainAudio} from "../audio/Utils.js";
 
 var browserHeight = undefined
-const pluginDivHeight = 325;
+const pluginDivHeight = 335;
 const pluginDivHeightMin = 27;
 
 var currentScrollX = undefined;
