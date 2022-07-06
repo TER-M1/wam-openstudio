@@ -142,22 +142,6 @@ const getProcessor = (moduleId) => {
             } else if (e.data.reset) {
                 this.playhead = 0;
             }
-            else if (e.data.scheduleList) {
-                this.clearEvents();
-
-
-                let scheduleList = e.data.scheduleList;
-                let wamParamId = e.data.wamParamId;
-                let start = e.data.start;
-
-                let events = [];
-                let t = 0;
-                for (let i = start; i < scheduleList.length; i++) {
-                    events.push({ type: 'wam-automation', data: { id: wamParamId, value: scheduleList[i] }, time: currentTime + t })
-                    t += 0.1;
-                }
-                this.scheduleEvents(...events);
-            }
             else if (e.data.delete) {
                 this.instance = null;
                 this._processPerf = null;

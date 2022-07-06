@@ -16,6 +16,7 @@ export default class WamEventDestination extends WebAudioModule {
                     numberOfInputs: 1,
                     numberOfOutputs: 1,
                     outputChannelCount: [2],
+                    useSab: true
                 }
             });
 
