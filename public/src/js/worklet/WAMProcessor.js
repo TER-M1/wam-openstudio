@@ -37,72 +37,72 @@ const getProcessor = (moduleId) => {
             this.scheduleList = []
 
             // this.setupMessages();
-            this.setupWasm(options);
+            // this.setupWasm(options);
         }
 
-        setupWasm(options) {
-            const memory = new WebAssembly.Memory({
-                initial: 256,
-                maximum: 256
-            });
+        // setupWasm(options) {
+        //     const memory = new WebAssembly.Memory({
+        //         initial: 256,
+        //         maximum: 256
+        //     });
+        //
+        //     const heap = new Float32Array(memory.buffer);
+        //
+        //     const imports = {
+        //         env: {
+        //             memory: memory,
+        //             DYNAMICTOP_PTR: 4096,
+        //             abort: function(err) {
+        //                 throw new Error('abort ' + err);
+        //             },
+        //             abortOnCannotGrowMemory: function(err) {
+        //                 throw new Error('abortOnCannotGrowMemory ' + err);
+        //             },
+        //             ___cxa_throw: function(ptr, type, destructor) {
+        //                 console.error('cxa_throw: throwing an exception, ' + [ptr,type,destructor]);
+        //             },
+        //             ___cxa_allocate_exception: function(size) {
+        //                 console.error('cxa_allocate_exception' + size);
+        //                 return false; // always fail
+        //             },
+        //             ___setErrNo: function(err) {
+        //                 throw new Error('ErrNo ' + err);
+        //             },
+        //             _emscripten_get_heap_size: function() {
+        //                 return heap.length;
+        //             },
+        //             _emscripten_resize_heap: function(size) {
+        //                 return false; // always fail
+        //             },
+        //             _emscripten_memcpy_big: function(dest, src, count) {
+        //                 heap.set(heap.subarray(src, src + count), dest);
+        //             }
+        //         }
+        //     };
+        //
+        //     // WebAssembly.instantiate(options.processorOptions.moduleWasm,imports)
+        //     //     .then(instance => {
+        //     //         this.instance = instance.exports;
+        //     //         this._processPerf = this.instance.processPerf;
+        //     //         this.loadBuffers();
+        //     //     })
+        //     //     .catch(err => console.log(err));
+        // }
 
-            const heap = new Float32Array(memory.buffer);
-
-            const imports = {
-                env: {
-                    memory: memory,
-                    DYNAMICTOP_PTR: 4096,
-                    abort: function(err) {
-                        throw new Error('abort ' + err);
-                    },
-                    abortOnCannotGrowMemory: function(err) {
-                        throw new Error('abortOnCannotGrowMemory ' + err);
-                    },
-                    ___cxa_throw: function(ptr, type, destructor) {
-                        console.error('cxa_throw: throwing an exception, ' + [ptr,type,destructor]);
-                    },
-                    ___cxa_allocate_exception: function(size) {
-                        console.error('cxa_allocate_exception' + size);
-                        return false; // always fail
-                    },
-                    ___setErrNo: function(err) {
-                        throw new Error('ErrNo ' + err);
-                    },
-                    _emscripten_get_heap_size: function() {
-                        return heap.length;
-                    },
-                    _emscripten_resize_heap: function(size) {
-                        return false; // always fail
-                    },
-                    _emscripten_memcpy_big: function(dest, src, count) {
-                        heap.set(heap.subarray(src, src + count), dest);
-                    }
-                }
-            };
-
-            WebAssembly.instantiate(options.processorOptions.moduleWasm,imports)
-                .then(instance => {
-                    this.instance = instance.exports;
-                    this._processPerf = this.instance.processPerf;
-                    this.loadBuffers();
-                })
-                .catch(err => console.log(err));
-        }
-
-        async loadBuffers() {
-            this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
-                this.instance,
-                RENDER_QUANTUM_FRAMES,
-                2,
-                MAX_CHANNEL_COUNT
-            );
-            this._heapOutputBuffer = new HeapAudioBufferInsideProcessor(
-                this.instance,
-                RENDER_QUANTUM_FRAMES,
-                2,
-                MAX_CHANNEL_COUNT
-            );
-        }
+        // async loadBuffers() {
+        //     this._heapInputBuffer = new HeapAudioBufferInsideProcessor(
+        //         this.instance,
+        //         RENDER_QUANTUM_FRAMES,
+        //         2,
+        //         MAX_CHANNEL_COUNT
+        //     );
+        //     this._heapOutputBuffer = new HeapAudioBufferInsideProcessor(
+        //         this.instance,
+        //         RENDER_QUANTUM_FRAMES,
+        //         2,
+        //         MAX_CHANNEL_COUNT
+        //     );
+        // }
 
         /** @type {AudioParamDescriptor[]} */
         static get parameterDescriptors() {
@@ -168,21 +168,21 @@ const getProcessor = (moduleId) => {
             if (!this.audio) return true;
 
             // Prepare the input array
-            let input = [];
+            // let input = [];
             let output = outputs[0];
             let channelCount = this.audio.length;
             const channelCountMin = Math.min(this.audio.length, output.length);
 
             // Slice the global audio with a RENDER_QUANTUM_FRAMES
             // to send the input to output by block of 128
-            for (let i = 0; i < channelCount; i++) {
-                input.push(
-                    this.audio[i].slice(
-                        this.playhead - RENDER_QUANTUM_FRAMES,
-                        this.playhead
-                    )
-                );
-            }
+            // for (let i = 0; i < channelCount; i++) {
+            //     input.push(
+            //         this.audio[i].slice(
+            //             this.playhead - RENDER_QUANTUM_FRAMES,
+            //             this.playhead
+            //         )
+            //     );
+            // }
 
             const bufferSize = outputs[0][0].length;
             const audioLength = this.audio[0].length;
@@ -192,13 +192,13 @@ const getProcessor = (moduleId) => {
 
             // Prepare HeapAudioBuffer for the channel count change in the current
             // render quantum.
-            this._heapInputBuffer.adaptChannel(channelCount);
-            this._heapOutputBuffer.adaptChannel(channelCount);
-
-            // Copy-in the current block
-            for (let channel = 0; channel < channelCount; ++channel) {
-                this._heapInputBuffer.getChannelData(channel).set(input[channel]);
-            }
+            // this._heapInputBuffer.adaptChannel(channelCount);
+            // this._heapOutputBuffer.adaptChannel(channelCount);
+            //
+            // // Copy-in the current block
+            // for (let channel = 0; channel < channelCount; ++channel) {
+            //     this._heapInputBuffer.getChannelData(channel).set(input[channel]);
+            // }
 
             // Copy-in, process and copy-out.
             for (let i = 0; i < bufferSize; i++) {
@@ -221,17 +221,15 @@ const getProcessor = (moduleId) => {
                  */
 
                     // Process the block
-                let returnCode = this._processPerf(
-                        this._heapInputBuffer.getHeapAddress(),
-                        this._heapOutputBuffer.getHeapAddress(),
-                        channelCount
-                    );
+                // let returnCode = this._processPerf(
+                //         this._heapInputBuffer.getHeapAddress(),
+                //         this._heapOutputBuffer.getHeapAddress(),
+                //         channelCount
+                //     );
 
                 // Copy-out the current block
                 for (let channel = 0; channel < channelCountMin; ++channel) {
-                    output[channel].set(
-                        this._heapOutputBuffer.getChannelData(channel)
-                    );
+                    output[channel][i] = this.audio[channel][this.playhead];
                 }
 
                 this.playhead++;
