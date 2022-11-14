@@ -70,6 +70,12 @@ customElements.define(
                 }
             });
             btnStart.playing = true;
+            let playhead = mainAudio.tracks[0].audioWorkletNode.playHeadPosition;
+            let time = (playhead / 48000) * 1000; // In milliseconds
+    
+            mainAudio.tracks.forEach(track => {
+                track.applyAutomation(playhead, time);
+            });
         } else {
             audioCtx.suspend();
             playPauseIcon.className = "large play icon";
@@ -91,6 +97,12 @@ customElements.define(
             track.audioWorkletNode.port.postMessage({reset: true});
             track.audioWorkletNode.resetPlayHead();
             updateCursorTracks();
+            let playhead = mainAudio.tracks[0].audioWorkletNode.playHeadPosition;
+            let time = (playhead / 48000) * 1000; // In milliseconds
+    
+            mainAudio.tracks.forEach(track => {
+                track.applyAutomation(playhead, time);
+            });
         });
     }
 
