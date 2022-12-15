@@ -1,5 +1,5 @@
 import Visualizer from "./Visualizer.js";
-import "https://wam-bank.herokuapp.com/plugins/utils/webaudio-controls.js";
+import "https://wam-bank.vidalmazuy.fr/plugins/utils/webaudio-controls.js";
 
 /**
  * @param {URL} relativeURL
