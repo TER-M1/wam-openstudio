@@ -72,18 +72,35 @@ export default class PedalBoardPlugin extends WebAudioModule {
     let json2 = await repos.json();
     let files = await Promise.allSettled(json2.map((el) => fetch(this.removeRelativeUrl(el))));
     let urls = await Promise.all(files.filter(filterFetch).map((el) => el.value.json()));
-
+    
+    console.log(urls);
     urls = urls.reduce((arr, next) => arr.concat(next), []);
 
     let responses = await Promise.allSettled(urls.map((el) => fetch(`${el}descriptor.json`)));
 
     let descriptors = await Promise.all(responses.map((el) => (filterFetch(el) ? el.value.json() : undefined)));
 
-    let modules = await Promise.allSettled(urls.map((el) => import(`${el}index.js`)));
+    // let modules = await Promise.allSettled(urls.map((el) => import(`${el}index.js`)));
+
+    let modules = [];
+    for (let el of urls) {
+      try {
+        console.log("Importing " + `${el}index.js`);
+        modules.push(await import(`${el}index.js`));
+      } catch (e) {
+        console.log(e);
+        modules.push(undefined);
+      }
+    }
 
     this.WAMS = {};
     descriptors.forEach((el, index) => {
-      if (el && modules[index].status == "fulfilled" && !this.WAMS[el.name]) {
+      console.log("el ", el);
+      console.log("modules ", modules[index].status);
+      console.log("name ", this.WAMS[el.name]);
+
+      if (el && /*modules[index].status == "fulfilled" &&*/ !this.WAMS[el.name] && modules[index] !== undefined) {
+        console.log(modules[index]);
         this.WAMS[el.name] = {
           url: urls[index],
           descriptor: el,
@@ -91,6 +108,7 @@ export default class PedalBoardPlugin extends WebAudioModule {
         };
       }
     });
+    console.log(this.WAMS);
   }
 
   async loadPreset(nodes) {

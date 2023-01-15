@@ -126,7 +126,7 @@ export default class AudioTrack {
 
     async addPedalBoard() {
         this.hasPlugin = true;
-        var {default: WAM} = await import ("../../../plugins/pedalboard/index.js");
+        var {default: WAM} = await import ("http://localhost:3008/src/index.js");
         var instance = await WAM.createInstance(mainAudio.hostGroupId, audioCtx);
 
         this.pluginInstance = instance;

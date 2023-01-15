@@ -1,1 +1,1 @@
-["./wams.json", "https://wam-bank.vidalmazuy.fr/wams"]
+["./wams.json", "http://localhost:3008/wams"]
