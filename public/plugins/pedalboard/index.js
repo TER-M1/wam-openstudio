@@ -10,7 +10,6 @@ const getBasetUrl = (relativeURL) => {
   const baseURL = relativeURL.href.substring(0, relativeURL.href.lastIndexOf("/"));
   return baseURL;
 };
-
 export default class PedalBoardPlugin extends WebAudioModule {
   _baseURL = getBasetUrl(new URL(".", import.meta.url));
 
@@ -20,11 +19,9 @@ export default class PedalBoardPlugin extends WebAudioModule {
 
   removeRelativeUrl = (relativeURL) => {
     if (relativeURL[0] == ".") {
-      console.log(`relative url ${this._baseURL}${relativeURL.substring(1)}`);
       return `${this._baseURL}${relativeURL.substring(1)}`;
     } else {
-      console.log("relative url 2 : ", `${this._baseURL.replace('/src', '')}${relativeURL}`);
-      return `${this._baseURL.replace('/src', '')}${relativeURL}`;
+      return relativeURL;
     }
   };
 
@@ -98,22 +95,12 @@ export default class PedalBoardPlugin extends WebAudioModule {
   }
 
   async loadPreset(nodes) {
-    this.gui.loadingPreset = true;
-    this.gui.setPreviewFullness(true);
-    let board = this.gui.board;
+    let board = this.pedalboardNode.module.gui.board;
     this.pedalboardNode.disconnectNodes(board.childNodes, true);
     board.innerHTML = "";
-
-    let size = 0;
-    for (let i = 0; i < nodes.length; i++) {
-      let node = nodes[i];
-      if ((await this.addWAM(node.name, node.state)) == false) {
-        break;
-      }
-      size++;
+    for (let el of nodes) {
+      await this.addWAM(el.name, el.state);
     }
-    this.gui.setPreviewFullness(size >= this.pedalboardNode.MAX_NODES);
-    this.gui.loadingPreset = false;
   }
 
   /**
@@ -124,21 +111,13 @@ export default class PedalBoardPlugin extends WebAudioModule {
    */
   async addWAM(WamName, state) {
     const { default: WAM } = this.WAMS[WamName].module;
-    let instance;
-    try {
-      instance = await WAM.createInstance(this.pedalboardNode.subGroupId, this.pedalboardNode.context);
-    } catch (e) {
-      return false;
+    let instance = await WAM.createInstance(this.pedalboardNode.subGroupId, this.pedalboardNode.context);
+    if (state) {
+      instance.audioNode.setState(state);
     }
-
     this.pedalboardNode.addPlugin(instance.audioNode, WamName, this.id);
     await this.gui.addPlugin(instance, this.WAMS[WamName].img, this.id);
-    if (state) {
-      await instance.audioNode.setState(state);
-    }
-    if (this.id == 100) this.gui.disableFaustPlugins();
     this.id++;
-    return true;
   }
 
   createGui() {
