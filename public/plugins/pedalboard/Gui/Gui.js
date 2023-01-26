@@ -1,5 +1,5 @@
 import Visualizer from "./Visualizer.js";
-import "http://localhost:3008/plugins/utils/webaudio-controls.js";
+import "../../webaudio-controls.js";
 
 /**
  * @param {URL} relativeURL
