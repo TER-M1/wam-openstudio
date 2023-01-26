@@ -10,6 +10,7 @@ const getBasetUrl = (relativeURL) => {
   const baseURL = relativeURL.href.substring(0, relativeURL.href.lastIndexOf("/"));
   return baseURL;
 };
+
 export default class PedalBoardPlugin extends WebAudioModule {
   _baseURL = getBasetUrl(new URL(".", import.meta.url));
 
@@ -19,9 +20,11 @@ export default class PedalBoardPlugin extends WebAudioModule {
 
   removeRelativeUrl = (relativeURL) => {
     if (relativeURL[0] == ".") {
+      console.log(`relative url ${this._baseURL}${relativeURL.substring(1)}`);
       return `${this._baseURL}${relativeURL.substring(1)}`;
     } else {
-      return relativeURL;
+      console.log("relative url 2 : ", `${this._baseURL.replace('/src', '')}${relativeURL}`);
+      return `${this._baseURL.replace('/src', '')}${relativeURL}`;
     }
   };
 
@@ -70,37 +73,21 @@ export default class PedalBoardPlugin extends WebAudioModule {
 
     let repos = await fetch(`${this._baseURL}/repositories.json`);
     let json2 = await repos.json();
+    console.log("json : " + json2);
     let files = await Promise.allSettled(json2.map((el) => fetch(this.removeRelativeUrl(el))));
     let urls = await Promise.all(files.filter(filterFetch).map((el) => el.value.json()));
-    
-    console.log(urls);
-    urls = urls.reduce((arr, next) => arr.concat(next), []);
 
+    urls = urls.reduce((arr, next) => arr.concat(next), []);
+    console.log(urls);
     let responses = await Promise.allSettled(urls.map((el) => fetch(`${el}descriptor.json`)));
 
     let descriptors = await Promise.all(responses.map((el) => (filterFetch(el) ? el.value.json() : undefined)));
 
-    // let modules = await Promise.allSettled(urls.map((el) => import(`${el}index.js`)));
-
-    let modules = [];
-    for (let el of urls) {
-      try {
-        console.log("Importing " + `${el}index.js`);
-        modules.push(await import(`${el}index.js`));
-      } catch (e) {
-        console.log(e);
-        modules.push(undefined);
-      }
-    }
+    let modules = await Promise.allSettled(urls.map((el) => import(`${el}index.js`)));
 
     this.WAMS = {};
     descriptors.forEach((el, index) => {
-      console.log("el ", el);
-      console.log("modules ", modules[index].status);
-      console.log("name ", this.WAMS[el.name]);
-
-      if (el && /*modules[index].status == "fulfilled" &&*/ !this.WAMS[el.name] && modules[index] !== undefined) {
-        console.log(modules[index]);
+      if (el && modules[index].status == "fulfilled" && !this.WAMS[el.name]) {
         this.WAMS[el.name] = {
           url: urls[index],
           descriptor: el,
@@ -108,16 +95,25 @@ export default class PedalBoardPlugin extends WebAudioModule {
         };
       }
     });
-    console.log(this.WAMS);
   }
 
   async loadPreset(nodes) {
-    let board = this.pedalboardNode.module.gui.board;
+    this.gui.loadingPreset = true;
+    this.gui.setPreviewFullness(true);
+    let board = this.gui.board;
     this.pedalboardNode.disconnectNodes(board.childNodes, true);
     board.innerHTML = "";
-    for (let el of nodes) {
-      await this.addWAM(el.name, el.state);
+
+    let size = 0;
+    for (let i = 0; i < nodes.length; i++) {
+      let node = nodes[i];
+      if ((await this.addWAM(node.name, node.state)) == false) {
+        break;
+      }
+      size++;
     }
+    this.gui.setPreviewFullness(size >= this.pedalboardNode.MAX_NODES);
+    this.gui.loadingPreset = false;
   }
 
   /**
@@ -128,13 +124,21 @@ export default class PedalBoardPlugin extends WebAudioModule {
    */
   async addWAM(WamName, state) {
     const { default: WAM } = this.WAMS[WamName].module;
-    let instance = await WAM.createInstance(this.pedalboardNode.subGroupId, this.pedalboardNode.context);
-    if (state) {
-      instance.audioNode.setState(state);
+    let instance;
+    try {
+      instance = await WAM.createInstance(this.pedalboardNode.subGroupId, this.pedalboardNode.context);
+    } catch (e) {
+      return false;
     }
+
     this.pedalboardNode.addPlugin(instance.audioNode, WamName, this.id);
     await this.gui.addPlugin(instance, this.WAMS[WamName].img, this.id);
+    if (state) {
+      await instance.audioNode.setState(state);
+    }
+    if (this.id == 100) this.gui.disableFaustPlugins();
     this.id++;
+    return true;
   }
 
   createGui() {

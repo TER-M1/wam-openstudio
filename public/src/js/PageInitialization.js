@@ -25,7 +25,7 @@ export function activateMainVolume(mainAudio, val) {
 }
 
 export function exploreTracks() {
-    fetch('https://wam-openstudio.dylann.fr/track')
+    fetch('https://wam-openstudio.vidalmazuy.fr/track')
         .then(res => res.json())
         .then((output) => {
             let values = output.tracks
@@ -49,7 +49,7 @@ function attachControl(values) {
         let el = document.querySelector('.item.multitrack-item' + value.value);
         el.addEventListener('click', () => {
             let asyncAddTrack = [];
-            fetch('https://wam-openstudio.dylann.fr/track/' + value.value)
+            fetch('https://wam-openstudio.vidalmazuy.fr/track/' + value.value)
                 .then(res => res.json())
                 .then(async (output) => {
                     let soundList = output.soundList;
